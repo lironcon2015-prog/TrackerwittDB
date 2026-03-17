@@ -109,6 +109,7 @@ body {
 .border-accent { border-color: var(--accent) !important; }
 .border-danger { border-color: #ff453a !important; }
 .border-type-b { border-color: var(--type-b) !important; }
+.border-type-c { border-color: var(--type-c) !important; }
 .border-success { border-color: #32D74B !important; }
 .border-dim { border-color: var(--border) !important; }
 .border-dashed { border-style: dashed !important; border-width: 1px !important; }
@@ -183,7 +184,7 @@ body {
     flex-direction: column; 
     height: 100%; 
     overflow-y: auto; 
-    padding-bottom: 40px; 
+    padding-bottom: 90px; 
     scrollbar-width: none;
     overscroll-behavior-y: contain; 
 }
