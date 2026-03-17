@@ -65,6 +65,7 @@ window.onload = () => {
     StorageManager.initDB();
     if(typeof renderWorkoutMenu === 'function') renderWorkoutMenu(); 
     checkRecovery();
+    if(typeof renderHeroCard === 'function') renderHeroCard();
 };
 
 function checkRecovery() {
@@ -690,7 +691,7 @@ function initPickers() {
     const timerArea = document.getElementById('timer-area');
     if (state.clusterMode && state.timerInterval) {
         timerArea.style.visibility = 'visible';
-    } else if (state.setIdx > 0 && !document.getElementById('action-panel').classList.contains('is-visible')) { 
+    } else if (state.setIdx > 0 && document.getElementById('action-panel').style.display === 'none') { 
         timerArea.style.visibility = 'visible'; 
     } else { 
         timerArea.style.visibility = 'hidden'; 

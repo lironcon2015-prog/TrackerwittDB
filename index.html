@@ -172,10 +172,20 @@
         <main class="content-area">
             
             <div id="ui-week" class="screen active">
-                <div class="hero-section"><h1>ברוך הבא <span>לוח בקרה אישי</span></h1></div>
-                
-                <div class="section-label mt-0">בחר תוכנית שבועית</div>
-                
+
+                <!-- Hero Card -->
+                <div class="hero-analytics-card mt-xs" id="hero-card">
+                    <h2>מוכן לאימון?</h2>
+                    <div class="streak-badge" id="hero-streak">🔥 טוען...</div>
+                    <div class="hero-stats-row" id="hero-stats-row">
+                        <div class="hero-stat" id="hero-stat-0"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
+                        <div class="hero-stat" id="hero-stat-1"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
+                        <div class="hero-stat" id="hero-stat-2"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
+                    </div>
+                    <button class="btn-text color-accent p-0 mt-sm text-sm" style="width:auto;text-align:right;" onclick="openHeroSettings()">ערוך תצוגה</button>
+                </div>
+
+                <div class="section-label mt-lg">בחר תוכנית שבועית</div>
                 <div class="grid-menu grid-2-cols mt-sm">
                     <button class="menu-card" onclick="selectWeek(1)"><span>שבוע 1</span><div class="chevron"></div></button>
                     <button class="menu-card" onclick="selectWeek(2)"><span>שבוע 2</span><div class="chevron"></div></button>
@@ -183,11 +193,12 @@
                     <button class="menu-card deload-card" onclick="selectWeek('deload')"><span>דילואוד</span><div class="chevron"></div></button>
                 </div>
 
-                <button class="action-card secondary mt-lg" onclick="openArchive()">
-                    <div class="card-text center-text">ארכיון וגיבוי</div>
+                <button class="menu-card freestyle-card w-100 mt-sm" onclick="startFreestyle()">
+                    <h3 class="color-type-free m-0">אימון Freestyle</h3>
+                    <p>בחר תרגילים חופשי</p>
                 </button>
 
-                <div class="version-footer">GymPro Elite v13.1.0</div>
+                <div class="version-footer">GymPro Elite v14.0</div>
             </div>
 
             <!-- SETTINGS SCREEN -->
@@ -500,8 +511,183 @@
                 </div>
             </div>
 
+            <!-- =================== ANALYTICS SCREEN =================== -->
+            <div id="ui-analytics" class="screen">
+
+                <div class="flex-between mt-xs mb-sm">
+                    <h2 class="m-0" style="font-size:1.4em;font-weight:800;">אנליטיקה</h2>
+                    <button class="tool-btn" onclick="openAnalyticsSettings()">⚙ הגדרות</button>
+                </div>
+
+                <!-- Segmented Control sticky -->
+                <div class="segmented-control" id="analytics-seg" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
+                    <button class="segment-btn active" id="seg-macro" onclick="switchAnalyticsTab('macro',this)">סקירה כללית</button>
+                    <button class="segment-btn" id="seg-micro" onclick="switchAnalyticsTab('micro',this)">התקדמות תרגיל</button>
+                </div>
+
+                <!-- ── MACRO TAB ── -->
+                <div id="analytics-macro">
+                    <div class="analytics-section-label">נתוני על</div>
+                    <div class="metrics-grid-2x2" id="hero-metrics-grid"></div>
+
+                    <div class="analytics-card">
+                        <div class="analytics-card-label">
+                            <span>נפח לאורך זמן</span>
+                            <div class="range-chips" id="vol-chips">
+                                <button class="range-chip active" onclick="setVolRange(4,this)">4</button>
+                                <button class="range-chip" onclick="setVolRange(8,this)">8</button>
+                                <button class="range-chip" onclick="setVolRange(12,this)">12</button>
+                                <button class="range-chip" onclick="setVolRange(16,this)">16</button>
+                            </div>
+                        </div>
+                        <div class="bar-chart-scroll"><div class="bar-chart-inner" id="vol-bar-chart"></div></div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="analytics-card-label">
+                            <span>התפלגות שרירים</span>
+                            <div class="range-chips" id="muscle-chips">
+                                <button class="range-chip active" onclick="setMuscleRange('1m',this)">חודש</button>
+                                <button class="range-chip" onclick="setMuscleRange('3m',this)">3 חודשים</button>
+                                <button class="range-chip" onclick="setMuscleRange('all',this)">הכל</button>
+                            </div>
+                        </div>
+                        <div class="donut-layout">
+                            <div class="donut-container">
+                                <svg id="donut-svg-el" class="donut-svg-el" viewBox="0 0 120 120"></svg>
+                                <div class="donut-center-label" id="donut-center-lbl"></div>
+                            </div>
+                            <div class="donut-legend" id="donut-legend-el"></div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="analytics-card-label">
+                            <span>עקביות</span>
+                            <div class="range-chips" id="cons-chips">
+                                <button class="range-chip active" onclick="setConsRange(8,this)">8</button>
+                                <button class="range-chip" onclick="setConsRange(12,this)">12</button>
+                                <button class="range-chip" onclick="setConsRange(16,this)">16</button>
+                            </div>
+                        </div>
+                        <div class="consistency-track" id="cons-track"></div>
+                        <div class="cons-legend">
+                            <span style="color:var(--type-b)">● ≤5 ימים</span>
+                            <span style="color:var(--type-c)">● 6–9 ימים</span>
+                            <span style="color:var(--danger)">● 10+ ימים</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── MICRO TAB ── -->
+                <div id="analytics-micro" style="display:none;">
+                    <div class="analytics-section-label">בחר תרגיל</div>
+                    <select id="micro-ex-selector" class="smart-exercise-select mb-md" onchange="loadMicroData(this.value)"></select>
+
+                    <div class="analytics-card">
+                        <div class="analytics-card-label">
+                            <span>E1RM התקדמות</span>
+                            <div class="range-chips" id="micro-pts-chips">
+                                <button class="range-chip active" onclick="setMicroPoints(4,this)">4</button>
+                                <button class="range-chip" onclick="setMicroPoints(6,this)">6</button>
+                                <button class="range-chip" onclick="setMicroPoints(8,this)">8</button>
+                                <button class="range-chip" onclick="setMicroPoints(12,this)">12</button>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-bottom:10px;" id="micro-axis-chips">
+                            <button class="range-chip active" onclick="setMicroAxis('e1rm',this)">E1RM</button>
+                            <button class="range-chip" onclick="setMicroAxis('maxw',this)">משקל מקסימלי</button>
+                            <button class="range-chip" onclick="setMicroAxis('vol',this)">נפח סט</button>
+                        </div>
+                        <svg id="micro-line-svg" viewBox="0 0 320 165" width="100%" style="display:block;overflow:visible;"></svg>
+                    </div>
+
+                    <div class="analytics-card flex-between" id="intensity-card" style="align-items:center;gap:16px;">
+                        <div>
+                            <div class="analytics-card-label" style="margin-bottom:4px;">Intensity Score</div>
+                            <div id="intensity-score-val" style="font-size:2em;font-weight:800;color:var(--type-c);font-variant-numeric:tabular-nums;line-height:1;">—</div>
+                            <div id="intensity-score-delta" style="font-size:0.72em;color:var(--type-b);margin-top:4px;"></div>
+                        </div>
+                        <svg id="micro-sparkline" viewBox="0 0 140 52" width="140" height="52" style="flex-shrink:0;"></svg>
+                    </div>
+
+                    <div class="pr-expand-card" id="pr-expand-card">
+                        <div class="pr-expand-header" onclick="togglePRCard()">
+                            <div>
+                                <div style="font-size:0.62em;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🏆 שיא אישי</div>
+                                <div id="pr-card-weight" style="font-size:1.75em;font-weight:800;letter-spacing:-0.5px;">—</div>
+                                <div id="pr-card-date" style="font-size:0.76em;color:var(--text-dim);margin-top:2px;"></div>
+                            </div>
+                            <div class="pr-expand-arrow" id="pr-expand-arrow">⌄</div>
+                        </div>
+                        <div class="pr-expand-body" id="pr-expand-body">
+                            <div class="pr-expand-inner">
+                                <div class="pr-stats-row" id="pr-stats-row"></div>
+                                <div id="pr-context-note" style="font-size:0.74em;color:var(--text-dim);text-align:center;margin-top:12px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- #ui-analytics -->
+
         </main>
     </div>
+
+    <!-- =================== TAB BAR =================== -->
+    <nav class="tab-bar">
+        <button class="tab-btn active" id="tabbtn-workout" onclick="switchMainTab('workout')">
+            <span class="tab-label">אימון</span>
+        </button>
+        <button class="tab-btn" id="tabbtn-analytics" onclick="switchMainTab('analytics')">
+            <span class="tab-label">אנליטיקה</span>
+        </button>
+        <button class="tab-btn" id="tabbtn-archive" onclick="switchMainTab('archive')">
+            <span class="tab-label">ארכיון</span>
+        </button>
+    </nav>
+
+    <!-- =================== ANALYTICS SETTINGS SHEET =================== -->
+    <div id="analytics-settings-overlay" class="bottom-sheet-overlay" onclick="closeAnalyticsSettings()"></div>
+    <div id="analytics-settings-sheet" class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <h3>הגדרות אנליטיקה</h3>
+        <div class="vertical-stack mt-md">
+            <div>
+                <label class="input-label">שם המתאמן</label>
+                <input type="text" id="pref-name" class="minimal-input m-0" placeholder="למשל: לירון">
+            </div>
+            <div class="flex-between border-bottom pb-sm">
+                <label class="input-label m-0">יחידות</label>
+                <select id="pref-units" class="minimal-input m-0 bg-card" style="width:auto;">
+                    <option value="kg">kg</option>
+                    <option value="lbs">lbs</option>
+                </select>
+            </div>
+            <div class="flex-between">
+                <label class="input-label m-0">נוסחת 1RM</label>
+                <select id="pref-formula" class="minimal-input m-0 bg-card" style="width:auto;">
+                    <option value="epley">Epley</option>
+                    <option value="brzycki">Brzycki</option>
+                    <option value="lombardi">Lombardi</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-main primary-gradient" onclick="saveAnalyticsSettingsPrefs()">שמור</button>
+        <button class="btn-text" onclick="closeAnalyticsSettings()">ביטול</button>
+    </div>
+
+    <!-- =================== HERO SETTINGS SHEET =================== -->
+    <div id="hero-settings-overlay" class="bottom-sheet-overlay" onclick="closeHeroSettings()"></div>
+    <div id="hero-settings-sheet" class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <h3>ערוך תצוגת כרטיס</h3>
+        <p class="sub-text">בחר בדיוק 3 מדדים שיוצגו</p>
+        <div id="hero-metric-picker" class="vertical-stack mt-md"></div>
+        <button class="btn-main primary-gradient" onclick="saveHeroSettings()">שמור</button>
+        <button class="btn-text" onclick="closeHeroSettings()">ביטול</button>
+    </div>
+
     <script src="data.js"></script>
     <script src="storage.js"></script>
     
