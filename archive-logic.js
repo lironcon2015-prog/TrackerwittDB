@@ -754,9 +754,10 @@ function switchMainTab(name) {
     } else if (name === 'analytics') {
         navigate('ui-analytics', true);
         renderAnalyticsDashboard();
-    } else if (name === 'archive') {
-        navigate('ui-archive', true);
-    }
+   } else if (name === 'archive') {
+    navigate('ui-archive', true);
+    openArchive();
+}
     haptic('light');
 }
 
