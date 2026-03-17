@@ -186,6 +186,9 @@ function navigate(id, clearStack = false) {
     document.getElementById(id).classList.add('active');
     
     if (id !== 'ui-main') stopRestTimer();
+    const WORKOUT_SCREENS = ['ui-workout-type','ui-confirm','ui-main','ui-1rm','ui-cluster-rest','ui-variation','ui-swap-list','ui-ask-extra','ui-summary'];
+const tabBar = document.querySelector('.tab-bar');
+if (tabBar) tabBar.style.display = WORKOUT_SCREENS.includes(id) ? 'none' : 'flex';
 
     if (clearStack) {
         state.historyStack = [id];
