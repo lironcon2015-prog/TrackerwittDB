@@ -97,7 +97,7 @@ function restoreSession() {
         
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(lastScreen).classList.add('active');
-        document.getElementById('global-back').style.visibility = (lastScreen === 'ui-week') ? 'hidden' : 'visible';
+        document.getElementById('global-back').style.visibility = ['ui-week','ui-analytics','ui-archive'].includes(lastScreen) ? 'hidden' : 'visible';
         
         switch (lastScreen) {
             case 'ui-main':
@@ -196,7 +196,8 @@ if (tabBar) tabBar.style.display = WORKOUT_SCREENS.includes(id) ? 'none' : 'flex
         if (state.historyStack[state.historyStack.length - 1] !== id) state.historyStack.push(id);
     }
     
-    document.getElementById('global-back').style.visibility = (id === 'ui-week') ? 'hidden' : 'visible';
+    const NO_BACK = ['ui-week','ui-analytics','ui-archive'];
+    document.getElementById('global-back').style.visibility = NO_BACK.includes(id) ? 'hidden' : 'visible';
 }
 
 function handleBackClick() {
@@ -271,7 +272,8 @@ function handleBackClick() {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(prevScreen).classList.add('active');
     
-    document.getElementById('global-back').style.visibility = (prevScreen === 'ui-week') ? 'hidden' : 'visible';
+    const NO_BACK2 = ['ui-week','ui-analytics','ui-archive'];
+    document.getElementById('global-back').style.visibility = NO_BACK2.includes(prevScreen) ? 'hidden' : 'visible';
 }
 
 function selectWeek(w) { 

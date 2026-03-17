@@ -1,7 +1,9 @@
 /**
  * GYMPRO ELITE - ARCHIVE & ANALYTICS
- * Version: 13.1.2 (Phase 3: Visual Summary Screen & Separation of Concerns)
- * Includes: Finish Workout, Archive View, Calendar, Data Import/Export, Log Editing.
+ * Version: 14.1.0 (Analytics Overhaul)
+ * Changes: Month-grouped archive, adaptive consistency, set-count donut,
+ *          workout-type comparison chart, smart micro selector, best-E1RM PR card,
+ *          trend badge on volume chart, last-workout hero info, removed streak.
  */
 
 function finish() {
@@ -36,7 +38,7 @@ function finish() {
     // Raw String for Clipboard
     let summaryText = `GYMPRO ELITE SUMMARY\n${workoutDisplayName} | Week ${state.week} | ${dateStr} | ${state.workoutDurationMins}m\n\n`;
 
-    // Visual HTML for Screen (No Icons, Typography Focused)
+    // Visual HTML for Screen
     let html = `
     <div class="summary-overview-card">
         <div class="summary-overview-col">
@@ -60,13 +62,11 @@ function finish() {
     let processedIndices = new Set();
     let lastClusterRound = 0;
 
-    // Single chronological loop building both outputs
     state.log.forEach((entry, index) => {
         if (processedIndices.has(index)) return; 
         if (entry.isWarmup) return; 
 
         if (entry.isCluster) {
-            // Cluster Card Handling
             if (entry.round && entry.round !== lastClusterRound) {
                 summaryText += `\n--- Cluster Round ${entry.round} ---\n`;
                 html += `<div class="summary-cluster-round">סבב ${entry.round}</div>`;
@@ -98,7 +98,6 @@ function finish() {
             processedIndices.add(index);
 
         } else {
-            // Standard Exercise Handling
             lastClusterRound = 0;
             if(grouped[entry.exName]) {
                 summaryText += `${entry.exName} (Vol: ${grouped[entry.exName].vol}kg):\n`;
@@ -145,13 +144,12 @@ function finish() {
     });
 
     const summaryArea = document.getElementById('summary-area');
-    summaryArea.className = ""; // Remove monospace specific class for the new visual layout
+    summaryArea.className = "";
     summaryArea.innerHTML = html;
-    summaryArea.dataset.rawSummary = summaryText.trim(); // Store original format for Clipboard
+    summaryArea.dataset.rawSummary = summaryText.trim();
 }
 
 function copyResult() {
-    // Read the pristine raw text stored in the dataset
     const summaryArea = document.getElementById('summary-area');
     const rawText = summaryArea.dataset.rawSummary;
     
@@ -162,7 +160,6 @@ function copyResult() {
     const workoutDisplayName = state.type;
     const dateStr = new Date().toLocaleDateString('he-IL');
     
-    // Save to LocalStorage exactly as before
     const archiveObj = { 
         id: Date.now(), 
         date: dateStr, 
@@ -217,40 +214,121 @@ function openArchive() {
 
 let selectedArchiveIds = new Set(); 
 
+// ─── ARCHIVE LIST (MONTH-GROUPED) ────────
+const MONTH_NAMES_HE = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+
+function createArchiveCard(item) {
+    const card = document.createElement('div');
+    card.className = "menu-card";
+    card.style.cursor = "default";
+    const weekStr = item.week ? ` • שבוע ${item.week}` : '';
+    
+    card.innerHTML = `
+        <div class="archive-card-row">
+            <input type="checkbox" class="archive-checkbox" data-id="${item.timestamp}">
+            <div class="archive-info">
+                <div class="flex-between w-100">
+                    <h3 class="m-0">${item.date}</h3>
+                    <span class="text-sm color-dim">${item.duration} דק'</span>
+                </div>
+                <p class="m-0 color-dim text-sm">${item.type}${weekStr}</p>
+            </div>
+            <div class="chevron"></div>
+        </div>`;
+        
+    const checkbox = card.querySelector('.archive-checkbox');
+    checkbox.addEventListener('change', (e) => toggleArchiveSelection(parseInt(e.target.dataset.id)));
+    checkbox.addEventListener('click', (e) => e.stopPropagation());
+    card.addEventListener('click', (e) => { if (e.target !== checkbox) showArchiveDetail(item); });
+    return card;
+}
+
 function renderArchiveList() {
-    const list = document.getElementById('archive-list'); list.innerHTML = "";
-    selectedArchiveIds.clear(); updateCopySelectedBtn();
+    const list = document.getElementById('archive-list');
+    list.innerHTML = "";
+    selectedArchiveIds.clear();
+    updateCopySelectedBtn();
     const history = StorageManager.getArchive();
     
     if (history.length === 0) { 
         list.innerHTML = `<div class="text-center color-dim mt-md">אין אימונים שמורים</div>`; 
-    } else {
-        history.forEach(item => {
-            const card = document.createElement('div'); 
-            card.className = "menu-card"; 
-            card.style.cursor = "default";
-            const weekStr = item.week ? ` • שבוע ${item.week}` : '';
-            
-            card.innerHTML = `
-                <div class="archive-card-row">
-                    <input type="checkbox" class="archive-checkbox" data-id="${item.timestamp}">
-                    <div class="archive-info">
-                        <div class="flex-between w-100">
-                            <h3 class="m-0">${item.date}</h3>
-                            <span class="text-sm color-dim">${item.duration} דק'</span>
-                        </div>
-                        <p class="m-0 color-dim text-sm">${item.type}${weekStr}</p>
-                    </div>
-                    <div class="chevron"></div>
-                </div>`;
-                
-            const checkbox = card.querySelector('.archive-checkbox');
-            checkbox.addEventListener('change', (e) => toggleArchiveSelection(parseInt(e.target.dataset.id)));
-            checkbox.addEventListener('click', (e) => e.stopPropagation());
-            card.addEventListener('click', (e) => { if (e.target !== checkbox) showArchiveDetail(item); });
-            list.appendChild(card);
-        });
+        return;
     }
+
+    // Group items by year-month key
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
+    const monthGroups = {};
+
+    history.forEach(item => {
+        const d = new Date(item.timestamp);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        if (!monthGroups[key]) {
+            monthGroups[key] = {
+                year: d.getFullYear(),
+                month: d.getMonth(),
+                label: `${MONTH_NAMES_HE[d.getMonth()]} ${d.getFullYear()}`,
+                isCurrentMonth: key === currentMonthKey,
+                items: []
+            };
+        }
+        monthGroups[key].items.push(item);
+    });
+
+    // Sort month keys descending
+    const sortedKeys = Object.keys(monthGroups).sort((a, b) => {
+        const [ay, am] = a.split('-').map(Number);
+        const [by, bm] = b.split('-').map(Number);
+        return by !== ay ? by - ay : bm - am;
+    });
+
+    sortedKeys.forEach(key => {
+        const group = monthGroups[key];
+        const totalVol = group.items.reduce((s, item) => {
+            if (!item.details) return s;
+            return s + Object.values(item.details).reduce((sv, ex) => sv + (ex.vol || 0), 0);
+        }, 0);
+        const volStr = totalVol >= 1000 ? (totalVol / 1000).toFixed(1) + 't' : totalVol + 'kg';
+
+        if (group.isCurrentMonth) {
+            // Current month: always expanded
+            const header = document.createElement('div');
+            header.className = 'archive-month-header current';
+            header.innerHTML = `
+                <span class="archive-month-title">${group.label}</span>
+                <span class="archive-month-meta">${group.items.length} אימונים • ${volStr}</span>`;
+            list.appendChild(header);
+            group.items.forEach(item => list.appendChild(createArchiveCard(item)));
+
+        } else {
+            // Past months: collapsible
+            const monthContainer = document.createElement('div');
+            monthContainer.className = 'archive-month-group';
+
+            const header = document.createElement('div');
+            header.className = 'archive-month-header collapsible';
+            header.innerHTML = `
+                <div class="archive-month-header-inner">
+                    <span class="archive-month-title">${group.label}</span>
+                    <span class="archive-month-meta">${group.items.length} אימונים • ${volStr}</span>
+                </div>
+                <div class="archive-month-arrow">›</div>`;
+
+            const itemsContainer = document.createElement('div');
+            itemsContainer.className = 'archive-month-items collapsed';
+            group.items.forEach(item => itemsContainer.appendChild(createArchiveCard(item)));
+
+            header.addEventListener('click', () => {
+                const isOpen = !itemsContainer.classList.contains('collapsed');
+                itemsContainer.classList.toggle('collapsed', isOpen);
+                header.classList.toggle('open', !isOpen);
+            });
+
+            monthContainer.appendChild(header);
+            monthContainer.appendChild(itemsContainer);
+            list.appendChild(monthContainer);
+        }
+    });
 }
 
 function toggleArchiveSelection(id) { if (selectedArchiveIds.has(id)) selectedArchiveIds.delete(id); else selectedArchiveIds.add(id); updateCopySelectedBtn(); }
@@ -287,8 +365,7 @@ function renderCalendar() {
     const targetDate = new Date(now.getFullYear(), now.getMonth() + state.calendarOffset, 1);
     const year = targetDate.getFullYear();
     const month = targetDate.getMonth();
-    const monthNames =["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
-    document.getElementById('current-month-display').innerText = `${monthNames[month]} ${year}`;
+    document.getElementById('current-month-display').innerText = `${MONTH_NAMES_HE[month]} ${year}`;
     const firstDayIndex = targetDate.getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const history = StorageManager.getArchive();
@@ -325,7 +402,7 @@ function renderCalendar() {
                 dotsContainer.appendChild(dot);
             });
             cell.appendChild(dotsContainer);
-            cell.onclick = () => openDayDrawer(dailyWorkouts, day, monthNames[month]);
+            cell.onclick = () => openDayDrawer(dailyWorkouts, day, MONTH_NAMES_HE[month]);
         }
         grid.appendChild(cell);
     }
@@ -613,7 +690,7 @@ function deleteSetFromLog() {
 }
 
 // =========================================
-// ANALYTICS ENGINE v14
+// ANALYTICS ENGINE v14.1
 // =========================================
 
 // ─── PREFS ───────────────────────────────
@@ -653,6 +730,7 @@ function getWorkoutVolume(workout) {
     return Object.values(workout.details).reduce((s, ex) => s + (ex.vol || 0), 0);
 }
 
+// Volume-based muscle map (kept for reference / future use)
 function getMuscleVolumes(archive, range) {
     const now = Date.now();
     const cutoff = range === '1m' ? now - 30 * 86400000
@@ -670,8 +748,26 @@ function getMuscleVolumes(archive, range) {
     return map;
 }
 
+// Set-count-based muscle map — fair comparison across muscle groups
+function getMuscleSetCounts(archive, range) {
+    const now = Date.now();
+    const cutoff = range === '1m' ? now - 30 * 86400000
+                 : range === '3m' ? now - 90 * 86400000 : 0;
+    const filtered = archive.filter(a => a.timestamp >= cutoff);
+    const map = {};
+    filtered.forEach(w => {
+        if (!w.details) return;
+        Object.entries(w.details).forEach(([exName, data]) => {
+            const ex = state.exercises.find(e => e.name === exName);
+            const muscle = (ex && ex.muscles && ex.muscles[0]) ? ex.muscles[0] : 'אחר';
+            const setCount = (data.sets && data.sets.length) ? data.sets.length : 0;
+            map[muscle] = (map[muscle] || 0) + setCount;
+        });
+    });
+    return map;
+}
+
 function parseSetsFromStrings(sets) {
-    // sets = ["70kg x 8 (RIR 2) | Note: ...", ...]
     return sets.map(s => {
         try {
             const core = s.includes('| Note:') ? s.split('| Note:')[0].trim() : s;
@@ -686,19 +782,6 @@ function parseSetsFromStrings(sets) {
             return { w, r, rir };
         } catch (e) { return null; }
     }).filter(Boolean);
-}
-
-// ─── STREAK ──────────────────────────────
-function calcStreak(archive) {
-    if (!archive.length) return 0;
-    let streak = 1;
-    let prev = archive[0].timestamp;
-    for (let i = 1; i < archive.length; i++) {
-        const diffDays = (prev - archive[i].timestamp) / 86400000;
-        if (diffDays < 14) { streak++; prev = archive[i].timestamp; }
-        else break;
-    }
-    return streak;
 }
 
 // ─── HERO CARD ───────────────────────────
@@ -727,10 +810,19 @@ const HERO_METRIC_DEFS = {
 function renderHeroCard() {
     const prefs = getAnalyticsPrefs();
     const archive = getArchiveClean();
-    const streak = calcStreak(archive);
 
-    const streakEl = document.getElementById('hero-streak');
-    if (streakEl) streakEl.textContent = '🔥 ' + streak + ' שבועות ברצף';
+    // Last workout info (replaces streak)
+    const lastWoEl = document.getElementById('hero-last-workout');
+    if (lastWoEl) {
+        if (archive.length > 0) {
+            const last = archive[0];
+            const days = Math.floor((Date.now() - last.timestamp) / 86400000);
+            const daysStr = days === 0 ? 'היום' : days === 1 ? 'אתמול' : `לפני ${days} ימים`;
+            lastWoEl.textContent = `${last.type} • ${daysStr}`;
+        } else {
+            lastWoEl.textContent = 'טרם בוצעו אימונים';
+        }
+    }
 
     prefs.heroMetrics.forEach((key, i) => {
         const def = HERO_METRIC_DEFS[key];
@@ -744,7 +836,6 @@ function renderHeroCard() {
 
 // ─── TAB BAR ─────────────────────────────
 function switchMainTab(name) {
-    // עדכון כפתורי Tab Bar
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     const activeBtn = document.getElementById('tabbtn-' + name);
     if (activeBtn) activeBtn.classList.add('active');
@@ -754,10 +845,10 @@ function switchMainTab(name) {
     } else if (name === 'analytics') {
         navigate('ui-analytics', true);
         renderAnalyticsDashboard();
-   } else if (name === 'archive') {
-    navigate('ui-archive', true);
-    openArchive();
-}
+    } else if (name === 'archive') {
+        navigate('ui-archive', true);
+        openArchive();
+    }
     haptic('light');
 }
 
@@ -767,6 +858,7 @@ function renderAnalyticsDashboard() {
     const archive = getArchiveClean();
     renderHeroMetricsGrid(archive);
     renderVolumeBarChart(archive, prefs.volumeRange);
+    renderWorkoutTypeChart(archive);
     renderDonutChart(archive, prefs.muscleRange);
     renderConsistencyTrack(archive, prefs.consistencyRange);
     populateMicroSelector(archive);
@@ -810,7 +902,30 @@ function renderHeroMetricsGrid(archive) {
 function renderVolumeBarChart(archive, n) {
     const el = document.getElementById('vol-bar-chart');
     if (!el) return;
-    const data = archive.slice(0, n).reverse();
+    const data = archive.slice(0, n).reverse(); // oldest → newest (left → right)
+
+    // Trend badge: compare avg of recent half vs older half
+    const trendEl = document.getElementById('vol-trend-badge');
+    if (trendEl) {
+        if (data.length >= 4) {
+            const half = Math.floor(data.length / 2);
+            const recentVols = data.slice(half).map(a => getWorkoutVolume(a));
+            const olderVols  = data.slice(0, half).map(a => getWorkoutVolume(a));
+            const avgRecent = recentVols.reduce((s, v) => s + v, 0) / recentVols.length;
+            const avgOlder  = olderVols.reduce((s, v) => s + v, 0) / olderVols.length;
+            if (avgOlder > 0) {
+                const pct = Math.round((avgRecent - avgOlder) / avgOlder * 100);
+                const arrow = pct >= 0 ? '↑' : '↓';
+                const color = pct >= 0 ? 'var(--type-b)' : 'var(--danger)';
+                trendEl.innerHTML = `<span style="color:${color};font-size:0.78em;font-weight:700;margin-right:6px;">${arrow} ${Math.abs(pct)}%</span>`;
+            } else {
+                trendEl.innerHTML = '';
+            }
+        } else {
+            trendEl.innerHTML = '';
+        }
+    }
+
     if (!data.length) { el.innerHTML = '<p class="color-dim text-sm text-center mt-md">אין נתונים</p>'; return; }
     const vols = data.map(a => getWorkoutVolume(a));
     const maxV = Math.max(...vols) || 1;
@@ -827,9 +942,55 @@ function renderVolumeBarChart(archive, n) {
             <div class="bar-col-date">${dt}</div>
         </div>`;
     }).join('');
+
+    // Scroll to show most recent (rightmost)
+    const scrollEl = el.parentElement;
+    if (scrollEl) setTimeout(() => { scrollEl.scrollLeft = scrollEl.scrollWidth; }, 60);
 }
 
-// ─── DONUT CHART ─────────────────────────
+// ─── WORKOUT TYPE COMPARISON CHART ───────
+function renderWorkoutTypeChart(archive) {
+    const el = document.getElementById('workout-type-chart');
+    if (!el) return;
+
+    const typeMap = {};
+    archive.forEach(w => {
+        const type = w.type || 'אחר';
+        if (!typeMap[type]) typeMap[type] = { total: 0, count: 0 };
+        typeMap[type].total += getWorkoutVolume(w);
+        typeMap[type].count++;
+    });
+
+    const entries = Object.entries(typeMap)
+        .map(([type, d]) => ({ type, avg: Math.round(d.total / d.count), count: d.count }))
+        .filter(e => e.count >= 2) // minimum 2 workouts for meaningful average
+        .sort((a, b) => b.avg - a.avg);
+
+    if (!entries.length) {
+        el.innerHTML = '<p class="color-dim text-sm text-center mt-md">נדרשים לפחות 2 אימונים לכל סוג</p>';
+        return;
+    }
+
+    const maxAvg = Math.max(...entries.map(e => e.avg)) || 1;
+    const COLORS = ['var(--type-a)', 'var(--type-b)', 'var(--type-c)', 'var(--type-free)', 'var(--accent)'];
+
+    el.innerHTML = entries.map((e, i) => {
+        const pct = (e.avg / maxAvg * 88).toFixed(1);
+        const color = COLORS[i % COLORS.length];
+        const label = e.avg >= 1000 ? (e.avg / 1000).toFixed(1) + 't' : e.avg + 'kg';
+        const shortType = e.type.length > 14 ? e.type.slice(0, 12) + '…' : e.type;
+        return `<div class="bar-col-wrap">
+            <div class="bar-col-track">
+                <div class="bar-col-val">${label}</div>
+                <div class="bar-col-fill" style="height:${pct}%;background:${color};"></div>
+            </div>
+            <div class="bar-col-date" title="${e.type}">${shortType}</div>
+            <div class="bar-col-count">${e.count}×</div>
+        </div>`;
+    }).join('');
+}
+
+// ─── DONUT CHART (set counts) ─────────────
 const DONUT_COLORS = ['#0A84FF','#32D74B','#FF9F0A','#BF5AF2','#ff453a','#AEAEB2'];
 
 function renderDonutChart(archive, range) {
@@ -838,7 +999,7 @@ function renderDonutChart(archive, range) {
     const legendEl = document.getElementById('donut-legend-el');
     if (!svgEl || !centerEl || !legendEl) return;
 
-    const map = getMuscleVolumes(archive, range);
+    const map = getMuscleSetCounts(archive, range);
     const entries = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const total = entries.reduce((s, e) => s + e[1], 0);
 
@@ -854,8 +1015,8 @@ function renderDonutChart(archive, range) {
     let circles = '';
     let legendHtml = '';
 
-    entries.forEach(([name, vol], i) => {
-        const pct = vol / total;
+    entries.forEach(([name, sets], i) => {
+        const pct = sets / total;
         const da = (pct * ci).toFixed(2);
         const gap = (ci - parseFloat(da)).toFixed(2);
         circles += `<circle cx="60" cy="60" r="${r}" fill="none"
@@ -865,19 +1026,19 @@ function renderDonutChart(archive, range) {
         legendHtml += `<div class="donut-legend-row">
             <div class="donut-legend-dot" style="background:${DONUT_COLORS[i]}"></div>
             <div class="donut-legend-name">${name}</div>
-            <div class="donut-legend-pct">${Math.round(pct * 100)}%</div>
+            <div class="donut-legend-pct">${sets} סטים</div>
         </div>`;
         offset += parseFloat(da);
     });
 
     svgEl.innerHTML = `<circle cx="60" cy="60" r="${r}" fill="none"
         stroke="rgba(255,255,255,0.04)" stroke-width="14"/>${circles}`;
-    centerEl.innerHTML = `<div class="donut-center-val">${entries.length}</div>
-        <div class="donut-center-sub">קבוצות</div>`;
+    centerEl.innerHTML = `<div class="donut-center-val">${total}</div>
+        <div class="donut-center-sub">סטים</div>`;
     legendEl.innerHTML = legendHtml;
 }
 
-// ─── CONSISTENCY TRACK ───────────────────
+// ─── CONSISTENCY TRACK (adaptive thresholds) ─
 function renderConsistencyTrack(archive, n) {
     const el = document.getElementById('cons-track');
     if (!el) return;
@@ -886,12 +1047,35 @@ function renderConsistencyTrack(archive, n) {
         el.innerHTML = '<p class="color-dim text-sm">נדרשים לפחות 2 אימונים</p>';
         return;
     }
+
+    // Compute personal median gap from full archive
+    let medianGap = 7;
+    if (archive.length >= 3) {
+        const allGaps = [];
+        for (let i = 1; i < archive.length; i++) {
+            allGaps.push((archive[i-1].timestamp - archive[i].timestamp) / 86400000);
+        }
+        allGaps.sort((a, b) => a - b);
+        medianGap = allGaps[Math.floor(allGaps.length / 2)];
+    }
+    const greenThreshold  = Math.max(2, Math.round(medianGap * 1.25));
+    const orangeThreshold = Math.max(greenThreshold + 1, Math.round(medianGap * 1.75));
+
+    // Update legend dynamically
+    const legendEl = document.getElementById('cons-legend');
+    if (legendEl) {
+        legendEl.innerHTML = `
+            <span style="color:var(--type-b)">● ≤${greenThreshold} ימים</span>
+            <span style="color:var(--type-c)">● ${greenThreshold + 1}–${orangeThreshold} ימים</span>
+            <span style="color:var(--danger)">● ${orangeThreshold + 1}+ ימים</span>`;
+    }
+
     let html = '';
     data.forEach((w, i) => {
         let cls = 'today', label = '●';
         if (i > 0) {
-            const days = Math.round((data[i].timestamp - data[i - 1].timestamp) / 86400000);
-            cls = days <= 5 ? 'green' : days <= 9 ? 'orange' : 'red';
+            const days = Math.round((data[i].timestamp - data[i-1].timestamp) / 86400000);
+            cls = days <= greenThreshold ? 'green' : days <= orangeThreshold ? 'orange' : 'red';
             label = days + 'd';
         }
         const dt = (w.date || '').slice(0, 5);
@@ -902,17 +1086,41 @@ function renderConsistencyTrack(archive, n) {
         if (i < data.length - 1) html += `<div class="cons-connector"></div>`;
     });
     el.innerHTML = html;
+
+    // Scroll to show most recent (rightmost)
+    setTimeout(() => { el.scrollLeft = el.scrollWidth; }, 60);
 }
 
-// ─── MICRO: SELECTOR ─────────────────────
+// ─── MICRO: SELECTOR (smart sort) ────────
 function populateMicroSelector(archive) {
     const sel = document.getElementById('micro-ex-selector');
     if (!sel) return;
-    const exSet = new Set();
-    archive.forEach(w => { if (w.details) Object.keys(w.details).forEach(e => exSet.add(e)); });
+
+    // Build map: exName → { isCalc, lastSeenIdx (lower = more recent) }
+    const exMap = {};
+    archive.forEach((w, idx) => {
+        if (!w.details) return;
+        Object.keys(w.details).forEach(exName => {
+            if (!exMap[exName]) {
+                const exData = state.exercises.find(e => e.name === exName);
+                exMap[exName] = {
+                    isCalc: exData ? !!exData.isCalc : false,
+                    lastSeenIdx: idx
+                };
+            }
+        });
+    });
+
+    // Sort: Main exercises first → then by recency (most recent first)
+    const sorted = Object.keys(exMap).sort((a, b) => {
+        const da = exMap[a], db = exMap[b];
+        if (da.isCalc !== db.isCalc) return da.isCalc ? -1 : 1;
+        return da.lastSeenIdx - db.lastSeenIdx;
+    });
+
     const current = sel.value;
-    sel.innerHTML = [...exSet].map(e => `<option value="${e}">${e}</option>`).join('');
-    if (current && exSet.has(current)) sel.value = current;
+    sel.innerHTML = sorted.map(e => `<option value="${e}">${e}</option>`).join('');
+    if (current && exMap[current]) sel.value = current;
     if (sel.value) loadMicroData(sel.value);
 }
 
@@ -962,23 +1170,19 @@ function drawMicroLineChart(vals, dates) {
     const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
     const areaPath = linePath + ` L${pts[n-1][0].toFixed(1)},${(pad.t + cH).toFixed(1)} L${pts[0][0].toFixed(1)},${(pad.t + cH).toFixed(1)} Z`;
 
-    // Y axis labels
     const yLabels = [mn, (mn + mx) / 2, mx].map(v =>
         `<text x="${pad.l - 5}" y="${py(v) + 4}" fill="rgba(255,255,255,0.28)" font-size="8.5" text-anchor="end" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`
     ).join('');
 
-    // X axis labels (every other)
     const xLabels = dates.map((d, i) => i % 2 === 0
         ? `<text x="${px(i).toFixed(1)}" y="${H - 5}" fill="rgba(255,255,255,0.28)" font-size="8" text-anchor="middle" font-family="-apple-system,sans-serif">${d.slice(0, 5)}</text>`
         : ''
     ).join('');
 
-    // Dots
     const dots = pts.map(p =>
         `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4.5" fill="#000" stroke="#32D74B" stroke-width="2.5"/>`
     ).join('');
 
-    // Tooltip on last point
     const lp = pts[n - 1];
     const tx = lp[0] > W - 72 ? lp[0] - 52 : lp[0] + 6;
     const tooltip = `
@@ -1020,7 +1224,6 @@ function renderIntensityScore(vals) {
         deltaEl.style.color = parseFloat(delta) >= 0 ? '#32D74B' : '#ff453a';
     }
 
-    // Sparkline
     if (sparkEl && vals.length >= 2) {
         const n = vals.length;
         const W = 140, H = 52;
@@ -1036,14 +1239,19 @@ function renderIntensityScore(vals) {
     }
 }
 
-// ─── MICRO: PR CARD ──────────────────────
+// ─── MICRO: PR CARD (best E1RM set) ──────
 function renderPRCard(exName, relevant, prefs) {
-    let prW = 0, prR = 1, prRIR = '—', prDate = '';
+    // Find the set with the highest E1RM (not just heaviest weight)
+    let bestE1RM = 0, prW = 0, prR = 1, prRIR = '—', prDate = '';
     relevant.forEach(w => {
         if (!w.details || !w.details[exName]) return;
         const parsed = parseSetsFromStrings(w.details[exName].sets);
         parsed.forEach(s => {
-            if (s.w > prW) { prW = s.w; prR = s.r; prRIR = s.rir; prDate = w.date || ''; }
+            const e1rm = calc1RM(s.w, s.r, prefs.formula);
+            if (e1rm > bestE1RM) {
+                bestE1RM = e1rm;
+                prW = s.w; prR = s.r; prRIR = s.rir; prDate = w.date || '';
+            }
         });
     });
 
@@ -1057,8 +1265,8 @@ function renderPRCard(exName, relevant, prefs) {
     if (gEl) gEl.innerHTML = `
         <div><div class="pr-stat-val">${prR}</div><div class="pr-stat-lbl">חזרות</div></div>
         <div><div class="pr-stat-val">RIR ${prRIR}</div><div class="pr-stat-lbl">RIR</div></div>
-        <div><div class="pr-stat-val">${prW ? Math.round(calc1RM(prW, prR, prefs.formula)) : '—'}</div><div class="pr-stat-lbl">1RM משוער</div></div>`;
-    if (nEl) nEl.textContent = prW ? `שיא בתרגיל: ${exName}` : '';
+        <div><div class="pr-stat-val">${prW ? Math.round(bestE1RM) : '—'}</div><div class="pr-stat-lbl">1RM משוער</div></div>`;
+    if (nEl) nEl.textContent = prW ? `שיא E1RM בתרגיל: ${exName}` : '';
 }
 
 function togglePRCard() {
