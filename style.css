@@ -1,672 +1,1188 @@
-<!DOCTYPE html>
+:root {
+    --bg: #000000;
+    --card-bg: rgba(28, 28, 30, 0.65); /* Glassmorphism Base */
+    --accent: #0A84FF;
+    --accent-gradient: linear-gradient(135deg, #0A84FF, #0056b3);
+    --success-gradient: linear-gradient(135deg, #32D74B, #248A3D);
+    --text: #ffffff;
+    --text-dim: #8E8E93;
+    --border: rgba(255, 255, 255, 0.10);
+    --border-hi: rgba(255, 255, 255, 0.18); /* Liquid Glass specular top edge */
+    --card-bg-solid: rgba(28, 28, 30, 0.92); /* @supports fallback */
+    --ios-radius: 16px;
+    --type-a: #0A84FF;
+    --type-b: #32D74B;
+    --type-c: #FF9F0A;
+    --type-free: #BF5AF2;
+    --danger: #ff453a;
 
-<html lang="he" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymPro Elite 14.1.1</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="glass-overlay"></div>
+    /* Design System: Spacing */
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
 
-```
-<!-- Warmup Modal -->
-<div id="warmup-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h3>חימום מומלץ</h3>
-        <div id="warmup-list" class="vertical-stack my-lg"></div>
-        <button class="btn-main primary-gradient" onclick="markWarmupDone()">סיימתי חימום</button>
-        <button class="btn-text color-danger" onclick="closeWarmup()">סגור ללא רישום</button>
-    </div>
-</div>
+    /* Design System: Typography */
+    --text-xs: 0.75em;
+    --text-sm: 0.85em;
+    --text-base: 1em;
+    --text-lg: 1.2em;
+    --text-xl: 1.5em;
+}
 
-<!-- Edit Set Modal -->
-<div id="edit-set-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h3>עריכת סט</h3>
-        <div class="input-grid mb-md">
-            <div class="glass-card compact m-0"><label>Weight</label><input type="number" id="edit-weight" class="minimal-input m-0"></div>
-            <div class="glass-card compact m-0"><label>Reps</label><input type="number" id="edit-reps" class="minimal-input m-0"></div>
-            <div class="glass-card compact m-0"><label>RIR</label><input type="number" id="edit-rir" class="minimal-input m-0"></div>
-        </div>
-        <input type="text" id="edit-note" class="minimal-input m-0" placeholder="הערה...">
-        <button class="btn-main primary-gradient" onclick="saveSetEdit()">שמור שינויים</button>
-        <button id="btn-delete-set" class="btn-text color-danger" onclick="deleteSetFromLog()">מחק סט זה</button>
-        <button class="btn-text" onclick="closeEditModal()">ביטול</button>
-    </div>
-</div>
+body {
+    margin: 0; font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    direction: rtl; overflow: hidden;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
 
-<!-- Exercise Config Modal -->
-<div id="ex-config-modal" class="modal-overlay">
-    <div class="modal-content max-w-350">
-        <h3 id="ex-config-title">הגדרת תרגיל</h3>
-        <div class="vertical-stack gap-md text-right">
-            <div>
-                <label class="input-label m-0 mb-xs">שם התרגיל</label>
-                <input type="text" id="conf-ex-name" class="minimal-input m-0" placeholder="למשל: לחיצת חזה">
-            </div>
-            <div>
-                <label class="input-label m-0 mb-xs">קבוצת שריר</label>
-                <select id="conf-ex-muscle" class="minimal-input m-0 bg-card">
-                    <option value="חזה">חזה</option>
-                    <option value="גב">גב</option>
-                    <option value="רגליים">רגליים</option>
-                    <option value="כתפיים">כתפיים</option>
-                    <option value="יד קדמית">יד קדמית</option>
-                    <option value="יד אחורית">יד אחורית</option>
-                    <option value="בטן">בטן</option>
-                    <option value="קליסטניקס">קליסטניקס</option>
-                </select>
-            </div>
-            <div class="flex-between border-bottom pb-sm">
-                <span class="input-label m-0">חד-צדדי (Unilateral)</span>
-                <input type="checkbox" id="conf-ex-uni" class="archive-checkbox">
-            </div>
-            <div class="input-grid grid-2-cols">
-                <div>
-                    <label class="input-label m-0 mb-xs">משקל בסיס</label>
-                    <input type="number" id="conf-ex-base" class="minimal-input m-0" placeholder="kg">
-                </div>
-                <div>
-                    <label class="input-label m-0 mb-xs">קפיצות (Step)</label>
-                    <select id="conf-ex-step" class="minimal-input m-0 bg-card">
-                        <option value="0.5">0.5</option>
-                        <option value="1">1.0</option>
-                        <option value="1.25">1.25</option>
-                        <option value="2.5">2.5</option>
-                        <option value="5">5.0</option>
-                        <option value="10">10.0</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-grid grid-2-cols">
-                <div>
-                    <label class="input-label m-0 mb-xs">מינימום</label>
-                    <input type="number" id="conf-ex-min" class="minimal-input m-0" placeholder="0">
-                </div>
-                <div>
-                    <label class="input-label m-0 mb-xs">מקסימום</label>
-                    <input type="number" id="conf-ex-max" class="minimal-input m-0" placeholder="200">
-                </div>
-            </div>
-        </div>
-        <button class="btn-main primary-gradient" onclick="saveExerciseConfig()">שמור הגדרות</button>
-        <button id="btn-delete-ex" class="btn-text color-danger d-none" onclick="deleteExercise()">מחק תרגיל מהמאגר</button>
-        <button class="btn-text" onclick="closeExConfigModal()">ביטול</button>
-    </div>
-</div>
+/* =========================================
+   DESIGN SYSTEM - UTILITY CLASSES
+   ========================================= */
 
-<!-- Exercise Settings Modal -->
-<div id="exercise-settings-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h3 id="ex-settings-title">הגדרות תרגיל בתוכנית</h3>
-        <p class="sub-text mb-md">הגדרות אלו ידרסו את ההיסטוריה עבור אימון זה</p>
-        <div class="input-grid mb-lg">
-            <div class="glass-card compact m-0 p-sm"><label>משקל יעד</label><input type="number" id="target-weight-input" class="minimal-input m-0" placeholder="Auto"></div>
-            <div class="glass-card compact m-0 p-sm"><label>חזרות יעד</label><input type="number" id="target-reps-input" class="minimal-input m-0" placeholder="Auto"></div>
-            <div class="glass-card compact m-0 p-sm"><label>RIR יעד</label><input type="number" id="target-rir-input" class="minimal-input m-0" placeholder="-"></div>
-        </div>
-        <p class="sub-text">זמן מנוחה (שניות)</p>
-        <div class="stepper-control mt-sm mb-lg">
-            <button class="stepper-btn" onclick="changeRestTime(-15)">-</button>
-            <span id="rest-time-display" class="stepper-value">90s</span>
-            <button class="stepper-btn" onclick="changeRestTime(15)">+</button>
-        </div>
-        <button class="btn-main primary-gradient" onclick="saveExerciseSettings()">שמור</button>
-        <button class="btn-text" onclick="closeExerciseSettings()">ביטול</button>
-    </div>
-</div>
+/* Spacing Utils */
+.m-0 { margin: 0 !important; }
+.mt-0 { margin-top: 0 !important; }
+.mt-xs { margin-top: var(--sp-xs) !important; }
+.mt-sm { margin-top: var(--sp-sm) !important; }
+.mt-md { margin-top: var(--sp-md) !important; }
+.mt-lg { margin-top: var(--sp-lg) !important; }
+.mt-xl { margin-top: var(--sp-xl) !important; }
+.mt-neg-sm { margin-top: -10px !important; }
 
-<!-- Recovery Modal -->
-<div id="recovery-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h3>נמצא אימון פעיל</h3>
-        <p class="sub-text">האם ברצונך להמשיך מהנקודה שבה הפסקת?</p>
-        <div class="vertical-stack">
-            <button class="btn-main primary-gradient" onclick="restoreSession()">כן, המשך אימון</button>
-            <button class="btn-text color-danger" onclick="discardSession()">לא, התחל מחדש</button>
-        </div>
-    </div>
-</div>
+.mb-0 { margin-bottom: 0 !important; }
+.mb-xs { margin-bottom: var(--sp-xs) !important; }
+.mb-sm { margin-bottom: var(--sp-sm) !important; }
+.mb-md { margin-bottom: var(--sp-md) !important; }
+.mb-lg { margin-bottom: var(--sp-lg) !important; }
 
-<!-- Bottom Sheet -->
-<div id="sheet-overlay" class="bottom-sheet-overlay" onclick="closeDayDrawer()"></div>
-<div id="sheet-modal" class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div id="sheet-content" class="sheet-content"></div>
-</div>
+.my-md { margin-top: var(--sp-md) !important; margin-bottom: var(--sp-md) !important; }
+.my-lg { margin-top: var(--sp-lg) !important; margin-bottom: var(--sp-lg) !important; }
+.my-xl { margin-top: var(--sp-xl) !important; margin-bottom: var(--sp-xl) !important; }
+.mx-auto { margin-left: auto !important; margin-right: auto !important; }
 
-<div class="app-container">
-    <header class="app-header">
-        <button id="global-back" class="back-btn" onclick="handleBackClick()">
-            <div class="chevron-back"></div>
-        </button>
-        <div class="brand-logo">GYMPRO <span>ELITE</span></div>
-        <div class="d-flex" style="gap:5px;">
-            <button id="btn-sound" class="settings-btn" onclick="initAudio()">🔇</button>
-            <button id="btn-settings" class="settings-btn" onclick="openSettings()">⚙️</button>
-        </div>
-    </header>
+.p-0 { padding: 0 !important; }
+.p-sm { padding: var(--sp-sm) !important; }
+.pt-sm { padding-top: var(--sp-sm) !important; }
+.pt-md { padding-top: var(--sp-md) !important; }
+.pb-sm { padding-bottom: var(--sp-sm) !important; }
 
-    <main class="content-area">
+/* Typography Utils */
+.text-center { text-align: center !important; }
+.text-right { text-align: right !important; }
+.text-xs { font-size: var(--text-xs) !important; }
+.text-sm { font-size: var(--text-sm) !important; }
+.text-base { font-size: var(--text-base) !important; }
+.text-lg { font-size: var(--text-lg) !important; }
+.text-xl { font-size: var(--text-xl) !important; }
+.font-bold { font-weight: 800 !important; }
+.font-semi { font-weight: 600 !important; }
 
-        <!-- WEEK / HOME SCREEN -->
-        <div id="ui-week" class="screen active">
-            <div class="hero-analytics-card mt-xs" id="hero-card">
-                <h2>מוכן לאימון?</h2>
-                <!-- Last workout info (replaces streak badge) -->
-                <div class="hero-last-workout" id="hero-last-workout"></div>
-                <div class="hero-stats-row" id="hero-stats-row">
-                    <div class="hero-stat" id="hero-stat-0"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
-                    <div class="hero-stat" id="hero-stat-1"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
-                    <div class="hero-stat" id="hero-stat-2"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
-                </div>
-                <button class="btn-text color-accent p-0 mt-sm text-sm" style="width:auto;text-align:right;" onclick="openHeroSettings()">ערוך תצוגה</button>
-            </div>
+/* Color Utils */
+.color-white { color: var(--text) !important; }
+.color-dim { color: var(--text-dim) !important; }
+.color-danger { color: #ff453a !important; }
+.color-accent { color: var(--accent) !important; }
+.color-type-b { color: var(--type-b) !important; }
+.color-type-c { color: var(--type-c) !important; }
+.color-type-free { color: var(--type-free) !important; }
+.color-success { color: #32D74B !important; }
 
-            <div class="section-label mt-lg">בחר תוכנית שבועית</div>
-            <div class="grid-menu grid-2-cols mt-sm">
-                <button class="menu-card" onclick="selectWeek(1)"><span>שבוע 1</span><div class="chevron"></div></button>
-                <button class="menu-card" onclick="selectWeek(2)"><span>שבוע 2</span><div class="chevron"></div></button>
-                <button class="menu-card" onclick="selectWeek(3)"><span>שבוע 3</span><div class="chevron"></div></button>
-                <button class="menu-card deload-card" onclick="selectWeek('deload')"><span>דילואוד</span><div class="chevron"></div></button>
-            </div>
-            <button class="menu-card freestyle-card w-100 mt-sm" onclick="startFreestyle()">
-                <h3 class="color-type-free m-0">אימון Freestyle</h3>
-                <p>בחר תרגילים חופשי</p>
-            </button>
-            <div class="version-footer">GymPro Elite v14.1.1</div>
-        </div>
+/* Layout & Flex Utils */
+.d-flex { display: flex !important; }
+.d-block { display: block !important; }
+.d-none { display: none !important; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.gap-sm { gap: var(--sp-sm) !important; }
+.gap-md { gap: var(--sp-md) !important; }
+.grid-2-cols { grid-template-columns: 1fr 1fr; }
+.w-100 { width: 100% !important; }
+.max-w-350 { max-width: 350px !important; }
 
-        <!-- SETTINGS -->
-        <div id="ui-settings" class="screen">
-            <h2 class="section-title">הגדרות וניהול</h2>
-            <button class="menu-card tall w-100 mb-sm border-accent" onclick="openWorkoutManager()">
-                <h3 class="color-accent m-0">ניהול תוכניות אימון</h3>
-                <p>ערוך, צור או מחק תוכניות</p>
-            </button>
-            <button class="menu-card tall w-100 mb-lg border-type-b" onclick="openExerciseDatabase()">
-                <h3 class="color-type-b m-0">ניהול מאגר תרגילים</h3>
-                <p>יצירה, עריכה וניהול הגדרות לכל התרגילים</p>
-            </button>
-            <div class="glass-card">
-                <h3 class="mt-0">ניהול נתונים</h3>
-                <p class="color-dim text-sm mb-0">גרסה V14.1.1</p>
-                <button class="btn-text color-danger border-danger rounded-md mb-lg" onclick="resetToFactorySettings()">איפוס להגדרות יצרן</button>
-                <div class="border-top pt-md">
-                    <label class="color-dim text-xs d-block mb-sm">ניהול תבניות (ללא היסטוריה)</label>
-                    <div class="input-grid grid-2-cols">
-                        <button class="glass-card compact m-0 border-accent color-accent" onclick="StorageManager.exportConfiguration()">שמור תבנית</button>
-                        <button class="glass-card compact m-0 border-type-b color-type-b" onclick="triggerConfigImport()">טען תבנית</button>
-                    </div>
-                </div>
-            </div>
-            <input type="file" id="import-config-file" class="d-none" onchange="processConfigImport(this)">
-        </div>
+/* Borders & Backgrounds Utils */
+.bg-card { background: var(--card-bg) !important; backdrop-filter: blur(20px) saturate(180%) brightness(0.88) !important; -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88) !important; box-shadow: inset 0 1px 0 var(--border-hi) !important; }
+.border-top { border-top: 1px solid var(--border) !important; }
+.border-bottom { border-bottom: 1px solid var(--border) !important; }
+.border-accent { border-color: var(--accent) !important; }
+.border-danger { border-color: #ff453a !important; }
+.border-type-b { border-color: var(--type-b) !important; }
+.border-type-c { border-color: var(--type-c) !important; }
+.border-success { border-color: #32D74B !important; }
+.border-dim { border-color: var(--border) !important; }
+.border-dashed { border-style: dashed !important; border-width: 1px !important; }
+.rounded-md { border-radius: 12px !important; }
+.opacity-50 { opacity: 0.5 !important; }
 
-        <!-- EXERCISE DATABASE -->
-        <div id="ui-exercise-db" class="screen">
-            <div class="sticky-header">
-                <h2 class="section-title mb-sm">מאגר תרגילים</h2>
-                <input type="text" id="db-search" class="search-input" placeholder="חפש תרגיל לעריכה..." oninput="renderExerciseDatabase()">
-                <div class="chip-container">
-                    <button class="chip active" onclick="setDbFilter('all', this)">הכל</button>
-                    <button class="chip" onclick="setDbFilter('חזה', this)">חזה</button>
-                    <button class="chip" onclick="setDbFilter('גב', this)">גב</button>
-                    <button class="chip" onclick="setDbFilter('רגליים', this)">רגליים</button>
-                    <button class="chip" onclick="setDbFilter('כתפיים', this)">כתפיים</button>
-                    <button class="chip" onclick="setDbFilter('ידיים', this)">ידיים</button>
-                    <button class="chip" onclick="setDbFilter('בטן', this)">בטן</button>
-                    <button class="chip" onclick="setDbFilter('קליסטניקס', this)">קליסטניקס</button>
-                </div>
-                <button class="btn-text color-type-b border-dashed border-type-b mt-sm font-semi" onclick="openExerciseCreator()">+ יצירת תרגיל חדש</button>
-            </div>
-            <div id="db-list" class="vertical-stack pt-sm"></div>
-            <button class="btn-text" onclick="handleBackClick()">חזור</button>
-        </div>
+/* Components Utils */
+.sticky-header { position: sticky; top: 0; background: var(--bg); z-index: 10; padding-bottom: var(--sp-sm); }
 
-        <!-- WORKOUT MANAGER -->
-        <div id="ui-workout-manager" class="screen">
-            <div class="hero-section"><h2>ניהול תוכניות</h2></div>
-            <div id="manager-list" class="vertical-stack"></div>
-            <div class="mt-md">
-                <button class="btn-main primary-gradient" onclick="createNewWorkout()">+ צור תוכנית חדשה</button>
-                <button class="btn-text mt-md" onclick="navigate('ui-week', true)">חזרה ללוח הבקרה</button>
-            </div>
-        </div>
+/* =========================================
+   BASE STYLES & COMPONENTS
+   ========================================= */
 
-        <!-- WORKOUT EDITOR -->
-        <div id="ui-workout-editor" class="screen">
-            <div class="hero-section"><h2>עריכת תוכנית</h2></div>
-            <div class="glass-card">
-                <label class="text-xs color-dim">שם התוכנית</label>
-                <input type="text" id="editor-workout-name" class="minimal-input text-right text-lg font-bold mb-sm">
-                <div class="flex-between border-top pt-sm">
-                    <span class="text-sm">הצג בשבוע דילואוד?</span>
-                    <input type="checkbox" id="editor-deload-check" class="archive-checkbox">
-                </div>
-                <div class="flex-between border-top pt-sm mt-xs">
-                    <span class="text-sm color-type-free">מופיע בדילואוד בלבד?</span>
-                    <input type="checkbox" id="editor-deload-only-check" class="archive-checkbox">
-                </div>
-            </div>
-            <div class="section-label">רשימת תרגילים</div>
-            <div id="editor-list" class="vertical-stack"></div>
-            <div class="input-grid mt-sm grid-2-cols">
-                <button class="btn-text border-dashed border-accent color-accent" onclick="openExerciseSelector()">+ הוסף תרגיל</button>
-                <button class="btn-text border-dashed color-type-free" style="border-color:var(--type-free)!important;" onclick="addClusterToEditor()">+ צור סבב</button>
-            </div>
-            <div class="mt-xl">
-                <button class="btn-main primary-gradient" onclick="saveWorkoutChanges()">שמור שינויים</button>
-                <button class="btn-text" onclick="handleBackClick()">ביטול</button>
-            </div>
-        </div>
+/* Ambient Light Upgrade (iOS 17 Style) */
+.glass-overlay {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at 15% 50%, rgba(10, 132, 255, 0.15), transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(191, 90, 242, 0.1), transparent 50%),
+                #000000;
+    z-index: -1;
+}
 
-        <!-- EXERCISE SELECTOR -->
-        <div id="ui-exercise-selector" class="screen">
-            <div class="sticky-header">
-                <h2 class="section-title mb-sm">בחר תרגיל</h2>
-                <input type="text" id="selector-search" class="search-input" placeholder="חפש תרגיל..." oninput="filterSelector()">
-                <div class="chip-container">
-                    <button class="chip active" onclick="setSelectorFilter('all', this)">הכל</button>
-                    <button class="chip" onclick="setSelectorFilter('חזה', this)">חזה</button>
-                    <button class="chip" onclick="setSelectorFilter('גב', this)">גב</button>
-                    <button class="chip" onclick="setSelectorFilter('רגליים', this)">רגליים</button>
-                    <button class="chip" onclick="setSelectorFilter('כתפיים', this)">כתפיים</button>
-                    <button class="chip" onclick="setSelectorFilter('ידיים', this)">ידיים</button>
-                    <button class="chip" onclick="setSelectorFilter('בטן', this)">בטן</button>
-                    <button class="chip" onclick="setSelectorFilter('קליסטניקס', this)">קליסטניקס</button>
-                </div>
-                <button class="btn-text color-type-b border-dashed border-type-b mt-sm font-semi" onclick="openExerciseCreator()">+ יצירת תרגיל חדש</button>
-            </div>
-            <div id="selector-list" class="vertical-stack pt-sm"></div>
-            <button class="btn-text" onclick="handleBackClick()">ביטול</button>
-        </div>
+.app-container {
+    height: 100vh; display: flex; flex-direction: column;
+    padding: calc(env(safe-area-inset-top) + 10px) 20px env(safe-area-inset-bottom);
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
 
-        <div id="ui-workout-type" class="screen">
-            <div class="hero-section"><h2 id="workout-week-title">בחר מסלול</h2></div>
-            <div id="workout-menu-container" class="vertical-stack"></div>
-            <button class="menu-card tall freestyle-card mt-md" onclick="startFreestyle()"><h3>Freestyle</h3><p>בחירה חופשית</p></button>
-        </div>
+/* Header */
+.app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.back-btn { background: none; border: none; padding: 8px; visibility: hidden; cursor: pointer; display: flex; align-items: center; }
+.brand-logo { font-weight: 800; font-size: 1.2em; letter-spacing: -0.5px; }
+.brand-logo span { color: var(--accent); }
+.settings-btn { background: none; border: none; font-size: 1.2em; cursor: pointer; padding: 8px; filter: grayscale(100%); transition: filter 0.2s; }
+.settings-btn:active { filter: grayscale(0%); }
 
-        <div id="ui-variation" class="screen">
-            <div class="sticky-header">
-                <div id="variation-context-container" class="mb-sm" style="display:none;">
-                    <button id="btn-var-resume" class="action-card success-gradient mb-sm d-flex" style="display:none;" onclick="resumeWorkout()">
-                        <div class="card-text center-text">חזור למסלול</div>
-                    </button>
-                </div>
-                <h2 id="variation-title" class="section-title mb-sm">בחר תרגיל</h2>
-                <input type="text" id="freestyle-search" class="search-input" placeholder="חפש תרגיל..." oninput="renderFreestyleList()">
-                <div id="variation-chips" class="chip-container d-flex"></div>
-            </div>
-            <div id="variation-options" class="vertical-stack pt-sm"></div>
-            <button id="btn-var-finish-extra" class="finish-main-btn mt-lg" style="display:none;" onclick="finishExtraPhase()">סיום אימון</button>
-            <button class="btn-text" onclick="handleBackClick()">חזור</button>
-        </div>
+/* CSS Chevrons */
+.chevron-back {
+    width: 10px; height: 10px;
+    border-right: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    transform: rotate(135deg);
+}
 
-        <div id="ui-swap-list" class="screen">
-            <h2 class="section-title">אפשרויות החלפה</h2>
-            <div id="swap-container" class="vertical-stack"></div>
-            <button class="btn-text" onclick="handleBackClick()">ביטול</button>
-        </div>
+.chevron {
+    width: 8px; height: 8px;
+    border-right: 2px solid var(--text-dim);
+    border-bottom: 2px solid var(--text-dim);
+    transform: rotate(-45deg);
+    margin-right: 5px; opacity: 0.5;
+}
 
-        <div id="ui-1rm" class="screen">
-            <div class="hero-section"><h2 id="rm-title">1RM</h2></div>
-            <div class="glass-card">
-                <label>משקל מקסימלי (RM)</label>
-                <select id="rm-picker" class="ios-picker"></select>
-            </div>
-            <button class="btn-main primary-gradient" onclick="save1RM()">צור אימון</button>
-        </div>
+.version-footer { 
+    font-size: 0.75em; 
+    color: var(--text-dim); 
+    text-align: center; 
+    margin-top: 30px; 
+    opacity: 0.6; 
+}
 
-        <div id="ui-confirm" class="screen">
-            <div class="confirm-fixed-top">
-                <div id="confirm-ex-counter" class="text-sm color-accent font-semi mb-xs" style="display:none;"></div>
-                <p>התרגיל הבא:</p>
-                <h2 id="confirm-ex-name"></h2>
-                <div id="confirm-ex-config" class="sub-text mt-neg-sm mb-lg text-xs color-accent"></div>
-                <button class="btn-main primary-gradient" onclick="confirmExercise(true)">התחל אימון</button>
-                <div class="secondary-buttons-grid">
-                    <button class="control-btn passive-action" onclick="confirmExercise(false)"><span>דלג</span></button>
-                    <button id="btn-swap-confirm" class="control-btn outline-action" onclick="openSwapMenu()"><span>החלף</span></button>
-                    <button id="btn-add-exercise" class="control-btn outline-action" onclick="interruptWorkout()"><span>הוסף</span></button>
-                </div>
-            </div>
-            <div id="history-container" class="w-100 mt-lg"></div>
-        </div>
+/* Screens & Animation */
+.content-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
 
-        <div id="ui-cluster-rest" class="screen flex-center">
-            <div class="confirm-box">
-                <p class="color-dim">מנוחה בין סבבים</p>
-                <h2 id="cluster-status-text"></h2>
-                <div class="timer-wrap my-xl mx-auto">
-                    <svg class="timer-svg" viewBox="0 0 100 100">
-                        <circle class="timer-bg" cx="50" cy="50" r="45"></circle>
-                        <circle id="cluster-timer-bar" class="timer-bar" cx="50" cy="50" r="45"></circle>
-                    </svg>
-                    <div id="cluster-timer-text" class="timer-text">00:00</div>
-                </div>
-                <div id="next-round-preview" class="glass-card compact text-right mb-lg">
-                    <label>הסבב הבא כולל:</label>
-                    <div id="cluster-next-list" class="text-sm color-white"></div>
-                </div>
-                <button id="btn-cluster-main" class="btn-main primary-gradient" onclick="startNextRound()">התחל סבב הבא</button>
-                <button id="btn-extra-round" class="btn-text secondary-action mt-md" style="display:none;" onclick="addExtraRound()">+ בצע סבב נוסף</button>
-                <button id="btn-cluster-skip-text" class="btn-text color-danger mt-sm" onclick="finishCluster()">סיים סבב זה והמשך</button>
-            </div>
-        </div>
+.screen { 
+    display: none; 
+    flex-direction: column; 
+    height: 100%; 
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 90px; 
+    scrollbar-width: none;
+    overscroll-behavior-y: contain; 
+}
+.screen::-webkit-scrollbar { display: none; }
+.screen.active { display: flex; animation: slideIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        <div id="ui-main" class="screen">
-            <div class="exercise-header">
-                <div class="header-tools">
-                    <button onclick="openHistoryDrawer()" class="tool-btn">היסטוריה</button>
-                    <button onclick="openSessionLog()" class="tool-btn">יומן</button>
-                </div>
-                <div class="badge-row mt-xs">
-                    <span id="set-counter" class="ios-badge">SET 1/3</span>
-                    <button id="btn-warmup" class="warmup-badge" onclick="calcWarmup()">חימום</button>
-                    <div id="unilateral-note" class="uni-badge">UNILATERAL</div>
-                </div>
-                <h2 id="ex-display-name" class="mt-md"></h2>
-                <div id="last-set-info" class="history-pill"></div>
-            </div>
-            <div class="input-grid">
-                <div class="glass-card compact"><label>Weight</label><select id="weight-picker" class="ios-picker"></select></div>
-                <div class="glass-card compact"><label>Reps</label><select id="reps-picker" class="ios-picker"></select></div>
-                <div class="glass-card compact"><label>RIR</label><select id="rir-picker" class="ios-picker"></select></div>
-            </div>
-            <input type="text" id="set-notes" class="minimal-input" placeholder="הערות לסט (אופציונלי)">
-            <button id="btn-submit-set" class="btn-main primary-gradient pulse" onclick="nextStep()">סיום סט</button>
-            <div id="action-panel" class="action-panel">
-                <p id="next-ex-preview" class="passive-preview"></p>
-                <div class="vertical-stack">
-                    <button class="btn-main primary-gradient" onclick="finishCurrentExercise()">המשך לתרגיל הבא</button>
-                    <button class="btn-text secondary-action" onclick="addExtraSet()">+ סט נוסף</button>
-                </div>
-            </div>
-            <div id="timer-area" class="timer-section">
-                <div class="timer-wrap">
-                    <svg class="timer-svg" viewBox="0 0 100 100">
-                        <circle class="timer-bg" cx="50" cy="50" r="45"></circle>
-                        <circle id="timer-progress" class="timer-bar" cx="50" cy="50" r="45"></circle>
-                    </svg>
-                    <div id="rest-timer" class="timer-text">00:00</div>
-                </div>
-            </div>
-            <div class="d-flex gap-sm mt-lg">
-                <button id="btn-skip-exercise" class="btn-text passive-skip w-100 m-0" onclick="skipCurrentExercise()">דלג על התרגיל</button>
-                <button id="btn-finish-round" class="btn-text passive-skip w-100 m-0 border-type-c color-type-c" style="display:none;" onclick="finishClusterRound()">סיים סבב</button>
-            </div>
-        </div>
+/* Cards & Buttons */
+.hero-section { margin-bottom: 25px; } 
+.hero-section h1 { font-size: 2em; line-height: 1.1; margin: 0; }
+.hero-section span { display: block; color: var(--text-dim); font-size: 0.6em; font-weight: 400; margin-top: 5px; }
 
-        <div id="ui-ask-extra" class="screen">
-            <div class="confirm-fixed-top">
-                <h2>האם להוסיף תרגילים נוספים?</h2>
-                <p class="sub-text">ניתן לבחור תרגילים מכל קבוצות השרירים</p>
-                <div class="vertical-stack">
-                    <button class="btn-text" onclick="finish()">לא, סיים אימון</button>
-                    <button class="btn-main primary-gradient" onclick="startExtraPhase()">כן, הוסף תרגילים</button>
-                </div>
-            </div>
-        </div>
+.section-label { font-size: 0.9em; color: var(--text-dim); margin-bottom: 15px; margin-top: 10px; }
+.section-title { font-size: 1.4em; margin-bottom: 20px; }
 
-        <div id="ui-summary" class="screen">
-            <div class="hero-section"><h2>סיכום אימון</h2></div>
-            <input type="text" id="summary-note" class="minimal-input mb-lg" placeholder="הערות כלליות לאימון (אופציונלי)">
-            <div id="summary-area" class="summary-card"></div>
-            <button class="btn-main primary-gradient" onclick="copyResult()">העתק וסגור</button>
-        </div>
+.action-card {
+    background: var(--accent-gradient); border-radius: var(--ios-radius); padding: 20px;
+    border: none; color: white; display: flex; align-items: center; 
+    justify-content: center; width: 100%; margin-bottom: 25px; font-weight: 600; 
+    box-shadow: 0 4px 20px rgba(10, 132, 255, 0.3);
+    transition: transform 0.1s, opacity 0.1s;
+}
+.action-card:active { transform: scale(0.98); opacity: 0.9; }
+.card-text.center-text { text-align: center; width: 100%; }
 
-        <div id="ui-archive" class="screen">
-            <div class="hero-section"><h2>ארכיון וגיבוי</h2></div>
-            <div class="input-grid mb-lg">
-                <button class="glass-card compact w-100 border-accent color-accent" onclick="exportData()"><label class="color-white text-sm mb-xs font-semi">ייצוא</label></button>
-                <button class="glass-card compact w-100 border-success color-success" onclick="triggerImport()"><label class="color-white text-sm mb-xs font-semi">ייבוא</label></button>
-            </div>
-            <div class="segmented-control">
-                <button id="btn-view-list" class="segment-btn active" onclick="switchArchiveView('list')">רשימה</button>
-                <button id="btn-view-calendar" class="segment-btn" onclick="switchArchiveView('calendar')">לוח שנה</button>
-            </div>
-            <div id="calendar-view" style="display:none;">
-                <div class="calendar-wrapper">
-                    <div class="calendar-header">
-                        <button class="month-nav-btn" onclick="changeMonth(-1)">❮</button>
-                        <span id="current-month-display" class="current-month-display"></span>
-                        <button class="month-nav-btn" onclick="changeMonth(1)">❯</button>
-                    </div>
-                    <div class="calendar-grid">
-                        <div class="day-name">א'</div><div class="day-name">ב'</div><div class="day-name">ג'</div><div class="day-name">ד'</div><div class="day-name">ה'</div><div class="day-name">ו'</div><div class="day-name">ש'</div>
-                    </div>
-                    <div id="calendar-days" class="calendar-grid"></div>
-                </div>
-            </div>
-            <div id="list-view-container">
-                <div class="archive-actions d-flex gap-sm mb-md">
-                    <button class="glass-card compact w-100 color-accent border-accent font-semi text-sm" onclick="copyBulkLog('all')">העתק הכל</button>
-                    <button id="btn-copy-selected" class="glass-card compact w-100 color-dim border-dim font-semi text-sm opacity-50" onclick="copyBulkLog('selected')" disabled>העתק מסומנים</button>
-                </div>
-                <div id="archive-list" class="vertical-stack"></div>
-            </div>
-            <input type="file" id="import-file" class="d-none" onchange="importData(this)">
-        </div>
+/* Glassmorphism Menus */
+.menu-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-top-color: var(--border-hi);
+    backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    border-radius: var(--ios-radius); padding: 18px; color: white; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    transition: transform 0.1s, background 0.1s;
+    box-shadow: inset 0 1px 0 var(--border-hi);
+}
+.menu-card:active { transform: scale(0.98); background: rgba(44, 44, 46, 0.8); }
+.menu-card.tall { flex-direction: column; align-items: flex-start; gap: 5px; }
+.menu-card h3 { margin: 0; font-size: 1.1em; }
+.menu-card p { margin: 0; color: var(--text-dim); font-size: 0.85em; }
+.freestyle-card { border-color: var(--accent); }
+.deload-card { border-color: var(--type-free); color: var(--type-free); }
 
-        <div id="ui-archive-detail" class="screen">
-            <div class="hero-section"><h2>פרטי אימון</h2></div>
-            <div id="archive-detail-content" class="summary-card"></div>
-            <div class="vertical-stack mt-lg">
-                <button class="btn-main primary-gradient" id="btn-archive-copy">העתק סיכום</button>
-                <button class="btn-text color-danger" id="btn-archive-delete">מחק אימון מהארכיון</button>
-            </div>
-        </div>
+/* Archive Specifics */
+.archive-card-row { display: flex; flex-direction: row; align-items: center; width: 100%; gap: 15px; }
+.archive-checkbox { width: 24px; height: 24px; accent-color: var(--accent); cursor: pointer; margin: 0; }
+.archive-info { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
 
-        <!-- =================== ANALYTICS =================== -->
-        <div id="ui-analytics" class="screen">
-            <div class="flex-between mt-xs mb-sm">
-                <h2 class="m-0" style="font-size:1.4em;font-weight:800;">אנליטיקה</h2>
-                <button class="tool-btn" onclick="openAnalyticsSettings()">⚙ הגדרות</button>
-            </div>
+/* Segmented Control */
+.segmented-control {
+    display: flex; background: rgba(118, 118, 128, 0.24); padding: 2px;
+    border-radius: 9px; margin-bottom: 20px;
+}
+.segment-btn {
+    flex: 1; background: none; border: none; color: white; padding: 6px;
+    font-size: 0.9em; font-weight: 500; border-radius: 7px; cursor: pointer;
+}
+.segment-btn.active { background: #636366; box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
 
-            <div class="segmented-control" id="analytics-seg" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
-                <button class="segment-btn active" onclick="switchAnalyticsTab('macro',this)">סקירה כללית</button>
-                <button class="segment-btn" onclick="switchAnalyticsTab('micro',this)">התקדמות תרגיל</button>
-            </div>
+/* Calendar Styles */
+.calendar-wrapper { margin-top: 10px; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 10px; }
+.month-nav-btn { background: none; border: none; color: var(--accent); font-size: 1.2em; padding: 5px 15px; cursor: pointer; }
+.current-month-display { font-weight: 700; font-size: 1.1em; }
 
-            <!-- MACRO TAB -->
-            <div id="analytics-macro">
-                <div class="analytics-section-label">נתוני על</div>
-                <div class="metrics-grid-2x2" id="hero-metrics-grid"></div>
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
+.day-name { font-size: 0.75em; color: var(--text-dim); padding-bottom: 10px; font-weight: 600; }
+.calendar-cell {
+    background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    aspect-ratio: 1/1; border-radius: 10px; display: flex; flex-direction: column; 
+    align-items: center; justify-content: flex-start; padding-top: 6px; 
+    font-size: 0.9em; position: relative; border: 1px solid transparent; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.calendar-cell.today { border-color: var(--accent); background: rgba(10, 132, 255, 0.1); font-weight: 700; }
+.calendar-cell.empty { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; cursor: default; }
 
-                <!-- Volume chart with muscle filter -->
-                <div class="analytics-card">
-                    <div class="analytics-card-label">
-                        <span>נפח לאורך זמן <span id="vol-trend-badge"></span></span>
-                        <div class="range-chips" id="vol-chips">
-                            <button class="range-chip active" onclick="setVolRange(4,this)">4</button>
-                            <button class="range-chip" onclick="setVolRange(8,this)">8</button>
-                            <button class="range-chip" onclick="setVolRange(12,this)">12</button>
-                            <button class="range-chip" onclick="setVolRange(16,this)">16</button>
-                        </div>
-                    </div>
-                    <div class="range-chips" id="vol-muscle-chips" style="margin-bottom:10px;flex-wrap:wrap;">
-                        <button class="range-chip active" data-muscle="all" onclick="setVolMuscle('all',this)">הכל</button>
-                        <button class="range-chip" data-muscle="חזה" onclick="setVolMuscle('חזה',this)">חזה</button>
-                        <button class="range-chip" data-muscle="גב" onclick="setVolMuscle('גב',this)">גב</button>
-                        <button class="range-chip" data-muscle="רגליים" onclick="setVolMuscle('רגליים',this)">רגליים</button>
-                        <button class="range-chip" data-muscle="כתפיים" onclick="setVolMuscle('כתפיים',this)">כתפיים</button>
-                        <button class="range-chip" data-muscle="ידיים" onclick="setVolMuscle('ידיים',this)">ידיים</button>
-                    </div>
-                    <div class="bar-chart-scroll"><div class="bar-chart-inner" id="vol-bar-chart"></div></div>
-                </div>
+.dots-container { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; justify-content: center; width: 80%; }
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.dot.type-a { background-color: var(--type-a); }
+.dot.type-b { background-color: var(--type-b); }
+.dot.type-c { background-color: var(--type-c); }
+.dot.type-free { background-color: var(--type-free); }
 
-                <!-- Workout type horizontal bar chart -->
-                <div class="analytics-card">
-                    <div class="analytics-card-label">
-                        <span>השוואת סוגי אימונים</span>
-                        <button class="tool-btn" style="font-size:0.85em;color:var(--accent);border-color:rgba(10,132,255,0.3);background:rgba(10,132,255,0.08);" onclick="openAliasSheet()">✎ קבץ</button>
-                    </div>
-                    <div style="font-size:0.66em;color:var(--text-dim);margin-bottom:10px;">ממוצע נפח לאימון — לחץ על שם לפרטים</div>
-                    <div class="hbar-chart" id="workout-type-chart"></div>
-                    <div style="margin-top:8px;font-size:0.62em;color:var(--text-dim);">
-                        <span style="color:var(--type-b)">●</span> קבוצה מאוחדת
-                    </div>
-                </div>
-                <div class="wt-toast" id="wt-toast"></div>
+/* Bottom Sheet */
+.bottom-sheet-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 1000; display: none; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+}
+.bottom-sheet {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: rgba(18, 18, 20, 0.88); backdrop-filter: blur(28px) saturate(200%) brightness(0.85); -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(0.85);
+    border-top-left-radius: 20px; border-top-right-radius: 20px;
+    padding: 20px; box-sizing: border-box;
+    transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 1001; border-top: 1px solid var(--border-hi);
+    box-shadow: inset 0 1px 0 var(--border-hi), 0 -4px 40px rgba(0,0,0,0.4);
+    max-height: 60vh; overflow-y: auto;
+}
+.bottom-sheet.open { transform: translateY(0); }
+.sheet-handle { width: 40px; height: 5px; background: #48484a; border-radius: 3px; margin: 0 auto 20px; }
+.sheet-content h3 { margin-top: 0; margin-bottom: 5px; }
+.sheet-content p { color: var(--text-dim); font-size: 0.9em; margin-bottom: 15px; }
+.mini-workout-item { 
+    background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; 
+    margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+}
+.mini-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-                <div class="analytics-card">
-                    <div class="analytics-card-label">
-                        <span>התפלגות שרירים</span>
-                        <div class="range-chips" id="muscle-chips">
-                            <button class="range-chip active" onclick="setMuscleRange('1m',this)">חודש</button>
-                            <button class="range-chip" onclick="setMuscleRange('3m',this)">3 חודשים</button>
-                            <button class="range-chip" onclick="setMuscleRange('all',this)">הכל</button>
-                        </div>
-                    </div>
-                    <div class="donut-layout">
-                        <div class="donut-container">
-                            <svg id="donut-svg-el" class="donut-svg-el" viewBox="0 0 120 120"></svg>
-                            <div class="donut-center-label" id="donut-center-lbl"></div>
-                        </div>
-                        <div class="donut-legend" id="donut-legend-el"></div>
-                    </div>
-                </div>
+.grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.vertical-stack { display: flex; flex-direction: column; gap: 10px; }
 
-                <div class="analytics-card">
-                    <div class="analytics-card-label">
-                        <span>עקביות</span>
-                        <div class="range-chips" id="cons-chips">
-                            <button class="range-chip active" onclick="setConsRange(8,this)">8</button>
-                            <button class="range-chip" onclick="setConsRange(12,this)">12</button>
-                            <button class="range-chip" onclick="setConsRange(16,this)">16</button>
-                        </div>
-                    </div>
-                    <div class="consistency-track" id="cons-track"></div>
-                    <div class="cons-legend" id="cons-legend">
-                        <span style="color:var(--type-b)">● ≤5 ימים</span>
-                        <span style="color:var(--type-c)">● 6–9 ימים</span>
-                        <span style="color:var(--danger)">● 10+ ימים</span>
-                    </div>
-                </div>
-            </div>
+/* Inputs & UI Elements */
+.glass-card { 
+    background: var(--card-bg); border-radius: var(--ios-radius); 
+    padding: 16px; border: 1px solid var(--border); margin-bottom: 15px; 
+    backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    border-top-color: var(--border-hi);
+    box-shadow: inset 0 1px 0 var(--border-hi);
+}
+.input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.compact { text-align: center; padding: 12px 5px; }
+.compact label { font-size: 0.7em; color: var(--text-dim); display: block; margin-bottom: 5px; text-transform: uppercase; }
+.input-label { font-size: 0.8em; color: var(--text-dim); display: block; margin-bottom: 5px; }
 
-            <!-- MICRO TAB -->
-            <div id="analytics-micro" style="display:none;">
-                <div class="analytics-section-label">בחר תרגיל</div>
+.ios-picker {
+    background: none; border: none; color: white; font-size: 1.3em; font-weight: 700;
+    width: 100%; outline: none; text-align: center; appearance: none;
+}
 
-                <!-- Selector + manual sort button -->
-                <div class="micro-selector-row mb-md">
-                    <select id="micro-ex-selector" class="smart-exercise-select" onchange="loadMicroData(this.value)"></select>
-                    <button class="tool-btn" style="flex-shrink:0;" onclick="openMicroSortSheet()">✦ סדר</button>
-                </div>
+.minimal-input {
+    background: transparent; border: none; border-bottom: 1px solid var(--border);
+    color: var(--text); font-size: 0.95em; width: 100%; padding: 12px 5px;
+    margin-bottom: 20px; text-align: center; font-family: inherit;
+    transition: border-color 0.3s;
+}
+.minimal-input:focus { outline: none; border-bottom-color: var(--accent); }
+.minimal-input::placeholder { color: var(--text-dim); }
 
-                <div class="analytics-card">
-                    <div class="analytics-card-label">
-                        <span>E1RM התקדמות</span>
-                        <div class="range-chips" id="micro-pts-chips">
-                            <button class="range-chip active" onclick="setMicroPoints(4,this)">4</button>
-                            <button class="range-chip" onclick="setMicroPoints(6,this)">6</button>
-                            <button class="range-chip" onclick="setMicroPoints(8,this)">8</button>
-                            <button class="range-chip" onclick="setMicroPoints(12,this)">12</button>
-                        </div>
-                    </div>
-                    <div style="display:flex;gap:6px;margin-bottom:10px;" id="micro-axis-chips">
-                        <button class="range-chip active" onclick="setMicroAxis('e1rm',this)">E1RM</button>
-                        <button class="range-chip" onclick="setMicroAxis('maxw',this)">משקל מקסימלי</button>
-                        <button class="range-chip" onclick="setMicroAxis('vol',this)">נפח סט</button>
-                    </div>
-                    <svg id="micro-line-svg" viewBox="0 0 320 165" width="100%" style="display:block;overflow:visible;"></svg>
-                </div>
+.btn-main {
+    padding: 18px; border-radius: var(--ios-radius); border: none;
+    font-weight: 700; color: white; width: 100%; font-size: 1.1em;
+    margin-top: 15px; cursor: pointer; transition: transform 0.1s, opacity 0.1s;
+}
+.btn-main:active { transform: scale(0.98); opacity: 0.9; }
+.btn-text { background: none; border: none; color: var(--text-dim); padding: 15px; width: 100%; margin-top: 5px; font-size: 0.9em; }
 
-                <div class="analytics-card flex-between" id="intensity-card" style="align-items:center;gap:16px;">
-                    <div>
-                        <div class="analytics-card-label" style="margin-bottom:4px;">Intensity Score</div>
-                        <div id="intensity-score-val" style="font-size:2em;font-weight:800;color:var(--type-c);font-variant-numeric:tabular-nums;line-height:1;">—</div>
-                        <div id="intensity-score-delta" style="font-size:0.72em;color:var(--type-b);margin-top:4px;"></div>
-                    </div>
-                    <svg id="micro-sparkline" viewBox="0 0 140 52" width="140" height="52" style="flex-shrink:0;"></svg>
-                </div>
+/* Selector Items */
+.selector-item-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-top-color: var(--border-hi);
+    backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    border-radius: var(--ios-radius); padding: 12px 18px;
+    margin-bottom: 10px; cursor: pointer;
+    box-shadow: inset 0 1px 0 var(--border-hi);
+}
+.selector-item-info { flex-grow: 1; font-weight: 500; }
+.selector-item-actions { display: flex; align-items: center; gap: 10px; }
+.btn-text-edit {
+    font-size: 0.75em; color: var(--accent); background: rgba(10, 132, 255, 0.1);
+    padding: 5px 10px; border-radius: 6px; border: none;
+}
 
-                <div class="pr-expand-card" id="pr-expand-card">
-                    <div class="pr-expand-header" onclick="togglePRCard()">
-                        <div>
-                            <div style="font-size:0.62em;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🏆 שיא אישי</div>
-                            <div id="pr-card-weight" style="font-size:1.75em;font-weight:800;letter-spacing:-0.5px;">—</div>
-                            <div id="pr-card-date" style="font-size:0.76em;color:var(--text-dim);margin-top:2px;"></div>
-                        </div>
-                        <div class="pr-expand-arrow" id="pr-expand-arrow">⌄</div>
-                    </div>
-                    <div class="pr-expand-body" id="pr-expand-body">
-                        <div class="pr-expand-inner">
-                            <div class="pr-stats-row" id="pr-stats-row"></div>
-                            <div id="pr-context-note" style="font-size:0.74em;color:var(--text-dim);text-align:center;margin-top:12px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div><!-- /ui-analytics -->
+/* CONFIRM SCREEN */
+#ui-confirm { justify-content: flex-start; }
+.confirm-fixed-top { width: 100%; margin-top: 0; padding-top: 10px; text-align: center; flex-shrink: 0; }
+.confirm-fixed-top h2 { font-size: 1.8em; margin: 10px 0 10px; }
+.sub-text { color: var(--text-dim); font-size: 0.9em; margin-bottom: 30px; }
 
-    </main>
-</div>
+/* 1. הירארכיה ויזואלית לשם התרגיל (מעודכן למניעת דריסה) */
+#ex-display-name {
+    font-size: 2em;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    max-width: calc(100% - 130px); /* Space for the header tools */
+    overflow-wrap: break-word;
+}
 
-<!-- TAB BAR -->
-<nav class="tab-bar">
-    <button class="tab-btn active" id="tabbtn-workout" onclick="switchMainTab('workout')"><span class="tab-label">אימון</span></button>
-    <button class="tab-btn" id="tabbtn-analytics" onclick="switchMainTab('analytics')"><span class="tab-label">אנליטיקה</span></button>
-    <button class="tab-btn" id="tabbtn-archive" onclick="switchMainTab('archive')"><span class="tab-label">ארכיון</span></button>
-</nav>
+/* 2. הפרדה ויזואלית לאזורים */
+.exercise-header {
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 20px;
+    position: relative;
+}
 
-<!-- ANALYTICS SETTINGS SHEET -->
-<div id="analytics-settings-overlay" class="bottom-sheet-overlay" onclick="closeAnalyticsSettings()"></div>
-<div id="analytics-settings-sheet" class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <h3>הגדרות אנליטיקה</h3>
-    <div class="vertical-stack mt-md">
-        <div><label class="input-label">שם המתאמן</label><input type="text" id="pref-name" class="minimal-input m-0" placeholder="למשל: לירון"></div>
-        <div class="flex-between border-bottom pb-sm"><label class="input-label m-0">יחידות</label><select id="pref-units" class="minimal-input m-0 bg-card" style="width:auto;"><option value="kg">kg</option><option value="lbs">lbs</option></select></div>
-        <div class="flex-between"><label class="input-label m-0">נוסחת 1RM</label><select id="pref-formula" class="minimal-input m-0 bg-card" style="width:auto;"><option value="epley">Epley</option><option value="brzycki">Brzycki</option><option value="lombardi">Lombardi</option></select></div>
-    </div>
-    <button class="btn-main primary-gradient" onclick="saveAnalyticsSettingsPrefs()">שמור</button>
-    <button class="btn-text" onclick="closeAnalyticsSettings()">ביטול</button>
-</div>
+#ui-main .input-grid {
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
 
-<!-- HERO SETTINGS SHEET -->
-<div id="hero-settings-overlay" class="bottom-sheet-overlay" onclick="closeHeroSettings()"></div>
-<div id="hero-settings-sheet" class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <h3>ערוך תצוגת כרטיס</h3>
-    <p class="sub-text">בחר בדיוק 3 מדדים שיוצגו</p>
-    <div id="hero-metric-picker" class="vertical-stack mt-md"></div>
-    <button class="btn-main primary-gradient" onclick="saveHeroSettings()">שמור</button>
-    <button class="btn-text" onclick="closeHeroSettings()">ביטול</button>
-</div>
+#ui-main .input-grid .glass-card {
+    margin-bottom: 0;
+}
 
-<!-- MICRO SORT SHEET -->
-<div id="micro-sort-overlay" class="bottom-sheet-overlay" onclick="closeMicroSortSheet()"></div>
-<div id="micro-sort-sheet" class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <h3>סדר תרגילים</h3>
-    <p class="sub-text">השתמש בחצים כדי לשנות את הסדר בפיקר</p>
-    <div id="micro-sort-content" class="vertical-stack mt-sm" style="max-height:50vh;overflow-y:auto;"></div>
-    <button class="btn-text" onclick="closeMicroSortSheet()">סגור</button>
-</div>
+/* 3. הבלטת כפתור הסיום (תוספת Pulse Animation ו-Click Feedback) */
+#btn-submit-set {
+    padding: 22px;
+    font-size: 1.2em;
+    box-shadow: 0 4px 20px rgba(10, 132, 255, 0.3);
+}
 
-<!-- ALIAS SHEET -->
-<div id="alias-overlay" class="bottom-sheet-overlay" onclick="closeAliasSheet()"></div>
-<div id="alias-sheet" class="bottom-sheet" style="max-height:88vh;">
-    <div class="sheet-handle"></div>
-    <div id="alias-sheet-body"></div>
-</div>
+.pulse {
+    animation: pulseButton 2s infinite;
+}
 
-<script src="data.js"></script>
-<script src="storage.js"></script>
-<script src="workout-core.js"></script>
-<script src="editor-logic.js"></script>
-<script src="archive-logic.js"></script>
-```
+@keyframes pulseButton {
+    0% { transform: scale(1); box-shadow: 0 4px 20px rgba(10, 132, 255, 0.3); }
+    50% { transform: scale(1.02); box-shadow: 0 4px 30px rgba(10, 132, 255, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 4px 20px rgba(10, 132, 255, 0.3); }
+}
 
-</body>
-</html>
+/* Click Glow Feedback */
+@keyframes buttonGlow {
+    0% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.8); transform: scale(0.95); }
+    50% { box-shadow: 0 0 20px 10px rgba(10, 132, 255, 0); transform: scale(1.02); }
+    100% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0); transform: scale(1); }
+}
+
+.click-feedback {
+    animation: buttonGlow 0.3s ease-out !important;
+}
+
+/* 4. מיקוד משקל בכפתורי הפעולה המשניים */
+.secondary-buttons-grid {
+    display: grid; 
+    grid-template-columns: 1fr 1.5fr 1.5fr; 
+    gap: 12px;
+    margin-top: 15px; width: 100%;
+}
+
+.control-btn {
+    border-radius: 12px; padding: 15px 5px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 0.9em; font-weight: 600; cursor: pointer; transition: all 0.2s; height: 50px;
+}
+.control-btn:active { transform: scale(0.95); opacity: 0.8; }
+
+/* 5. כפתורים הרסניים ומשניים */
+.passive-action { background: rgba(255, 59, 48, 0.08); border: 1px solid rgba(255, 59, 48, 0.3); color: #ff453a; }
+.outline-action { background: transparent; border: 1px solid var(--accent); color: var(--text); }
+.primary-gradient { background: var(--accent-gradient); }
+.success-gradient { background: var(--success-gradient); }
+.secondary { background: #3a3a3c; }
+
+/* Timer */
+.timer-section { display: flex; flex-direction: column; align-items: center; margin-top: 25px; visibility: hidden; }
+.timer-wrap { position: relative; width: 140px; height: 140px; margin-bottom: 15px; }
+.timer-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+.timer-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+.timer-bar {
+    fill: none; stroke: var(--accent); stroke-width: 6; stroke-linecap: round;
+    stroke-dasharray: 283; stroke-dashoffset: 283; transition: 1s linear;
+}
+.timer-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.2em; font-weight: 300; font-variant-numeric: tabular-nums; }
+
+/* Badges & History Pill */
+.history-pill { 
+    background: rgba(10, 132, 255, 0.1); color: var(--accent); 
+    padding: 8px 12px; border-radius: 8px; font-size: 0.85em; font-weight: 600;
+    margin-top: 5px; margin-bottom: 20px; 
+    display: none; text-align: center; 
+}
+.badge-row { display: flex; gap: 8px; margin-bottom: 5px; align-items: center; }
+.ios-badge { background: var(--accent); padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 800; }
+.uni-badge { background: #ff9f0a; color: black; padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 800; display: none; }
+.warmup-badge { 
+    background: #ff3b30; color: white; padding: 4px 10px; border: none;
+    border-radius: 6px; font-size: 0.7em; font-weight: 800; 
+    display: none; cursor: pointer; animation: pulseRed 2s infinite;
+}
+@keyframes pulseRed { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+/* =========================================
+   SUMMARY SCREEN UI CARDS (Phase 3)
+   ========================================= */
+
+/* Legacy Monospace class for Archive Detail views */
+.summary-card {
+    background: #111; padding: 20px; border-radius: var(--ios-radius);
+    font-family: 'Menlo', monospace; white-space: pre-wrap; font-size: 0.85em;
+    border: 1px solid var(--border); color: #d1d1d6; line-height: 1.5;
+}
+
+/* New Visual Cards for Summary Area */
+.summary-overview-card { 
+    background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); 
+    border: 1px solid var(--border); border-top-color: var(--border-hi);
+    border-radius: var(--ios-radius); 
+    padding: 15px; margin-bottom: 20px; display: flex; 
+    justify-content: space-between; align-items: center; text-align: center; 
+    box-shadow: inset 0 1px 0 var(--border-hi);
+}
+.summary-overview-col { flex: 1; display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1); }
+.summary-overview-col:last-child { border-left: none; }
+.summary-overview-val { font-size: 1.05em; font-weight: 700; color: var(--text); }
+.summary-overview-label { font-size: 0.7em; color: var(--text-dim); margin-top: 4px; }
+
+.summary-ex-card { 
+    background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); 
+    border: 1px solid var(--border); border-top-color: var(--border-hi);
+    border-radius: var(--ios-radius); 
+    padding: 15px; margin-bottom: 15px; text-align: right; 
+    box-shadow: inset 0 1px 0 var(--border-hi);
+}
+.summary-ex-header { 
+    display: flex; justify-content: space-between; align-items: baseline; 
+    border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px; 
+}
+.summary-ex-title { font-weight: 700; font-size: 1.05em; color: var(--text); }
+.summary-ex-vol { font-size: 0.8em; color: var(--text-dim); }
+
+.summary-set-row { 
+    display: flex; align-items: center; justify-content: flex-start; 
+    padding: 4px 0; font-size: 0.95em; color: var(--text); 
+}
+.summary-set-num { width: 25px; color: var(--text-dim); font-size: 0.9em; }
+.summary-set-details { flex-grow: 1; }
+.summary-set-note { 
+    display: block; font-size: 0.85em; color: var(--text-dim); 
+    padding-right: 25px; margin-top: -2px; margin-bottom: 6px; 
+}
+
+.summary-tag-warmup { 
+    color: var(--text-dim); font-size: 0.85em; margin-bottom: 5px; 
+    border: 1px solid var(--border); display: inline-block; padding: 2px 6px; border-radius: 4px; 
+}
+.summary-tag-skip { color: var(--text-dim); font-size: 0.85em; margin-bottom: 5px; font-style: italic; }
+.summary-cluster-round { 
+    color: var(--type-free); font-weight: 700; font-size: 0.9em; 
+    margin: 10px 0 5px; border-bottom: 1px dashed rgba(191, 90, 242, 0.3); 
+    padding-bottom: 4px; text-align: right; 
+}
+
+.finish-main-btn { background: #3a3a3c; color: white; padding: 15px; border-radius: var(--ios-radius); border: none; width: 100%; margin-top: 20px; font-weight: 600; }
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 1000;
+    display: none; justify-content: center; align-items: center;
+    backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+}
+.modal-content {
+    background: rgba(22, 22, 24, 0.82); border: 1px solid var(--border);
+    border-top-color: var(--border-hi);
+    backdrop-filter: blur(28px) saturate(200%) brightness(0.85); -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(0.85);
+    padding: 25px; border-radius: var(--ios-radius); width: 85%;
+    text-align: center;
+    box-shadow: inset 0 1px 0 var(--border-hi), 0 8px 48px rgba(0,0,0,0.5);
+}
+.warmup-row {
+    display: flex; justify-content: space-between; padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.95em;
+}
+.warmup-row:last-child { border-bottom: none; }
+
+.action-panel { display: none; } /* Animated via JS class now */
+.action-panel.is-visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.passive-preview { color: var(--text-dim); font-size: 0.8em; text-align: center; margin-bottom: 15px; }
+.secondary-action { border: 1px solid var(--border); border-radius: var(--ios-radius); color: var(--text); padding: 15px; }
+
+.history-card-container { background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); width: 100%; border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: var(--ios-radius); padding: 15px; box-shadow: inset 0 1px 0 var(--border-hi); }
+.history-header { display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px; font-size: 0.8em; color: var(--text-dim); font-weight: 600; text-align: center; }
+.history-list { display: flex; flex-direction: column; gap: 0; width: 100%; }
+.history-row { display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95em; text-align: center; color: white; }
+.history-row:last-child { border-bottom: none; }
+.history-col { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.history-col.set-idx { color: var(--text-dim); font-size: 0.9em; }
+.history-col.rir-note { color: var(--accent); font-size: 0.85em; }
+
+/* History Notes Section */
+.history-notes-list { margin-top: 15px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2); text-align: right; }
+.note-item { font-size: 0.85em; color: var(--text-dim); margin-bottom: 4px; display: flex; align-items: flex-start; }
+.note-num { color: var(--accent); font-weight: bold; margin-left: 8px; min-width: 15px; }
+
+.passive-skip { 
+    margin: 25px auto 0; font-size: 0.85em; color: #ff453a; 
+    background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.3); 
+    border-radius: 20px; padding: 10px 20px; width: auto; 
+    display: block; cursor: pointer; transition: all 0.2s; 
+}
+.passive-skip:hover { background: rgba(255, 59, 48, 0.15); color: #ff3b30; }
+
+/* Header Toolbar */
+.header-tools { position: absolute; left: 0; top: 0; display: flex; gap: 8px; z-index: 5; }
+.tool-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text-dim); padding: 6px 10px; font-size: 0.8em; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.tool-btn:active { background: rgba(255,255,255,0.15); }
+
+.cluster-queue-container { background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 10px; margin: 10px 0 20px; text-align: right; border-right: 3px solid var(--type-free); }
+.queue-title { font-size: 0.75em; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
+.queue-item { font-size: 0.9em; color: var(--text-dim); margin-bottom: 2px; }
+.queue-item.next { color: white; font-weight: 600; }
+
+.manager-item { background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: var(--ios-radius); padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.1s; box-shadow: inset 0 1px 0 var(--border-hi); }
+.manager-item:active { transform: scale(0.98); } 
+.manager-info h3 { margin: 0; font-size: 1.1em; color: white; }
+.manager-info p { margin: 5px 0 0; font-size: 0.8em; color: var(--text-dim); }
+.manager-actions { display: flex; gap: 8px; }
+
+.btn-text-action { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text-dim); padding: 6px 10px; font-size: 0.8em; cursor: pointer; transition: all 0.2s; }
+.btn-text-action:active { background: rgba(255,255,255,0.1); }
+.btn-text-action.delete { color: #ff453a; border-color: rgba(255, 69, 58, 0.3); }
+
+.editor-row { background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: 12px; padding: 10px 10px 10px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; box-shadow: inset 0 1px 0 var(--border-hi); }
+.row-info { font-weight: 500; font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 45%; cursor: pointer; }
+.editor-controls { display: flex; gap: 8px; align-items: center; }
+
+.cluster-box { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--type-free); border-radius: 12px; padding: 10px; margin-bottom: 15px; }
+.cluster-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.cluster-title { color: var(--type-free); font-weight: 700; font-size: 0.9em; }
+.cluster-content { padding-left: 5px; }
+
+.stepper-control { display: flex; align-items: center; justify-content: center; gap: 20px; }
+.stepper-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1.5em; cursor: pointer; }
+.stepper-value { font-size: 1.5em; font-weight: 700; width: 60px; }
+
+.badge-main { font-size: 0.6em; font-weight: 800; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--border); color: var(--text-dim); background: none; cursor: pointer; transition: all 0.2s; }
+.badge-main.active { border-color: #FFD700; color: #FFD700; background: rgba(255, 215, 0, 0.1); }
+
+.set-selector { display: flex; align-items: center; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 2px; }
+.set-btn { background: none; border: none; color: white; width: 28px; height: 28px; cursor: pointer; font-weight: bold; font-size: 1.1em; }
+.set-val { font-size: 0.9em; font-weight: 600; width: 20px; text-align: center; }
+
+.control-icon-btn { background: none; border: 1px solid var(--border); color: var(--text-dim); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+.search-input { background: rgba(18, 18, 20, 0.75); backdrop-filter: blur(20px) saturate(160%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(160%) brightness(0.88); border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: 12px; padding: 12px; color: white; width: 100%; font-family: inherit; font-size: 1em; box-sizing: border-box; margin-bottom: 10px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+.search-input:focus { outline: none; border-color: var(--accent); }
+
+.chip-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.chip-container::-webkit-scrollbar { display: none; }
+.chip { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; white-space: nowrap; cursor: pointer; transition: 0.2s; }
+.chip.active { background: var(--accent); color: white; font-weight: 600; }
+
+/* =========================================
+   LIQUID GLASS — @supports FALLBACK
+   ========================================= */
+@supports not (backdrop-filter: blur(1px)) {
+    .glass-card, .menu-card, .selector-item-row,
+    .summary-overview-card, .summary-ex-card,
+    .history-card-container, .manager-item, .editor-row,
+    .modal-content, .bottom-sheet, .calendar-cell {
+        background: var(--card-bg-solid) !important;
+        box-shadow: none !important;
+    }
+    .bg-card { background: var(--card-bg-solid) !important; box-shadow: none !important; }
+}
+
+/* =========================================
+   ACCESSIBILITY — REDUCED MOTION
+   ========================================= */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* =========================================
+   TAB BAR (v14)
+   ========================================= */
+.tab-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    background: rgba(10, 10, 12, 0.88);
+    backdrop-filter: blur(28px) saturate(200%) brightness(0.85);
+    -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(0.85);
+    border-top: 1px solid var(--border-hi);
+    box-shadow: inset 0 1px 0 var(--border-hi);
+    display: flex; align-items: flex-start;
+    padding-top: 8px; padding-left: 8px; padding-right: 8px; gap: 6px;
+}
+.tab-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    background: none; border: 1px solid transparent;
+    color: rgba(174,174,178,0.6); cursor: pointer;
+    padding: 11px 6px; border-radius: 12px;
+    transition: all 0.22s cubic-bezier(0.2,0.8,0.2,1); font-family: inherit;
+}
+.tab-btn.active {
+    color: #fff; background: rgba(10,132,255,0.14);
+    border-color: rgba(10,132,255,0.32);
+    box-shadow: inset 0 1px 0 rgba(10,132,255,0.2);
+}
+.tab-btn:active { transform: scale(0.97); }
+.tab-label { font-size: 0.9em; font-weight: 700; letter-spacing: 0.1px; }
+
+/* =========================================
+   HERO CARD (Tab 1)
+   ========================================= */
+.hero-analytics-card {
+    background: linear-gradient(140deg, rgba(10,132,255,0.2) 0%, rgba(191,90,242,0.12) 100%);
+    border: 1px solid rgba(10,132,255,0.25); border-top-color: rgba(10,132,255,0.45);
+    backdrop-filter: blur(24px) saturate(200%); -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border-radius: var(--ios-radius); padding: 18px;
+    box-shadow: inset 0 1px 0 rgba(10,132,255,0.25), 0 4px 24px rgba(10,132,255,0.1);
+}
+.hero-analytics-card h2 { font-size: 1.55em; font-weight: 800; letter-spacing: -0.5px; margin: 0 0 10px; }
+.hero-stats-row { display: flex; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; }
+.hero-stat { flex: 1; text-align: center; border-left: 1px solid rgba(255,255,255,0.08); }
+.hero-stat:last-child { border-left: none; }
+.hero-stat-val { font-size: 1.2em; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.hero-stat-lbl { font-size: 0.6em; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
+.streak-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,159,10,0.12); border: 1px solid rgba(255,159,10,0.35);
+    border-radius: 20px; padding: 4px 11px;
+    font-size: 0.78em; font-weight: 700; color: var(--type-c); margin-bottom: 14px;
+}
+
+/* =========================================
+   ANALYTICS SCREEN
+   ========================================= */
+.range-chips { display: flex; gap: 6px; margin-bottom: 10px; }
+.range-chip {
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    border-radius: 20px; color: var(--text-dim); padding: 5px 13px;
+    font-size: 0.75em; font-weight: 700; cursor: pointer;
+    transition: all 0.18s; white-space: nowrap; font-family: inherit;
+    min-height: 44px; display: flex; align-items: center;
+}
+.range-chip.active { background: rgba(10,132,255,0.16); border-color: rgba(10,132,255,0.45); color: var(--accent); }
+.range-chip:active { transform: scale(0.96); }
+
+.analytics-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    border: 1px solid var(--border); border-top-color: var(--border-hi);
+    border-radius: var(--ios-radius); padding: 15px; margin-bottom: 14px;
+    box-shadow: inset 0 1px 0 var(--border-hi);
+}
+.analytics-card-label {
+    font-size: 0.62em; color: var(--text-dim); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.analytics-section-label {
+    font-size: 0.66em; color: var(--text-dim); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px; margin: 18px 0 9px;
+}
+
+.metrics-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.metric-tile {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    border: 1px solid var(--border); border-top-color: var(--border-hi);
+    border-radius: 14px; padding: 14px; box-shadow: inset 0 1px 0 var(--border-hi);
+}
+.metric-tile.highlight { border-color: rgba(50,215,75,0.32); border-top-color: rgba(50,215,75,0.5); background: rgba(50,215,75,0.06); }
+.metric-tile-lbl { font-size: 0.62em; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.metric-tile-val { font-size: 1.4em; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; }
+.metric-tile-sub { font-size: 0.7em; color: var(--text-dim); margin-top: 3px; }
+
+.donut-layout { display: flex; align-items: center; gap: 18px; }
+.donut-container { position: relative; width: 118px; height: 118px; flex-shrink: 0; }
+.donut-svg-el { transform: rotate(-90deg); width: 100%; height: 100%; }
+.donut-center-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.donut-center-val { font-size: 1.1em; font-weight: 800; }
+.donut-center-sub { font-size: 0.58em; color: var(--text-dim); }
+.donut-legend { display: flex; flex-direction: column; gap: 9px; flex: 1; }
+.donut-legend-row { display: flex; align-items: center; gap: 8px; }
+.donut-legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.donut-legend-name { font-size: 0.82em; flex: 1; }
+.donut-legend-pct { font-size: 0.8em; color: var(--text-dim); font-weight: 600; }
+
+.consistency-track { display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+.consistency-track::-webkit-scrollbar { display: none; }
+.cons-node-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.cons-node { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.58em; font-weight: 700; }
+.cons-node.green { background: rgba(50,215,75,0.12); border: 1.5px solid var(--type-b); color: var(--type-b); }
+.cons-node.orange { background: rgba(255,159,10,0.12); border: 1.5px solid var(--type-c); color: var(--type-c); }
+.cons-node.red { background: rgba(255,69,58,0.12); border: 1.5px solid var(--danger); color: var(--danger); }
+.cons-node.today { background: rgba(10,132,255,0.18); border: 2px solid var(--accent); color: var(--accent); }
+.cons-node-date { font-size: 0.52em; color: var(--text-dim); }
+.cons-connector { flex: 1; height: 1px; background: rgba(255,255,255,0.07); flex-shrink: 0; min-width: 6px; }
+.cons-legend { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+.cons-legend span { font-size: 0.66em; }
+
+.bar-chart-scroll { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+.bar-chart-scroll::-webkit-scrollbar { display: none; }
+.bar-chart-inner { display: flex; align-items: flex-end; gap: 10px; height: 120px; min-width: max-content; padding: 0 2px; }
+.bar-col-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 40px; }
+.bar-col-track { width: 100%; height: 90px; display: flex; align-items: flex-end; position: relative; }
+.bar-col-fill { width: 100%; border-radius: 6px 6px 3px 3px; background: rgba(10,132,255,0.65); transition: height 1s cubic-bezier(0.2,0.8,0.2,1); }
+.bar-col-fill.peak { background: linear-gradient(to top, rgba(50,215,75,0.75), rgba(50,215,75,0.95)); }
+.bar-col-val { font-size: 0.58em; color: var(--text-dim); position: absolute; top: -16px; width: 100%; text-align: center; white-space: nowrap; }
+.bar-col-date { font-size: 0.58em; color: var(--text-dim); white-space: nowrap; }
+
+.smart-exercise-select {
+    width: 100%; background: var(--card-bg);
+    backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    border: 1px solid var(--border); border-top-color: var(--border-hi);
+    border-radius: 12px; color: var(--text); padding: 13px 14px;
+    font-size: 0.95em; font-weight: 600; appearance: none; -webkit-appearance: none;
+    font-family: inherit; outline: none; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.pr-expand-card {
+    background: rgba(10,132,255,0.07); border: 1px solid rgba(10,132,255,0.25);
+    border-top-color: rgba(10,132,255,0.45);
+    backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--ios-radius); overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(10,132,255,0.18);
+}
+.pr-expand-header { padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; min-height: 44px; }
+.pr-expand-arrow { color: var(--accent); font-size: 1.1em; transition: transform 0.3s cubic-bezier(0.2,0.8,0.2,1); flex-shrink: 0; }
+.pr-expand-arrow.open { transform: rotate(180deg); }
+.pr-expand-body { max-height: 0; overflow: hidden; transition: max-height 0.38s cubic-bezier(0.2,0.8,0.2,1); }
+.pr-expand-body.open { max-height: 200px; }
+.pr-expand-inner { padding: 14px 15px; border-top: 1px solid rgba(10,132,255,0.15); }
+.pr-stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center; }
+.pr-stat-val { font-size: 1.2em; font-weight: 700; color: var(--accent); }
+.pr-stat-lbl { font-size: 0.62em; color: var(--text-dim); margin-top: 3px; }
+
+.intensity-row { display: flex; align-items: center; gap: 16px; }
+.intensity-left { flex-shrink: 0; }
+.intensity-label { font-size: 0.62em; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.intensity-value { font-size: 2em; font-weight: 800; color: var(--type-c); font-variant-numeric: tabular-nums; line-height: 1; }
+.intensity-delta { font-size: 0.7em; margin-top: 3px; }
+.intensity-right { flex: 1; }
+
+.analytics-settings-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 8px; color: var(--text-dim); padding: 6px 10px; font-size: 0.8em; font-weight: 600; cursor: pointer; transition: background 0.2s; font-family: inherit; min-height: 44px; }
+.analytics-settings-btn:active { background: rgba(255,255,255,0.12); }
+
+.settings-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 0.9em; font-weight: 600; }
+.settings-row-sub { font-size: 0.75em; color: var(--text-dim); margin-top: 2px; }
+.settings-seg { display: flex; background: rgba(118,118,128,0.2); padding: 2px; border-radius: 8px; }
+.settings-seg-btn { background: none; border: none; color: var(--text-dim); padding: 5px 10px; font-size: 0.78em; font-weight: 600; border-radius: 6px; cursor: pointer; transition: all 0.18s; font-family: inherit; }
+.settings-seg-btn.on { background: rgba(88,88,92,0.9); color: #fff; }
+
+.hero-metric-option { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; min-height: 44px; }
+.hero-metric-option:last-child { border-bottom: none; }
+.hero-metric-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.18s; }
+.hero-metric-check.on { background: var(--accent); border-color: var(--accent); }
+.hero-metric-check.on::after { content: '✓'; font-size: 0.75em; color: white; font-weight: 800; }
+.hero-metric-name { font-size: 0.9em; font-weight: 500; flex: 1; }
+.hero-metric-hint { font-size: 0.72em; color: var(--text-dim); }
+
+/* =========================================
+   v14.1.1 — NEW COMPONENTS
+   ========================================= */
+
+/* ── Hero Last Workout (replaces streak) ── */
+.hero-last-workout {
+    font-size: 0.82em;
+    color: var(--text-dim);
+    font-weight: 500;
+    margin-bottom: 14px;
+    letter-spacing: 0.1px;
+}
+
+/* ── Bar chart: padding-top to prevent value labels clipping ── */
+.bar-chart-scroll {
+    padding-top: 20px;
+}
+.bar-chart-inner {
+    padding-top: 4px;
+}
+
+/* ── Archive Month Groups ── */
+.archive-month-group {
+    margin-bottom: 4px;
+}
+
+.archive-month-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 4px 6px;
+    margin-bottom: 6px;
+}
+
+.archive-month-header.current .archive-month-title {
+    font-size: 0.78em;
+    font-weight: 800;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.archive-month-header.current .archive-month-meta {
+    font-size: 0.72em;
+    color: var(--text-dim);
+}
+
+.archive-month-header.collapsible {
+    cursor: pointer;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+    min-height: 44px;
+    transition: background 0.18s;
+}
+.archive-month-header.collapsible:active { background: rgba(255,255,255,0.07); }
+
+.archive-month-header-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.archive-month-title {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.archive-month-meta {
+    font-size: 0.72em;
+    color: var(--text-dim);
+}
+
+.archive-month-arrow {
+    color: var(--text-dim);
+    font-size: 1.2em;
+    font-weight: 300;
+    transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1);
+    margin-right: 4px;
+}
+
+.archive-month-header.collapsible.open .archive-month-arrow {
+    transform: rotate(90deg);
+}
+
+/* ── Collapsed archive month ── */
+.archive-month-items.collapsed { display: none; }
+
+/* ── Horizontal Bar Chart (workout type) ── */
+.hbar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.hbar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+}
+
+.hbar-label {
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 60px;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.hbar-track {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    height: 26px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hbar-fill {
+    height: 100%;
+    border-radius: 6px;
+    opacity: 0.8;
+    transition: width 0.7s cubic-bezier(0.2,0.8,0.2,1);
+}
+
+.hbar-val {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.72em;
+    font-weight: 700;
+    color: #fff;
+    pointer-events: none;
+}
+
+.hbar-count {
+    font-size: 0.72em;
+    color: var(--text-dim);
+    font-weight: 600;
+    min-width: 24px;
+    text-align: left;
+    flex-shrink: 0;
+}
+
+/* ── Micro Selector Row (select + sort btn) ── */
+.micro-selector-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.micro-selector-row .smart-exercise-select {
+    flex: 1;
+}
+
+/* ── Micro Sort Sheet ── */
+.micro-sort-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.micro-sort-row:last-child { border-bottom: none; }
+
+.micro-sort-name {
+    font-size: 0.92em;
+    font-weight: 500;
+    flex: 1;
+}
+
+.micro-sort-btns {
+    display: flex;
+    gap: 6px;
+}
+
+.micro-sort-btn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    font-size: 1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.micro-sort-btn:disabled { opacity: 0.3; cursor: default; }
+.micro-sort-btn:not(:disabled):active { background: rgba(255,255,255,0.18); }
+
+/* ── Compact Cluster Mode ──
+   JS adds class="cluster" to #ui-main when in cluster.
+   All elements stay in place — only spacing shrinks.
+   Total savings: ~80px, enough to reveal the bottom buttons.
+   ─────────────────────────────────────────────────────── */
+#ui-main.cluster .exercise-header {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+#ui-main.cluster #ex-display-name {
+    font-size: 1.6em;
+}
+#ui-main.cluster .cluster-queue-container {
+    padding: 7px 10px;
+    margin: 6px 0 10px;
+}
+#ui-main.cluster .input-grid {
+    padding: 10px;
+    margin-bottom: 10px;
+}
+#ui-main.cluster .glass-card.compact {
+    padding: 7px 5px;
+}
+#ui-main.cluster .minimal-input {
+    margin-bottom: 10px;
+    padding: 8px 5px;
+}
+#ui-main.cluster #btn-submit-set {
+    padding: 14px;
+    margin-top: 8px;
+}
+#ui-main.cluster .timer-section {
+    margin-top: 12px;
+}
+#ui-main.cluster .timer-wrap {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 8px;
+}
+#ui-main.cluster .timer-text {
+    font-size: 1.7em;
+}
+#ui-main.cluster .d-flex.gap-sm.mt-lg {
+    margin-top: 10px;
+}
+
+/* ── Horizontal bar chart — label clickable ── */
+.hbar-label { cursor: pointer; transition: color 0.15s; }
+.hbar-label.grouped { color: var(--type-b); }
+.hbar-gdot {
+    display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--type-b); margin-left: 3px; vertical-align: middle; flex-shrink: 0;
+}
+
+/* ── Workout Type Toast ── */
+.wt-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: rgba(28,28,30,0.96); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 10px 16px; font-size: 0.8em; font-weight: 600;
+    color: #fff; backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    opacity: 0; pointer-events: none; transition: opacity 0.22s;
+    white-space: nowrap; z-index: 500;
+    max-width: calc(100vw - 40px); text-align: center;
+}
+.wt-toast.show { opacity: 1; }
+
+/* ── Alias Sheet rows ── */
+.alias-raw-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer; min-height: 44px;
+}
+.alias-check {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center; transition: all 0.18s;
+}
+.alias-check.on { background: var(--accent); border-color: var(--accent); }
+.alias-check.on::after { content: '✓'; font-size: 0.7em; font-weight: 800; color: #fff; }
+.alias-type-name { font-size: 0.88em; font-weight: 600; flex: 1; }
+.alias-meta { font-size: 0.7em; color: var(--text-dim); margin-top: 1px; }
+.alias-group-badge {
+    font-size: 0.66em; background: rgba(50,215,75,0.12);
+    border: 1px solid rgba(50,215,75,0.3); border-radius: 6px;
+    color: var(--type-b); padding: 2px 7px; font-weight: 700; white-space: nowrap;
+}
+.alias-existing-row {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(50,215,75,0.05); border: 1px solid rgba(50,215,75,0.18);
+    border-radius: 10px; padding: 10px 12px; margin-bottom: 6px;
+    cursor: pointer; min-height: 44px; transition: background 0.15s;
+}
+.alias-existing-row:active { background: rgba(50,215,75,0.1); }
+.alias-eg-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--type-b); flex-shrink: 0; }
+.alias-eg-name { font-size: 0.85em; font-weight: 700; flex: 1; }
+.alias-eg-members { font-size: 0.68em; color: var(--text-dim); margin-top: 1px; }
+.alias-del-btn {
+    font-size: 0.72em; color: var(--danger);
+    background: rgba(255,69,58,0.08); border: 1px solid rgba(255,69,58,0.2);
+    border-radius: 6px; padding: 4px 8px; cursor: pointer; font-family: inherit; min-height: 32px;
+}
+.alias-del-btn:active { background: rgba(255,69,58,0.18); }
+.alias-name-field {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+}
+.alias-name-lbl {
+    font-size: 0.62em; color: var(--text-dim); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.alias-name-input {
+    background: none; border: none; border-bottom: 1.5px solid rgba(255,255,255,0.15);
+    color: var(--text); font-size: 1.1em; font-weight: 700; font-family: inherit;
+    width: 100%; outline: none; padding: 4px 0 8px; transition: border-color 0.2s;
+}
+.alias-name-input:focus { border-bottom-color: var(--accent); }
+.alias-preview-box {
+    background: rgba(255,255,255,0.03); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
+}
+.alias-preview-lbl {
+    font-size: 0.62em; color: var(--text-dim); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.alias-preview-tag {
+    display: inline-block; background: rgba(10,132,255,0.1);
+    border: 1px solid rgba(10,132,255,0.28); border-radius: 8px;
+    padding: 4px 10px; font-size: 0.75em; font-weight: 600; color: var(--accent);
+    margin-left: 6px; margin-bottom: 6px;
+}
+.alias-confirm-box {
+    background: rgba(50,215,75,0.06); border: 1px solid rgba(50,215,75,0.25);
+    border-radius: 14px; padding: 16px; margin-bottom: 16px; text-align: center;
+}
+.alias-confirm-name { font-size: 1.3em; font-weight: 800; color: var(--type-b); margin-bottom: 4px; }
+.alias-confirm-arrow { font-size: 0.78em; color: var(--text-dim); margin: 6px 0; }
+.alias-confirm-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 4px; }
+.alias-confirm-tag {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 4px 10px; font-size: 0.75em; color: #d1d1d6;
+}
