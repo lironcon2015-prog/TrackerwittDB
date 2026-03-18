@@ -646,22 +646,17 @@ function renderVolumeBarChart(archive, n, muscleFilter) {
 
     if (!data.length) { el.innerHTML = '<p class="color-dim text-sm text-center mt-md">אין נתונים</p>'; return; }
 
-    // For visual rendering: oldest left → newest right (reverse render order)
-    const renderData = [...data].reverse();
-    const vols = renderData.map(a => getWorkoutVolumeFiltered(a, muscleFilter));
+    // RTL: index 0 = rightmost = newest. No reverse needed.
+    const vols = data.map(a => getWorkoutVolumeFiltered(a, muscleFilter));
     const maxV = Math.max(...vols) || 1;
 
-    el.innerHTML = renderData.map((a, i) => {
+    el.innerHTML = data.map((a, i) => {
         const pct = (vols[i] / maxV * 88).toFixed(1);
         const isPeak = vols[i] === maxV;
         const dt = (a.date || '').slice(0, 5);
         const label = vols[i] >= 1000 ? (vols[i]/1000).toFixed(1)+'t' : vols[i]+'kg';
         return `<div class="bar-col-wrap"><div class="bar-col-track"><div class="bar-col-val">${label}</div><div class="bar-col-fill${isPeak?' peak':''}" style="height:${pct}%"></div></div><div class="bar-col-date">${dt}</div></div>`;
     }).join('');
-
-    // Scroll right to show newest
-    const scrollEl = el.parentElement;
-    if (scrollEl) setTimeout(() => { scrollEl.scrollLeft = scrollEl.scrollWidth; }, 60);
 }
 
 // ─── WORKOUT TYPE CHART (horizontal bars) ──
