@@ -505,10 +505,15 @@
                     <div class="analytics-card">
                         <div class="analytics-card-label">
                             <span>השוואת סוגי אימונים</span>
-                            <span style="font-size:0.9em;color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;">ממוצע נפח לאימון</span>
+                            <button class="tool-btn" style="font-size:0.85em;color:var(--accent);border-color:rgba(10,132,255,0.3);background:rgba(10,132,255,0.08);" onclick="openAliasSheet()">✎ קבץ</button>
                         </div>
+                        <div style="font-size:0.66em;color:var(--text-dim);margin-bottom:10px;">ממוצע נפח לאימון — לחץ על שם לפרטים</div>
                         <div class="hbar-chart" id="workout-type-chart"></div>
+                        <div style="margin-top:8px;font-size:0.62em;color:var(--text-dim);">
+                            <span style="color:var(--type-b)">●</span> קבוצה מאוחדת
+                        </div>
                     </div>
+                    <div class="wt-toast" id="wt-toast"></div>
 
                     <div class="analytics-card">
                         <div class="analytics-card-label">
@@ -645,6 +650,13 @@
         <p class="sub-text">השתמש בחצים כדי לשנות את הסדר בפיקר</p>
         <div id="micro-sort-content" class="vertical-stack mt-sm" style="max-height:50vh;overflow-y:auto;"></div>
         <button class="btn-text" onclick="closeMicroSortSheet()">סגור</button>
+    </div>
+
+    <!-- ALIAS SHEET -->
+    <div id="alias-overlay" class="bottom-sheet-overlay" onclick="closeAliasSheet()"></div>
+    <div id="alias-sheet" class="bottom-sheet" style="max-height:88vh;">
+        <div class="sheet-handle"></div>
+        <div id="alias-sheet-body"></div>
     </div>
 
     <script src="data.js"></script>

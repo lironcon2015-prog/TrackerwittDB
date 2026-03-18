@@ -496,7 +496,8 @@ const ANALYTICS_DEFAULTS = {
     volumeRange: 8, volumeMuscle: 'all',
     muscleRange: '3m', consistencyRange: 8,
     microPoints: 6, microAxis: 'e1rm',
-    microOrder: null
+    microOrder: null,
+    workoutAliases: {}  // { displayName: [rawName1, rawName2, ...] }
 };
 
 function getAnalyticsPrefs() { return Object.assign({}, ANALYTICS_DEFAULTS, StorageManager.getData(ANALYTICS_PREFS_KEY) || {}); }
@@ -660,30 +661,259 @@ function renderVolumeBarChart(archive, n, muscleFilter) {
 }
 
 // ─── WORKOUT TYPE CHART (horizontal bars) ──
+// ─── ALIAS HELPERS ───────────────────────
+function normalizeWorkoutType(rawName, aliases) {
+    for (const [display, members] of Object.entries(aliases)) {
+        if (members.includes(rawName)) return { display, aliased: true };
+    }
+    return { display: rawName, aliased: false };
+}
+
+function buildNormalizedTypeData(archive, aliases) {
+    const map = {};
+    archive.forEach(w => {
+        const raw = w.type || 'אחר';
+        const { display, aliased } = normalizeWorkoutType(raw, aliases);
+        if (!map[display]) map[display] = { total: 0, count: 0, aliased, rawNames: [] };
+        map[display].total += getWorkoutVolume(w);
+        map[display].count++;
+        if (!map[display].rawNames.includes(raw)) map[display].rawNames.push(raw);
+        if (aliased) map[display].aliased = true;
+    });
+    return Object.entries(map)
+        .map(([display, d]) => ({ display, avg: Math.round(d.total / d.count), count: d.count, aliased: d.aliased, rawNames: d.rawNames }))
+        .sort((a, b) => b.avg - a.avg);
+}
+
 function renderWorkoutTypeChart(archive) {
     const el = document.getElementById('workout-type-chart'); if (!el) return;
-    const typeMap = {};
-    archive.forEach(w => {
-        const type = w.type || 'אחר';
-        if (!typeMap[type]) typeMap[type] = { total: 0, count: 0 };
-        typeMap[type].total += getWorkoutVolume(w); typeMap[type].count++;
-    });
-    const entries = Object.entries(typeMap)
-        .map(([type, d]) => ({ type, avg: Math.round(d.total / d.count), count: d.count }))
-        .sort((a, b) => b.avg - a.avg);
+    const prefs = getAnalyticsPrefs();
+    const aliases = prefs.workoutAliases || {};
+    const entries = buildNormalizedTypeData(archive, aliases);
+
     if (!entries.length) { el.innerHTML = '<p class="color-dim text-sm text-center">אין נתונים</p>'; return; }
     const maxAvg = Math.max(...entries.map(e => e.avg)) || 1;
     const COLORS = ['var(--type-a)', 'var(--type-b)', 'var(--type-c)', 'var(--type-free)', 'var(--accent)'];
+
     el.innerHTML = entries.map((e, i) => {
         const pct = (e.avg / maxAvg * 100).toFixed(1);
         const color = COLORS[i % COLORS.length];
         const label = e.avg >= 1000 ? (e.avg/1000).toFixed(1)+'t' : e.avg+'kg';
+        const groupedCls = e.aliased ? ' grouped' : '';
+        const gdot = e.aliased ? '<span class="hbar-gdot"></span>' : '';
+        const tooltipData = e.aliased ? `data-members="${e.rawNames.join('|')}"` : '';
         return `<div class="hbar-row">
-            <div class="hbar-label">${e.type}</div>
+            <div class="hbar-label${groupedCls}" ${tooltipData} onclick="showWTToast('${e.display.replace(/'/g,"\'")}','${e.rawNames.join(", ").replace(/'/g,"\'")}',${e.count})">${gdot}${e.display}</div>
             <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${color};"></div><span class="hbar-val">${label}</span></div>
             <div class="hbar-count">${e.count}×</div>
         </div>`;
     }).join('');
+}
+
+// ─── WORKOUT TYPE TOAST ───────────────────
+let _wtToastTimer;
+function showWTToast(display, members, count) {
+    const t = document.getElementById('wt-toast'); if (!t) return;
+    const membersStr = members !== display ? members : `${count} אימונים`;
+    t.textContent = `${display} — ${membersStr}`;
+    t.classList.add('show');
+    clearTimeout(_wtToastTimer);
+    _wtToastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── ALIAS SHEET ─────────────────────────
+let _aliasSelected = new Set();
+let _aliasGroupName = '';
+let _aliasStep = 1;
+let _aliasEditingGroup = null; // name of group being edited
+
+function openAliasSheet() {
+    _aliasSelected = new Set();
+    _aliasGroupName = '';
+    _aliasEditingGroup = null;
+    _renderAliasStep1();
+    document.getElementById('alias-overlay').style.display = 'block';
+    document.getElementById('alias-sheet').classList.add('open');
+    haptic('light');
+}
+
+function closeAliasSheet() {
+    document.getElementById('alias-overlay').style.display = 'none';
+    document.getElementById('alias-sheet').classList.remove('open');
+}
+
+function _renderAliasStep1() {
+    _aliasStep = 1;
+    const prefs = getAnalyticsPrefs();
+    const aliases = prefs.workoutAliases || {};
+    const archive = getArchiveClean();
+
+    // Collect all raw types with stats
+    const rawMap = {};
+    archive.forEach(w => {
+        const t = w.type || 'אחר';
+        if (!rawMap[t]) rawMap[t] = { count: 0, totalVol: 0 };
+        rawMap[t].count++;
+        rawMap[t].totalVol += getWorkoutVolume(w);
+    });
+
+    // Map raw → group
+    const rawToGroup = {};
+    Object.entries(aliases).forEach(([g, ms]) => ms.forEach(m => rawToGroup[m] = g));
+
+    let html = `<div class="sh-title">קיבוץ סוגי אימונים</div>
+        <div class="sheet-content" style="font-size:0.78em;color:var(--text-dim);margin-bottom:18px;line-height:1.5;">
+            סמן אימונים שהם למעשה אותו אימון — שמות שהשתנו על פני זמן
+        </div>`;
+
+    // Existing groups
+    if (Object.keys(aliases).length > 0) {
+        html += `<div style="font-size:0.62em;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">קבוצות קיימות</div>`;
+        Object.entries(aliases).forEach(([g, ms]) => {
+            html += `<div class="alias-existing-row" onclick="_editAliasGroup('${g.replace(/'/g,"\'")}')" >
+                <div class="alias-eg-dot"></div>
+                <div style="flex:1;">
+                    <div class="alias-eg-name">${g}</div>
+                    <div class="alias-eg-members">${ms.join(' · ')}</div>
+                </div>
+                <button class="alias-del-btn" onclick="event.stopPropagation();_deleteAliasGroup('${g.replace(/'/g,"\'")}')">מחק</button>
+            </div>`;
+        });
+        html += `<div style="height:1px;background:rgba(255,255,255,0.07);margin:14px 0;"></div>`;
+    }
+
+    html += `<div style="font-size:0.62em;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">קבוצה חדשה — בחר אימונים</div>`;
+
+    const rawNames = Object.keys(rawMap).sort();
+    rawNames.forEach(t => {
+        const d = rawMap[t];
+        const inGroup = rawToGroup[t];
+        const isSel = _aliasSelected.has(t);
+        const avgVol = d.count > 0 ? Math.round(d.totalVol / d.count) : 0;
+        const avgStr = avgVol >= 1000 ? (avgVol/1000).toFixed(1)+'t' : avgVol+'kg';
+        html += `<div class="alias-raw-row" onclick="_toggleAliasSelect('${t.replace(/'/g,"\'")}')">
+            <div class="alias-check${isSel?' on':''}"></div>
+            <div style="flex:1;">
+                <div class="alias-type-name">${t}</div>
+                <div class="alias-meta">${d.count} אימונים · ממוצע ${avgStr}</div>
+            </div>
+            ${inGroup ? `<span class="alias-group-badge">${inGroup}</span>` : ''}
+        </div>`;
+    });
+
+    const canNext = _aliasSelected.size >= 2;
+    html += `<button class="btn-main primary-gradient" style="margin-top:16px;" ${canNext?'':'disabled'} onclick="_renderAliasStep2()">
+        המשך${_aliasSelected.size >= 2 ? ` (${_aliasSelected.size} נבחרו)` : ''}
+    </button>
+    <button class="btn-text" onclick="closeAliasSheet()">ביטול</button>`;
+
+    document.getElementById('alias-sheet-body').innerHTML = html;
+}
+
+function _toggleAliasSelect(name) {
+    if (_aliasSelected.has(name)) _aliasSelected.delete(name);
+    else _aliasSelected.add(name);
+    _renderAliasStep1();
+    haptic('light');
+}
+
+function _deleteAliasGroup(g) {
+    const prefs = getAnalyticsPrefs();
+    delete prefs.workoutAliases[g];
+    saveAnalyticsPrefs(prefs);
+    renderWorkoutTypeChart(getArchiveClean());
+    _renderAliasStep1();
+    haptic('warning');
+}
+
+function _editAliasGroup(g) {
+    const prefs = getAnalyticsPrefs();
+    const members = prefs.workoutAliases[g] || [];
+    _aliasSelected = new Set(members);
+    _aliasGroupName = g;
+    _aliasEditingGroup = g;
+    // Remove from aliases temporarily so it doesn't interfere
+    delete prefs.workoutAliases[g];
+    saveAnalyticsPrefs(prefs);
+    _renderAliasStep2();
+}
+
+function _renderAliasStep2() {
+    _aliasStep = 2;
+    const selArr = [..._aliasSelected];
+    const suggested = _aliasGroupName || selArr.reduce((a,b) => a.length <= b.length ? a : b, selArr[0] || '');
+
+    const html = `<div class="sh-title">שם לקבוצה</div>
+        <div class="sheet-content" style="font-size:0.78em;color:var(--text-dim);margin-bottom:18px;line-height:1.5;">
+            בחר שם קצר שיופיע בגרף
+        </div>
+        <div class="alias-name-field">
+            <div class="alias-name-lbl">שם תצוגה בגרף</div>
+            <input class="alias-name-input" id="alias-name-inp" type="text"
+                value="${suggested}"
+                placeholder="לדוגמה: חזה"
+                oninput="_onAliasNameInput(this.value)"
+                onkeydown="if(event.key==='Enter')_renderAliasStep3()">
+        </div>
+        <div class="alias-preview-box">
+            <div class="alias-preview-lbl">אימונים שיאוחדו</div>
+            ${selArr.map(n=>`<span class="alias-preview-tag">${n}</span>`).join('')}
+        </div>
+        <button class="btn-main primary-gradient" id="alias-btn-step3" ${suggested?'':'disabled'} onclick="_renderAliasStep3()">המשך</button>
+        <button class="btn-text" onclick="_renderAliasStep1()">⟵ חזור</button>`;
+
+    document.getElementById('alias-sheet-body').innerHTML = html;
+    _aliasGroupName = suggested;
+    setTimeout(() => {
+        const inp = document.getElementById('alias-name-inp');
+        if (inp) { inp.focus(); inp.select(); }
+    }, 80);
+}
+
+function _onAliasNameInput(v) {
+    _aliasGroupName = v.trim();
+    const btn = document.getElementById('alias-btn-step3');
+    if (btn) btn.disabled = _aliasGroupName.length < 1;
+}
+
+function _renderAliasStep3() {
+    if (!_aliasGroupName) return;
+    _aliasStep = 3;
+    const selArr = [..._aliasSelected];
+    const archive = getArchiveClean();
+    const rawMap = {};
+    archive.forEach(w => { const t = w.type||'אחר'; if (!rawMap[t]) rawMap[t]={count:0,totalVol:0}; rawMap[t].count++; rawMap[t].totalVol+=getWorkoutVolume(w); });
+    const totalCount = selArr.reduce((s,n) => s+(rawMap[n]?rawMap[n].count:0), 0);
+    const totalVol   = selArr.reduce((s,n) => s+(rawMap[n]?rawMap[n].totalVol:0), 0);
+    const avgVol = totalCount > 0 ? Math.round(totalVol/totalCount) : 0;
+    const avgStr = avgVol>=1000?(avgVol/1000).toFixed(1)+'t':avgVol+'kg';
+
+    const html = `<div class="sh-title">אישור קיבוץ</div>
+        <div class="sheet-content" style="font-size:0.78em;color:var(--text-dim);margin-bottom:18px;">כך ייראה הגרף לאחר האיחוד</div>
+        <div class="alias-confirm-box">
+            <div class="alias-confirm-name">${_aliasGroupName}</div>
+            <div style="font-size:0.72em;color:var(--text-dim);margin-bottom:6px;">${totalCount} אימונים · ממוצע ${avgStr}</div>
+            <div class="alias-confirm-arrow">יאחד את ↓</div>
+            <div class="alias-confirm-tags">
+                ${selArr.map(n=>`<span class="alias-confirm-tag">${n}</span>`).join('')}
+            </div>
+        </div>
+        <button class="btn-main success-gradient" onclick="_saveAliasGroup()">✓ שמור קיבוץ</button>
+        <button class="btn-text" onclick="_renderAliasStep2()">⟵ ערוך שם</button>`;
+
+    document.getElementById('alias-sheet-body').innerHTML = html;
+}
+
+function _saveAliasGroup() {
+    const prefs = getAnalyticsPrefs();
+    if (!prefs.workoutAliases) prefs.workoutAliases = {};
+    prefs.workoutAliases[_aliasGroupName] = [..._aliasSelected];
+    saveAnalyticsPrefs(prefs);
+    renderWorkoutTypeChart(getArchiveClean());
+    closeAliasSheet();
+    haptic('success');
+    // Toast
+    showWTToast(_aliasGroupName, [..._aliasSelected].join(', '), 0);
 }
 
 // ─── DONUT CHART (set counts) ─────────────

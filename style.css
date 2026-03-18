@@ -1090,3 +1090,99 @@ body {
 #ui-main.cluster .d-flex.gap-sm.mt-lg {
     margin-top: 10px;
 }
+
+/* ── Horizontal bar chart — label clickable ── */
+.hbar-label { cursor: pointer; transition: color 0.15s; }
+.hbar-label.grouped { color: var(--type-b); }
+.hbar-gdot {
+    display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--type-b); margin-left: 3px; vertical-align: middle; flex-shrink: 0;
+}
+
+/* ── Workout Type Toast ── */
+.wt-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: rgba(28,28,30,0.96); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 10px 16px; font-size: 0.8em; font-weight: 600;
+    color: #fff; backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    opacity: 0; pointer-events: none; transition: opacity 0.22s;
+    white-space: nowrap; z-index: 500;
+    max-width: calc(100vw - 40px); text-align: center;
+}
+.wt-toast.show { opacity: 1; }
+
+/* ── Alias Sheet rows ── */
+.alias-raw-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer; min-height: 44px;
+}
+.alias-check {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center; transition: all 0.18s;
+}
+.alias-check.on { background: var(--accent); border-color: var(--accent); }
+.alias-check.on::after { content: '✓'; font-size: 0.7em; font-weight: 800; color: #fff; }
+.alias-type-name { font-size: 0.88em; font-weight: 600; flex: 1; }
+.alias-meta { font-size: 0.7em; color: var(--text-dim); margin-top: 1px; }
+.alias-group-badge {
+    font-size: 0.66em; background: rgba(50,215,75,0.12);
+    border: 1px solid rgba(50,215,75,0.3); border-radius: 6px;
+    color: var(--type-b); padding: 2px 7px; font-weight: 700; white-space: nowrap;
+}
+.alias-existing-row {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(50,215,75,0.05); border: 1px solid rgba(50,215,75,0.18);
+    border-radius: 10px; padding: 10px 12px; margin-bottom: 6px;
+    cursor: pointer; min-height: 44px; transition: background 0.15s;
+}
+.alias-existing-row:active { background: rgba(50,215,75,0.1); }
+.alias-eg-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--type-b); flex-shrink: 0; }
+.alias-eg-name { font-size: 0.85em; font-weight: 700; flex: 1; }
+.alias-eg-members { font-size: 0.68em; color: var(--text-dim); margin-top: 1px; }
+.alias-del-btn {
+    font-size: 0.72em; color: var(--danger);
+    background: rgba(255,69,58,0.08); border: 1px solid rgba(255,69,58,0.2);
+    border-radius: 6px; padding: 4px 8px; cursor: pointer; font-family: inherit; min-height: 32px;
+}
+.alias-del-btn:active { background: rgba(255,69,58,0.18); }
+.alias-name-field {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+}
+.alias-name-lbl {
+    font-size: 0.62em; color: var(--text-dim); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.alias-name-input {
+    background: none; border: none; border-bottom: 1.5px solid rgba(255,255,255,0.15);
+    color: var(--text); font-size: 1.1em; font-weight: 700; font-family: inherit;
+    width: 100%; outline: none; padding: 4px 0 8px; transition: border-color 0.2s;
+}
+.alias-name-input:focus { border-bottom-color: var(--accent); }
+.alias-preview-box {
+    background: rgba(255,255,255,0.03); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
+}
+.alias-preview-lbl {
+    font-size: 0.62em; color: var(--text-dim); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.alias-preview-tag {
+    display: inline-block; background: rgba(10,132,255,0.1);
+    border: 1px solid rgba(10,132,255,0.28); border-radius: 8px;
+    padding: 4px 10px; font-size: 0.75em; font-weight: 600; color: var(--accent);
+    margin-left: 6px; margin-bottom: 6px;
+}
+.alias-confirm-box {
+    background: rgba(50,215,75,0.06); border: 1px solid rgba(50,215,75,0.25);
+    border-radius: 14px; padding: 16px; margin-bottom: 16px; text-align: center;
+}
+.alias-confirm-name { font-size: 1.3em; font-weight: 800; color: var(--type-b); margin-bottom: 4px; }
+.alias-confirm-arrow { font-size: 0.78em; color: var(--text-dim); margin: 6px 0; }
+.alias-confirm-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 4px; }
+.alias-confirm-tag {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 4px 10px; font-size: 0.75em; color: #d1d1d6;
+}
