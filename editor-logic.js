@@ -909,7 +909,7 @@ async function checkForUpdate() {
         const res = await fetch('./version.json?t=' + Date.now());
         if (!res.ok) throw new Error('network error');
         const data = await res.json();
-        const currentVersion = '14.11.0';
+        const currentVersion = '14.11.0-1';
         if (data.version && data.version !== currentVersion) {
             showConfirm(
                 `עדכון זמין (${data.version}). לנקות cache ולרענן?`,
