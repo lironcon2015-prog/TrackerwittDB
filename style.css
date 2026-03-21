@@ -13,7 +13,7 @@
     --type-a: #0A84FF;
     --type-b: #32D74B;
     --type-c: #FF9F0A;
-    --type-free: #BF5AF2;
+    --type-free: #5E5CE6;
     --danger: #ff453a;
 
     /* Design System: Spacing */
@@ -32,7 +32,7 @@
 }
 
 body {
-    margin: 0; font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0; font-family: 'Inter', 'Heebo', -apple-system, sans-serif;
     background: var(--bg); color: var(--text);
     direction: rtl; overflow: hidden;
     overflow-x: hidden;
@@ -141,12 +141,24 @@ body {
 }
 
 /* Header */
-.app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; position: relative; }
 .back-btn { background: none; border: none; padding: 8px; visibility: hidden; cursor: pointer; display: flex; align-items: center; }
-.brand-logo { font-weight: 800; font-size: 1.2em; letter-spacing: -0.5px; }
+.brand-logo { font-weight: 800; font-size: 1.2em; letter-spacing: -0.5px; position: absolute; left: 50%; transform: translateX(-50%); }
 .brand-logo span { color: var(--accent); }
-.settings-btn { background: none; border: none; font-size: 1.2em; cursor: pointer; padding: 8px; filter: grayscale(100%); transition: filter 0.2s; }
-.settings-btn:active { filter: grayscale(0%); }
+
+/* ── SVG Icon Buttons ── */
+.settings-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 8px; display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.2s;
+}
+.settings-btn svg { stroke: rgba(174,174,178,0.7); transition: stroke 0.2s; }
+.settings-btn:active svg { stroke: var(--accent); }
+
+/* Sound button states */
+.sound-active-waves { display: none; }
+#btn-sound.sound-active .sound-muted-lines { display: none; }
+#btn-sound.sound-active .sound-active-waves { display: block; }
 
 /* CSS Chevrons */
 .chevron-back {
@@ -162,6 +174,15 @@ body {
     border-bottom: 2px solid var(--text-dim);
     transform: rotate(-45deg);
     margin-right: 5px; opacity: 0.5;
+}
+
+/* PR card expand chevron */
+.chevron-down-icon {
+    width: 9px; height: 9px;
+    border-right: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    transform: rotate(45deg);
+    margin-bottom: 3px;
 }
 
 .version-footer { 
@@ -358,17 +379,15 @@ body {
 .confirm-fixed-top h2 { font-size: 1.8em; margin: 10px 0 10px; }
 .sub-text { color: var(--text-dim); font-size: 0.9em; margin-bottom: 30px; }
 
-/* 1. הירארכיה ויזואלית לשם התרגיל (מעודכן למניעת דריסה) */
 #ex-display-name {
     font-size: 2em;
     font-weight: 800;
     letter-spacing: -0.5px;
     line-height: 1.1;
-    max-width: calc(100% - 130px); /* Space for the header tools */
+    max-width: calc(100% - 130px);
     overflow-wrap: break-word;
 }
 
-/* 2. הפרדה ויזואלית לאזורים */
 .exercise-header {
     padding-bottom: 20px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -388,7 +407,6 @@ body {
     margin-bottom: 0;
 }
 
-/* 3. הבלטת כפתור הסיום (תוספת Pulse Animation ו-Click Feedback) */
 #btn-submit-set {
     padding: 22px;
     font-size: 1.2em;
@@ -405,7 +423,6 @@ body {
     100% { transform: scale(1); box-shadow: 0 4px 20px rgba(10, 132, 255, 0.3); }
 }
 
-/* Click Glow Feedback */
 @keyframes buttonGlow {
     0% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.8); transform: scale(0.95); }
     50% { box-shadow: 0 0 20px 10px rgba(10, 132, 255, 0); transform: scale(1.02); }
@@ -416,7 +433,6 @@ body {
     animation: buttonGlow 0.3s ease-out !important;
 }
 
-/* 4. מיקוד משקל בכפתורי הפעולה המשניים */
 .secondary-buttons-grid {
     display: grid; 
     grid-template-columns: 1fr 1.5fr 1.5fr; 
@@ -431,7 +447,6 @@ body {
 }
 .control-btn:active { transform: scale(0.95); opacity: 0.8; }
 
-/* 5. כפתורים הרסניים ומשניים */
 .passive-action { background: rgba(255, 59, 48, 0.08); border: 1px solid rgba(255, 59, 48, 0.3); color: #ff453a; }
 .outline-action { background: transparent; border: 1px solid var(--accent); color: var(--text); }
 .primary-gradient { background: var(--accent-gradient); }
@@ -459,25 +474,18 @@ body {
 .badge-row { display: flex; gap: 8px; margin-bottom: 5px; align-items: center; }
 .ios-badge { background: var(--accent); padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 800; }
 .uni-badge { background: #ff9f0a; color: black; padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 800; display: none; }
-.warmup-badge { 
-    background: #ff3b30; color: white; padding: 4px 10px; border: none;
-    border-radius: 6px; font-size: 0.7em; font-weight: 800; 
-    display: none; cursor: pointer; animation: pulseRed 2s infinite;
-}
-@keyframes pulseRed { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
 
 /* =========================================
    SUMMARY SCREEN UI CARDS (Phase 3)
    ========================================= */
 
-/* Legacy Monospace class for Archive Detail views */
 .summary-card {
     background: #111; padding: 20px; border-radius: var(--ios-radius);
     font-family: 'Menlo', monospace; white-space: pre-wrap; font-size: 0.85em;
     border: 1px solid var(--border); color: #d1d1d6; line-height: 1.5;
 }
 
-/* New Visual Cards for Summary Area */
 .summary-overview-card { 
     background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); 
     border: 1px solid var(--border); border-top-color: var(--border-hi);
@@ -516,10 +524,7 @@ body {
     padding-right: 25px; margin-top: -2px; margin-bottom: 6px; 
 }
 
-.summary-tag-warmup { 
-    color: var(--text-dim); font-size: 0.85em; margin-bottom: 5px; 
-    border: 1px solid var(--border); display: inline-block; padding: 2px 6px; border-radius: 4px; 
-}
+
 .summary-tag-skip { color: var(--text-dim); font-size: 0.85em; margin-bottom: 5px; font-style: italic; }
 .summary-cluster-round { 
     color: var(--type-free); font-weight: 700; font-size: 0.9em; 
@@ -529,7 +534,7 @@ body {
 
 .finish-main-btn { background: #3a3a3c; color: white; padding: 15px; border-radius: var(--ios-radius); border: none; width: 100%; margin-top: 20px; font-weight: 600; }
 
-/* Modal Styles */
+/* ── Modal Styles ── */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.85); z-index: 1000;
@@ -543,15 +548,38 @@ body {
     padding: 25px; border-radius: var(--ios-radius); width: 85%;
     text-align: center;
     box-shadow: inset 0 1px 0 var(--border-hi), 0 8px 48px rgba(0,0,0,0.5);
+    max-height: 82vh; display: flex; flex-direction: column; overflow: hidden;
 }
-.warmup-row {
-    display: flex; justify-content: space-between; padding: 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 0.95em;
-}
-.warmup-row:last-child { border-bottom: none; }
 
-.action-panel { display: none; } /* Animated via JS class now */
+/* ── Custom Alert / Confirm Dialogs ── */
+.custom-dialog { text-align: center; }
+.custom-dialog-msg {
+    font-size: 1em; line-height: 1.55;
+    margin: 0 0 20px; color: var(--text);
+    white-space: pre-line; font-family: inherit;
+}
+.custom-dialog-btns { display: flex; flex-direction: column; gap: 8px; }
+.custom-dialog-btns .btn-main { margin-top: 0; }
+.custom-dialog-btns .btn-text { padding: 12px; margin-top: 0; }
+
+/* ── Workout Color Swatches (editor) ── */
+.color-swatches-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 4px 0; }
+.color-swatch {
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+.color-swatch:active { transform: scale(0.9); }
+.color-swatch.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.5);
+    transform: scale(1.15);
+}
+
+
+
+.action-panel { display: none; }
 .action-panel.is-visible { display: block; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -567,7 +595,6 @@ body {
 .history-col.set-idx { color: var(--text-dim); font-size: 0.9em; }
 .history-col.rir-note { color: var(--accent); font-size: 0.85em; }
 
-/* History Notes Section */
 .history-notes-list { margin-top: 15px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2); text-align: right; }
 .note-item { font-size: 0.85em; color: var(--text-dim); margin-bottom: 4px; display: flex; align-items: flex-start; }
 .note-num { color: var(--accent); font-weight: bold; margin-left: 8px; min-width: 15px; }
@@ -580,7 +607,6 @@ body {
 }
 .passive-skip:hover { background: rgba(255, 59, 48, 0.15); color: #ff3b30; }
 
-/* Header Toolbar */
 .header-tools { position: absolute; left: 0; top: 0; display: flex; gap: 8px; z-index: 5; }
 .tool-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text-dim); padding: 6px 10px; font-size: 0.8em; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .tool-btn:active { background: rgba(255,255,255,0.15); }
@@ -656,7 +682,7 @@ body {
 }
 
 /* =========================================
-   TAB BAR (v14)
+   TAB BAR
    ========================================= */
 .tab-bar {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
@@ -806,7 +832,11 @@ body {
     box-shadow: inset 0 1px 0 rgba(10,132,255,0.18);
 }
 .pr-expand-header { padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; min-height: 44px; }
-.pr-expand-arrow { color: var(--accent); font-size: 1.1em; transition: transform 0.3s cubic-bezier(0.2,0.8,0.2,1); flex-shrink: 0; }
+.pr-expand-arrow {
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; padding: 4px;
+    transition: transform 0.3s cubic-bezier(0.2,0.8,0.2,1);
+}
 .pr-expand-arrow.open { transform: rotate(180deg); }
 .pr-expand-body { max-height: 0; overflow: hidden; transition: max-height 0.38s cubic-bezier(0.2,0.8,0.2,1); }
 .pr-expand-body.open { max-height: 200px; }
@@ -1047,7 +1077,6 @@ body {
 
 /* ── Compact Cluster Mode ──
    JS adds class="cluster" to #ui-main when in cluster.
-   All elements stay in place — only spacing shrinks.
    Total savings: ~80px, enough to reveal the bottom buttons.
    ─────────────────────────────────────────────────────── */
 #ui-main.cluster .exercise-header {
@@ -1099,9 +1128,11 @@ body {
     background: var(--type-b); margin-left: 3px; vertical-align: middle; flex-shrink: 0;
 }
 
-/* ── Workout Type Toast ── */
+/* ── Workout Type Toast — safe-area aware ── */
 .wt-toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+    left: 50%; transform: translateX(-50%);
     background: rgba(28,28,30,0.96); border: 1px solid rgba(255,255,255,0.15);
     border-radius: 12px; padding: 10px 16px; font-size: 0.8em; font-weight: 600;
     color: #fff; backdrop-filter: blur(20px) saturate(180%);
@@ -1185,4 +1216,267 @@ body {
 .alias-confirm-tag {
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
     border-radius: 8px; padding: 4px 10px; font-size: 0.75em; color: #d1d1d6;
+}
+
+
+
+/* ──────────────────────────────────────────
+   HOME PR CARD (ui-week)
+   ────────────────────────────────────────── */
+.home-pr-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border); border-top-color: var(--border-hi);
+    backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    border-radius: var(--ios-radius); padding: 12px 14px; margin-bottom: 0;
+    box-shadow: inset 0 1px 0 var(--border-hi);
+}
+.home-pr-top {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+.home-pr-lbl {
+    font-size: 0.6em; color: var(--text-dim); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+}
+.home-pr-toggle {
+    display: flex; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 2px; gap: 2px;
+}
+.home-pr-btn {
+    background: none; border: none; color: rgba(255,255,255,0.38);
+    font-size: 0.7em; font-weight: 700; padding: 4px 9px; border-radius: 6px;
+    cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; min-height: 28px;
+}
+.home-pr-btn.active { background: rgba(255,255,255,0.11); color: var(--text); }
+.home-pr-body { display: flex; align-items: center; gap: 10px; }
+.home-pr-left { flex-shrink: 0; width: 110px; }
+.home-pr-num-row { display: flex; align-items: baseline; gap: 3px; }
+.home-pr-num {
+    font-size: 2.2em; font-weight: 800; letter-spacing: -1px;
+    line-height: 1; font-variant-numeric: tabular-nums; transition: color 0.2s;
+}
+.home-pr-unit { font-size: 0.82em; font-weight: 400; color: var(--text-dim); }
+.home-pr-set { font-size: 0.72em; color: rgba(255,255,255,0.5); margin-top: 4px; line-height: 1.4; min-height: 2em; }
+.home-pr-date { font-size: 0.68em; color: var(--text-dim); margin-top: 2px; }
+.home-pr-delta {
+    display: inline-block; margin-top: 5px; font-size: 0.65em; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px; min-height: 18px;
+}
+.home-pr-delta.up { background: rgba(50,215,75,0.12); border: 1px solid rgba(50,215,75,0.28); color: var(--type-b); }
+.home-pr-delta.down { background: rgba(255,69,58,0.1); border: 1px solid rgba(255,69,58,0.22); color: var(--danger); }
+.home-pr-delta.same { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text-dim); }
+.home-pr-chart { flex: 1; min-width: 0; }
+
+/* ─── WORKOUT PLAN FEATURE (v14.4.0) ──────────────────────────────────────── */
+
+/* Pill button on each workout card in ui-workout-type */
+.btn-exercises-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(10,132,255,0.12);
+    border: 1px solid rgba(10,132,255,0.3);
+    border-radius: 20px;
+    padding: 6px 11px;
+    color: var(--accent);
+    font-size: 0.72em; font-weight: 700; font-family: inherit;
+    cursor: pointer; white-space: nowrap; letter-spacing: 0.2px;
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+}
+.btn-exercises-pill:active { background: rgba(10,132,255,0.25); transform: scale(0.95); }
+.btn-exercises-pill svg { flex-shrink: 0; }
+
+/* Floating plan button removed in v14.5.0 — replaced by tool-btn */
+
+/* Plan sheet container */
+.plan-sheet { max-height: 82vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.plan-sheet .sheet-handle { margin: 12px auto 0; flex-shrink: 0; }
+.plan-sheet-body { flex: 1; overflow-y: auto; padding: 0 16px 16px; }
+
+/* Sheet header inside body */
+.plan-sheet-header { padding: 12px 0 10px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.plan-sheet-title { font-size: 0.95em; font-weight: 800; margin: 0 0 2px; }
+.plan-sheet-subtitle { font-size: 0.72em; color: var(--accent); font-weight: 600; }
+
+/* Progress bar row (in-flow sheet) */
+.plan-progress-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0 6px;
+}
+.plan-progress-bg {
+    flex: 1; height: 3px; background: rgba(255,255,255,0.1);
+    border-radius: 2px; overflow: hidden;
+}
+.plan-progress-fill {
+    height: 100%; background: var(--accent);
+    border-radius: 2px; transition: width 0.4s;
+}
+.plan-progress-label { font-size: 0.65em; color: var(--text-dim); font-weight: 600; white-space: nowrap; }
+
+/* Section divider inside sheet */
+.plan-section-label {
+    font-size: 0.62em; font-weight: 700; color: var(--text-dim);
+    letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 10px 0 5px;
+}
+
+/* Individual exercise row */
+.plan-ex-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 10px; border-radius: 10px; margin-bottom: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+}
+.plan-ex-item.plan-main {
+    background: rgba(10,132,255,0.07);
+    border-color: rgba(10,132,255,0.2);
+}
+.plan-ex-item.plan-current {
+    background: rgba(48,209,88,0.07);
+    border-color: rgba(48,209,88,0.25);
+}
+.plan-ex-item.plan-done { opacity: 0.55; }
+
+.plan-ex-num {
+    font-size: 0.62em; font-weight: 700; color: var(--text-dim);
+    min-width: 18px; text-align: center; letter-spacing: 0.5px;
+}
+.plan-ex-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.plan-ex-dot.dot-current {
+    background: #30D158;
+    box-shadow: 0 0 6px rgba(48,209,88,0.7);
+    animation: plan-pulse 1.4s ease-in-out infinite;
+}
+.plan-ex-dot.dot-done { background: rgba(48,209,88,0.55); }
+.plan-ex-dot.dot-upcoming { background: rgba(255,255,255,0.18); }
+.plan-ex-dot.dot-main { background: var(--accent); }
+
+@keyframes plan-pulse {
+    0%,100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.45); opacity: 0.7; }
+}
+
+.plan-ex-info { flex: 1; min-width: 0; }
+.plan-ex-name {
+    font-size: 0.82em; font-weight: 700; line-height: 1.3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.plan-ex-name.name-done { color: var(--text-dim); text-decoration: line-through; }
+.plan-ex-meta { font-size: 0.63em; color: var(--text-dim); margin-top: 1px; }
+.plan-ex-sets-str { color: rgba(10,132,255,0.75); font-weight: 600; }
+
+.plan-ex-right {
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: 3px; flex-shrink: 0;
+}
+.plan-main-badge {
+    font-size: 0.58em; font-weight: 700; color: var(--accent);
+    background: rgba(10,132,255,0.15); border: 1px solid rgba(10,132,255,0.3);
+    border-radius: 6px; padding: 2px 6px; letter-spacing: 0.3px;
+}
+.plan-done-check { font-size: 0.72em; color: #30D158; font-weight: 700; }
+.plan-sets-done { font-size: 0.62em; color: var(--text-dim); font-weight: 600; }
+
+/* Sheet close button */
+.plan-sheet-close {
+    display: block; width: calc(100% - 32px); margin: 0 16px 16px;
+    padding: 12px; border-radius: 12px;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    color: var(--text-dim); font-size: 0.82em; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+}
+
+/* ─── HOME PR CARD — ALL TIME ROW + RANGE CHIPS (v14.5.0) ────────────────── */
+.home-pr-range-chips {
+    display: flex; gap: 4px; margin-bottom: 0;
+}
+.home-pr-range-chip {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 7px; padding: 3px 8px;
+    font-size: 0.6em; font-weight: 700; font-family: inherit;
+    color: var(--text-dim); cursor: pointer; transition: all 0.15s;
+}
+.home-pr-range-chip.active {
+    background: rgba(10,132,255,0.18); border-color: rgba(10,132,255,0.4);
+    color: var(--accent);
+}
+.home-pr-alltime {
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 7px; margin-top: 2px;
+    display: flex; align-items: center; gap: 8px;
+}
+.home-pr-alltime-icon { font-size: 1em; flex-shrink: 0; }
+.home-pr-alltime-info { flex: 1; }
+.home-pr-alltime-label {
+    font-size: 0.58em; font-weight: 700; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px;
+}
+.home-pr-alltime-val {
+    font-size: 0.88em; font-weight: 800; color: #FFD60A; letter-spacing: -0.3px;
+}
+.home-pr-alltime-set { font-size: 0.62em; color: var(--text-dim); margin-top: 1px; }
+.home-pr-alltime-right { text-align: left; flex-shrink: 0; }
+.home-pr-alltime-badge {
+    font-size: 0.56em; font-weight: 700;
+    background: rgba(255,214,10,0.12); border: 1px solid rgba(255,214,10,0.28);
+    color: #FFD60A; border-radius: 6px; padding: 2px 6px; white-space: nowrap;
+}
+.home-pr-alltime-date { font-size: 0.58em; color: var(--text-dim); margin-top: 3px; }
+
+/* ─── SESSION LOG MODAL ─────────────────────────────────────────────────── */
+
+#session-log-list {
+    overflow-y: auto; flex: 1; min-height: 0; scrollbar-width: none;
+}
+#session-log-list::-webkit-scrollbar { display: none; }
+
+.log-ex-header {
+    font-size: 0.85em; font-weight: 700; color: var(--text);
+    padding: 10px 0 5px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-top: 10px;
+}
+.log-ex-header:first-child { margin-top: 0; }
+
+.log-set-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.9em;
+}
+.log-set-row:last-of-type { border-bottom: none; }
+
+.btn-log-edit {
+    font-size: 0.72em; color: var(--accent);
+    background: rgba(10,132,255,0.1); border: 1px solid rgba(10,132,255,0.28);
+    border-radius: 6px; padding: 4px 8px; cursor: pointer; font-family: inherit;
+    white-space: nowrap; flex-shrink: 0;
+}
+
+/* ─── SESSION TIMER STRIP ────────────────────────────────────────────────── */
+
+.session-timer-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #30D158; flex-shrink: 0;
+}
+
+/* ─── MANAGER HIDDEN ITEM ────────────────────────────────────────────────── */
+
+.manager-item--hidden { opacity: 0.45; }
+
+/* ─── v14.9.0 additions ──────────────────────────────────────────────────── */
+/* swap-search uses existing .search-input — no new rules needed              */
+/* btn-reload uses existing .settings-btn — no new rules needed               */
+
+/* ─── v14.10.0 additions ─────────────────────────────────────────────────── */
+
+/* alias color swatch — כמו color-swatch, בתוך bottom-sheet */
+.alias-color-swatch {
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+.alias-color-swatch:active { transform: scale(0.9); }
+.alias-color-swatch.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.5);
+    transform: scale(1.15);
 }

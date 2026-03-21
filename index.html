@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymPro Elite 14.1.1</title>
+    <title>GymPro Elite 14.10.0</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
 </head>
 <body>
     <div class="glass-overlay"></div>
     
-    <!-- Warmup Modal -->
-    <div id="warmup-modal" class="modal-overlay">
+    <!-- Session Log Modal -->
+    <div id="session-log-modal" class="modal-overlay">
         <div class="modal-content">
-            <h3>חימום מומלץ</h3>
-            <div id="warmup-list" class="vertical-stack my-lg"></div>
-            <button class="btn-main primary-gradient" onclick="markWarmupDone()">סיימתי חימום</button>
-            <button class="btn-text color-danger" onclick="closeWarmup()">סגור ללא רישום</button>
+            <h3>יומן אימון</h3>
+            <div id="session-log-list" class="vertical-stack my-lg"></div>
+            <button class="btn-text" onclick="closeSessionLog()">סגור</button>
         </div>
     </div>
 
@@ -131,6 +132,27 @@
         </div>
     </div>
 
+    <!-- Custom Alert Modal -->
+    <div id="custom-alert-modal" class="modal-overlay">
+        <div class="modal-content custom-dialog">
+            <p id="custom-alert-msg" class="custom-dialog-msg"></p>
+            <div class="custom-dialog-btns">
+                <button id="custom-alert-ok" class="btn-main primary-gradient">אישור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="custom-confirm-modal" class="modal-overlay">
+        <div class="modal-content custom-dialog">
+            <p id="custom-confirm-msg" class="custom-dialog-msg"></p>
+            <div class="custom-dialog-btns">
+                <button id="custom-confirm-ok" class="btn-main primary-gradient">אישור</button>
+                <button id="custom-confirm-cancel" class="btn-text">ביטול</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bottom Sheet -->
     <div id="sheet-overlay" class="bottom-sheet-overlay" onclick="closeDayDrawer()"></div>
     <div id="sheet-modal" class="bottom-sheet">
@@ -145,8 +167,34 @@
             </button>
             <div class="brand-logo">GYMPRO <span>ELITE</span></div>
             <div class="d-flex" style="gap:5px;">
-                <button id="btn-sound" class="settings-btn" onclick="initAudio()">🔇</button>
-                <button id="btn-settings" class="settings-btn" onclick="openSettings()">⚙️</button>
+                <!-- Reload button: visible only outside workout flow -->
+                <button id="btn-reload" class="settings-btn" onclick="window.location.reload()" title="רענון">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                </button>
+                <!-- Sound button: muted by default, waves appear on activation -->
+                <button id="btn-sound" class="settings-btn" onclick="initAudio()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <g class="sound-muted-lines">
+                            <line x1="23" y1="9" x2="17" y2="15"/>
+                            <line x1="17" y1="9" x2="23" y2="15"/>
+                        </g>
+                        <g class="sound-active-waves">
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                        </g>
+                    </svg>
+                </button>
+                <!-- Settings button: gear SVG -->
+                <button id="btn-settings" class="settings-btn" onclick="openSettings()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
             </div>
         </header>
 
@@ -156,7 +204,6 @@
             <div id="ui-week" class="screen active">
                 <div class="hero-analytics-card mt-xs" id="hero-card">
                     <h2>מוכן לאימון?</h2>
-                    <!-- Last workout info (replaces streak badge) -->
                     <div class="hero-last-workout" id="hero-last-workout"></div>
                     <div class="hero-stats-row" id="hero-stats-row">
                         <div class="hero-stat" id="hero-stat-0"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
@@ -166,6 +213,34 @@
                     <button class="btn-text color-accent p-0 mt-sm text-sm" style="width:auto;text-align:right;" onclick="openHeroSettings()">ערוך תצוגה</button>
                 </div>
 
+                <!-- PR CARD -->
+                <div class="home-pr-card mt-md" id="home-pr-card">
+                    <div class="home-pr-top">
+                        <span class="home-pr-lbl">שיא אישי — E1RM</span>
+                        <div style="display:flex;align-items:center;gap:5px;">
+                            <div id="home-pr-range-chips-inline" class="home-pr-range-chips" style="margin-bottom:0;"></div>
+                            <div class="home-pr-toggle">
+                                <button class="home-pr-btn active" id="home-pr-bench" onclick="switchHomePR('bench',this)">Bench Press</button>
+                                <button class="home-pr-btn" id="home-pr-ohp" onclick="switchHomePR('ohp',this)">Overhead Press</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="home-pr-body">
+                        <div class="home-pr-left">
+                            <div class="home-pr-num-row">
+                                <span class="home-pr-num" id="home-pr-num">—</span>
+                                <span class="home-pr-unit">kg</span>
+                            </div>
+                            <div class="home-pr-set" id="home-pr-set">—</div>
+                            <div class="home-pr-date" id="home-pr-date"></div>
+                            <div class="home-pr-delta" id="home-pr-delta"></div>
+                        </div>
+                        <div class="home-pr-chart">
+                            <svg id="home-pr-svg" viewBox="0 0 180 68" style="display:block;overflow:visible;width:100%"></svg>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section-label mt-lg">בחר תוכנית שבועית</div>
                 <div class="grid-menu grid-2-cols mt-sm">
                     <button class="menu-card" onclick="selectWeek(1)"><span>שבוע 1</span><div class="chevron"></div></button>
@@ -173,11 +248,7 @@
                     <button class="menu-card" onclick="selectWeek(3)"><span>שבוע 3</span><div class="chevron"></div></button>
                     <button class="menu-card deload-card" onclick="selectWeek('deload')"><span>דילואוד</span><div class="chevron"></div></button>
                 </div>
-                <button class="menu-card freestyle-card w-100 mt-sm" onclick="startFreestyle()">
-                    <h3 class="color-type-free m-0">אימון Freestyle</h3>
-                    <p>בחר תרגילים חופשי</p>
-                </button>
-                <div class="version-footer">GymPro Elite v14.1.1</div>
+                <div class="version-footer">GymPro Elite v14.10.0</div>
             </div>
 
             <!-- SETTINGS -->
@@ -187,13 +258,17 @@
                     <h3 class="color-accent m-0">ניהול תוכניות אימון</h3>
                     <p>ערוך, צור או מחק תוכניות</p>
                 </button>
-                <button class="menu-card tall w-100 mb-lg border-type-b" onclick="openExerciseDatabase()">
+                <button class="menu-card tall w-100 mb-sm border-type-b" onclick="openExerciseDatabase()">
                     <h3 class="color-type-b m-0">ניהול מאגר תרגילים</h3>
                     <p>יצירה, עריכה וניהול הגדרות לכל התרגילים</p>
                 </button>
+                <button class="menu-card tall w-100 mb-lg" style="border-color:#FF9F0A;" onclick="openAnalyticsSettings()">
+                    <h3 style="color:#FF9F0A;" class="m-0">הגדרות אנליטיקה</h3>
+                    <p>מדדי גיבור, פורמולה, יחידות, שם מתאמן</p>
+                </button>
                 <div class="glass-card">
                     <h3 class="mt-0">ניהול נתונים</h3>
-                    <p class="color-dim text-sm mb-0">גרסה V14.1.1</p>
+                    <p class="color-dim text-sm mb-0">גרסה V14.10.0</p>
                     <button class="btn-text color-danger border-danger rounded-md mb-lg" onclick="resetToFactorySettings()">איפוס להגדרות יצרן</button>
                     <div class="border-top pt-md">
                         <label class="color-dim text-xs d-block mb-sm">ניהול תבניות (ללא היסטוריה)</label>
@@ -232,7 +307,7 @@
                 <div class="hero-section"><h2>ניהול תוכניות</h2></div>
                 <div id="manager-list" class="vertical-stack"></div>
                 <div class="mt-md">
-                    <button class="btn-main primary-gradient" onclick="createNewWorkout()">+ צור תוכנית חדשה</button>
+                    <button id="btn-create-workout" class="btn-main primary-gradient" onclick="createNewWorkout()">+ צור תוכנית חדשה</button>
                     <button class="btn-text mt-md" onclick="navigate('ui-week', true)">חזרה ללוח הבקרה</button>
                 </div>
             </div>
@@ -250,6 +325,14 @@
                     <div class="flex-between border-top pt-sm mt-xs">
                         <span class="text-sm color-type-free">מופיע בדילואוד בלבד?</span>
                         <input type="checkbox" id="editor-deload-only-check" class="archive-checkbox">
+                    </div>
+                    <div class="flex-between border-top pt-sm mt-xs">
+                        <span class="text-sm color-dim">הסתר מרשימת האימונים</span>
+                        <input type="checkbox" id="editor-hidden-check" class="archive-checkbox">
+                    </div>
+                    <div class="border-top pt-sm mt-xs">
+                        <span class="text-sm color-dim d-block mb-sm">צבע זיהוי</span>
+                        <div id="editor-color-swatches" class="color-swatches-row"></div>
                     </div>
                 </div>
                 <div class="section-label">רשימת תרגילים</div>
@@ -308,8 +391,11 @@
             </div>
 
             <div id="ui-swap-list" class="screen">
-                <h2 class="section-title">אפשרויות החלפה</h2>
-                <div id="swap-container" class="vertical-stack"></div>
+                <div class="sticky-header">
+                    <h2 class="section-title mb-sm">אפשרויות החלפה</h2>
+                    <input type="text" id="swap-search" class="search-input" placeholder="חפש תרגיל..." oninput="_renderSwapMenu(this.value)">
+                </div>
+                <div id="swap-container" class="vertical-stack pt-sm"></div>
                 <button class="btn-text" onclick="handleBackClick()">ביטול</button>
             </div>
 
@@ -367,7 +453,6 @@
                     </div>
                     <div class="badge-row mt-xs">
                         <span id="set-counter" class="ios-badge">SET 1/3</span>
-                        <button id="btn-warmup" class="warmup-badge" onclick="calcWarmup()">חימום</button>
                         <div id="unilateral-note" class="uni-badge">UNILATERAL</div>
                     </div>
                     <h2 id="ex-display-name" class="mt-md"></h2>
@@ -409,15 +494,22 @@
                     <div class="vertical-stack">
                         <button class="btn-text" onclick="finish()">לא, סיים אימון</button>
                         <button class="btn-main primary-gradient" onclick="startExtraPhase()">כן, הוסף תרגילים</button>
+                        <button class="btn-text" style="border:1px solid var(--border);border-radius:var(--ios-radius);padding:14px;" onclick="startExtraCluster()">הוסף סבב קיים</button>
                     </div>
                 </div>
+            </div>
+
+            <div id="ui-extra-cluster" class="screen">
+                <div class="hero-section"><h2>בחר סבב להוספה</h2></div>
+                <div id="extra-cluster-list" class="vertical-stack"></div>
+                <button class="btn-text mt-lg" onclick="handleBackClick()">ביטול</button>
             </div>
 
             <div id="ui-summary" class="screen">
                 <div class="hero-section"><h2>סיכום אימון</h2></div>
                 <input type="text" id="summary-note" class="minimal-input mb-lg" placeholder="הערות כלליות לאימון (אופציונלי)">
                 <div id="summary-area" class="summary-card"></div>
-                <button class="btn-main primary-gradient" onclick="copyResult()">העתק וסגור</button>
+                <button class="btn-main primary-gradient" onclick="copyResult()">שמור וסגור</button>
             </div>
 
             <div id="ui-archive" class="screen">
@@ -444,10 +536,11 @@
                     </div>
                 </div>
                 <div id="list-view-container">
-                    <div class="archive-actions d-flex gap-sm mb-md">
+                    <div class="archive-actions d-flex gap-sm mb-sm">
                         <button class="glass-card compact w-100 color-accent border-accent font-semi text-sm" onclick="copyBulkLog('all')">העתק הכל</button>
                         <button id="btn-copy-selected" class="glass-card compact w-100 color-dim border-dim font-semi text-sm opacity-50" onclick="copyBulkLog('selected')" disabled>העתק מסומנים</button>
                     </div>
+                    <button class="glass-card compact w-100 font-semi text-sm mb-md" style="color:#FF9F0A;border-color:rgba(255,159,10,0.45);" onclick="openRangeSheet()">העתק לפי טווח</button>
                     <div id="archive-list" class="vertical-stack"></div>
                 </div>
                 <input type="file" id="import-file" class="d-none" onchange="importData(this)">
@@ -466,7 +559,6 @@
             <div id="ui-analytics" class="screen">
                 <div class="flex-between mt-xs mb-sm">
                     <h2 class="m-0" style="font-size:1.4em;font-weight:800;">אנליטיקה</h2>
-                    <button class="tool-btn" onclick="openAnalyticsSettings()">⚙ הגדרות</button>
                 </div>
 
                 <div class="segmented-control" id="analytics-seg" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
@@ -519,6 +611,7 @@
                         <div class="analytics-card-label">
                             <span>התפלגות שרירים</span>
                             <div class="range-chips" id="muscle-chips">
+                                <button class="range-chip" onclick="setMuscleRange('1w',this)">שבוע</button>
                                 <button class="range-chip active" onclick="setMuscleRange('1m',this)">חודש</button>
                                 <button class="range-chip" onclick="setMuscleRange('3m',this)">3 חודשים</button>
                                 <button class="range-chip" onclick="setMuscleRange('all',this)">הכל</button>
@@ -591,11 +684,13 @@
                     <div class="pr-expand-card" id="pr-expand-card">
                         <div class="pr-expand-header" onclick="togglePRCard()">
                             <div>
-                                <div style="font-size:0.62em;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🏆 שיא אישי</div>
+                                <div style="font-size:0.62em;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">שיא אישי</div>
                                 <div id="pr-card-weight" style="font-size:1.75em;font-weight:800;letter-spacing:-0.5px;">—</div>
                                 <div id="pr-card-date" style="font-size:0.76em;color:var(--text-dim);margin-top:2px;"></div>
                             </div>
-                            <div class="pr-expand-arrow" id="pr-expand-arrow">⌄</div>
+                            <div class="pr-expand-arrow" id="pr-expand-arrow">
+                                <div class="chevron-down-icon"></div>
+                            </div>
                         </div>
                         <div class="pr-expand-body" id="pr-expand-body">
                             <div class="pr-expand-inner">
@@ -626,6 +721,20 @@
             <div><label class="input-label">שם המתאמן</label><input type="text" id="pref-name" class="minimal-input m-0" placeholder="למשל: לירון"></div>
             <div class="flex-between border-bottom pb-sm"><label class="input-label m-0">יחידות</label><select id="pref-units" class="minimal-input m-0 bg-card" style="width:auto;"><option value="kg">kg</option><option value="lbs">lbs</option></select></div>
             <div class="flex-between"><label class="input-label m-0">נוסחת 1RM</label><select id="pref-formula" class="minimal-input m-0 bg-card" style="width:auto;"><option value="epley">Epley</option><option value="brzycki">Brzycki</option><option value="lombardi">Lombardi</option></select></div>
+            <div class="border-top pt-sm">
+                <div class="input-label mb-xs" style="color:var(--text-dim);font-size:0.72em;text-transform:uppercase;letter-spacing:0.4px;">סף ימים — עקביות</div>
+                <p class="color-dim text-xs mt-0 mb-sm">השאר ריק לחישוב אוטומטי לפי הרגלי האימון שלך</p>
+                <div class="input-grid grid-2-cols" style="gap:10px;">
+                    <div>
+                        <label class="input-label" style="font-size:0.75em;">🟢 ירוק — עד (ימים)</label>
+                        <input type="number" id="pref-cons-green" class="minimal-input m-0" min="1" max="30" placeholder="אוטומטי">
+                    </div>
+                    <div>
+                        <label class="input-label" style="font-size:0.75em;">🟠 כתום — עד (ימים)</label>
+                        <input type="number" id="pref-cons-orange" class="minimal-input m-0" min="1" max="60" placeholder="אוטומטי">
+                    </div>
+                </div>
+            </div>
         </div>
         <button class="btn-main primary-gradient" onclick="saveAnalyticsSettingsPrefs()">שמור</button>
         <button class="btn-text" onclick="closeAnalyticsSettings()">ביטול</button>
@@ -657,6 +766,48 @@
     <div id="alias-sheet" class="bottom-sheet" style="max-height:88vh;">
         <div class="sheet-handle"></div>
         <div id="alias-sheet-body"></div>
+    </div>
+
+    <!-- WORKOUT PLAN SHEET -->
+    <div id="workout-plan-overlay" class="bottom-sheet-overlay" onclick="closePlanSheet()"></div>
+    <div id="workout-plan-sheet" class="bottom-sheet plan-sheet">
+        <div class="sheet-handle"></div>
+        <div id="workout-plan-sheet-body" class="plan-sheet-body"></div>
+    </div>
+
+
+    <!-- Session Timer Strip -->
+    <div id="session-timer-strip" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:199;height:calc(36px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:rgba(10,10,12,0.92);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1px solid rgba(255,255,255,0.08);align-items:center;justify-content:center;gap:7px;">
+        <div class="session-timer-dot"></div>
+        <span id="session-timer-text" style="font-size:0.78em;font-weight:700;color:rgba(255,255,255,0.65);font-variant-numeric:tabular-nums;letter-spacing:0.5px;">00:00</span>
+        <span style="font-size:0.65em;color:rgba(255,255,255,0.25);">זמן אימון</span>
+    </div>
+
+    <!-- Archive Range Copy Sheet -->
+    <div id="range-copy-overlay" class="bottom-sheet-overlay" onclick="closeRangeSheet()"></div>
+    <div id="range-copy-sheet" class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <h3 style="margin:0 0 14px;">העתק לפי טווח</h3>
+        <div class="segmented-control" style="margin-bottom:14px;">
+            <button class="segment-btn active" id="range-seg-month" onclick="switchRangeTab('month')">חודש</button>
+            <button class="segment-btn" id="range-seg-weeks" onclick="switchRangeTab('weeks')">שבועות</button>
+        </div>
+        <div id="range-panel-month">
+            <div id="range-month-chips" class="range-chips" style="flex-wrap:wrap;gap:8px;"></div>
+        </div>
+        <div id="range-panel-weeks" style="display:none;">
+            <div class="range-chips" style="flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+                <button class="range-chip" onclick="selectRangeWeeks(1,this)">1</button>
+                <button class="range-chip" onclick="selectRangeWeeks(2,this)">2</button>
+                <button class="range-chip" onclick="selectRangeWeeks(3,this)">3</button>
+                <button class="range-chip" onclick="selectRangeWeeks(4,this)">4</button>
+                <button class="range-chip" onclick="selectRangeWeeks(6,this)">6</button>
+                <button class="range-chip" onclick="selectRangeWeeks(8,this)">8</button>
+            </div>
+            <p class="color-dim text-sm" style="margin:0 0 4px;">שבועות אחורה — כולל השבוע הנוכחי (ראשון–שבת)</p>
+        </div>
+        <button class="btn-main primary-gradient" id="btn-range-copy" onclick="executeCopyByRange()" disabled style="opacity:0.5;margin-top:16px;">בחר טווח</button>
+        <button class="btn-text" onclick="closeRangeSheet()">ביטול</button>
     </div>
 
     <script src="data.js"></script>
