@@ -803,19 +803,19 @@ function _renderColorSwatches(currentColor) {
 
 function openFirebaseConfigModal() {
     const cfg = FirebaseManager.getFirebaseConfig() || {};
-    document.getElementById('fb-api-key').value          = cfg.apiKey          || '';
-    document.getElementById('fb-auth-domain').value      = cfg.authDomain      || '';
-    document.getElementById('fb-project-id').value       = cfg.projectId       || '';
-    document.getElementById('fb-storage-bucket').value   = cfg.storageBucket   || '';
-    document.getElementById('fb-messaging-id').value     = cfg.messagingSenderId || '';
-    document.getElementById('fb-app-id').value           = cfg.appId           || '';
+    document.getElementById('fb-api-key').value            = cfg.apiKey             || '';
+    document.getElementById('fb-auth-domain').value        = cfg.authDomain         || '';
+    document.getElementById('fb-project-id').value         = cfg.projectId          || '';
+    document.getElementById('fb-storage-bucket').value     = cfg.storageBucket      || '';
+    document.getElementById('fb-messaging-id').value       = cfg.messagingSenderId  || '';
+    document.getElementById('fb-app-id').value             = cfg.appId              || '';
     const btnClear = document.getElementById('btn-clear-firebase');
     if (btnClear) btnClear.style.display = FirebaseManager.isConfigured() ? '' : 'none';
-    document.getElementById('firebase-config-modal').classList.add('active');
+    document.getElementById('firebase-config-modal').style.display = 'flex';
 }
 
 function closeFirebaseConfigModal() {
-    document.getElementById('firebase-config-modal').classList.remove('active');
+    document.getElementById('firebase-config-modal').style.display = 'none';
 }
 
 function saveFirebaseConfig() {
