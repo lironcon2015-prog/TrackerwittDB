@@ -266,11 +266,12 @@ function openArchiveDetail(idx) {
     deleteBtn.onclick = () => {
         showConfirm("האם למחוק אימון זה מהארכיון?", () => {
             StorageManager.deleteFromArchive(item.timestamp);
-            if (typeof FirebaseManager !== 'undefined' && FirebaseManager.isConfigured()) {
-                FirebaseManager.saveArchiveToCloud();
-            }
             haptic('warning');
-            window.location.reload();
+            if (typeof FirebaseManager !== 'undefined' && FirebaseManager.isConfigured()) {
+                FirebaseManager.saveArchiveToCloud().then(() => window.location.reload());
+            } else {
+                window.location.reload();
+            }
         });
     };
 
