@@ -13,6 +13,10 @@ const StorageManager = {
     KEY_META:         'gympro_workout_meta',
     KEY_SESSION:      'gympro_current_session',
     KEY_ANALYTICS:    'gympro_analytics_prefs',
+    KEY_GEMINI_KEY:   'gympro_gemini_key',
+    KEY_AI_MODELS:    'gympro_ai_models',
+    KEY_AI_PERSONA:   'gympro_ai_persona',
+    KEY_AI_HISTORY:   'gympro_ai_history',
 
     getData(key) {
         try { return JSON.parse(localStorage.getItem(key)); }
@@ -239,7 +243,51 @@ const StorageManager = {
         localStorage.removeItem(this.KEY_DB_WORKOUTS);
         localStorage.removeItem(this.KEY_META);
         localStorage.removeItem(this.KEY_SESSION);
-        // Analytics prefs kept intentionally — only structural data is reset
+        // Analytics prefs, AI config & history kept intentionally
+    },
+
+    // ── AI Coach ─────────────────────────────────────────────────────────
+
+    getAIConfig() {
+        const key    = localStorage.getItem(this.KEY_GEMINI_KEY) || '';
+        const stored = localStorage.getItem(this.KEY_AI_MODELS);
+        const models = stored
+            ? stored.split(',').map(s => s.trim()).filter(Boolean)
+            : ['gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+        return { apiKey: key, models };
+    },
+
+    saveAIConfig(apiKey, modelsString) {
+        localStorage.setItem(this.KEY_GEMINI_KEY, apiKey.trim());
+        const models = modelsString.split(',').map(s => s.trim()).filter(Boolean);
+        localStorage.setItem(this.KEY_AI_MODELS, models.join(','));
+    },
+
+    getAIPersona() {
+        return localStorage.getItem(this.KEY_AI_PERSONA) || '';
+    },
+
+    saveAIPersona(text) {
+        localStorage.setItem(this.KEY_AI_PERSONA, text);
+    },
+
+    getAIHistory() {
+        try { return JSON.parse(localStorage.getItem(this.KEY_AI_HISTORY)) || []; }
+        catch { return []; }
+    },
+
+    saveAIHistory(arr) {
+        localStorage.setItem(this.KEY_AI_HISTORY, JSON.stringify(arr));
+    },
+
+    appendAIMessage(msg) {
+        const history = this.getAIHistory();
+        history.push(msg);
+        this.saveAIHistory(history);
+    },
+
+    clearAIHistory() {
+        localStorage.removeItem(this.KEY_AI_HISTORY);
     }
 };
 
@@ -389,6 +437,41 @@ const FirebaseManager = {
             }
         } catch(e) {
             showAlert('שגיאה בהעלאה: ' + e.message);
+        }
+    },
+
+    // ── AI History ───────────────────────────────────────────────────────────
+
+    async saveAIHistoryToCloud() {
+        if (!this.init()) return false;
+        try {
+            const history = StorageManager.getAIHistory();
+            await this._db.collection('gympro_data').doc('ai_history').set({
+                messages: history,
+                updatedAt: Date.now()
+            });
+            return true;
+        } catch(e) {
+            console.error('GymPro saveAIHistory error:', e);
+            return false;
+        }
+    },
+
+    async loadAIHistoryFromCloud() {
+        if (!this.init()) {
+            showAlert('Firebase לא מוגדר. הגדר חיבור תחילה.');
+            return;
+        }
+        try {
+            const doc = await this._db.collection('gympro_data').doc('ai_history').get();
+            if (!doc.exists || !doc.data().messages) {
+                showAlert('לא נמצאה היסטוריית שיחות בענן.');
+                return;
+            }
+            StorageManager.saveAIHistory(doc.data().messages);
+            showAlert('היסטוריית שיחות שוחזרה!', () => { window.location.reload(); });
+        } catch(e) {
+            showAlert('שגיאה בטעינה מהענן: ' + e.message);
         }
     }
 };

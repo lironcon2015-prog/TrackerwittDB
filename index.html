@@ -187,6 +187,13 @@
 
     <div class="app-container">
         <header class="app-header">
+            <button id="btn-ai" class="settings-btn ai-header-btn" onclick="openAICoach()" title="AI Coach">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+                    <circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"/>
+                    <circle cx="15" cy="14" r="1" fill="currentColor" stroke="none"/>
+                </svg>
+            </button>
             <button id="global-back" class="back-btn" onclick="handleBackClick()">
                 <div class="chevron-back"></div>
             </button>
@@ -325,6 +332,24 @@
                     <h3>🔄 עדכון אפליקציה</h3>
                     <p class="cloud-section-subtitle">בדוק אם קיימת גרסה חדשה ב-GitHub</p>
                     <button class="cloud-btn accent full-w" onclick="checkForUpdate()">בדוק עדכון</button>
+                </div>
+
+                <!-- AI Coach -->
+                <div class="cloud-section ai-settings-section" style="margin-top:10px;">
+                    <h3>AI Coach</h3>
+                    <p class="cloud-section-subtitle">מאמן אישי חכם — Gemini API</p>
+                    <div id="ai-status" style="margin-bottom:10px;font-size:0.85em;"></div>
+                    <label class="input-label">Gemini API Key</label>
+                    <input type="password" id="ai-api-key-input" class="minimal-input mb-sm" placeholder="הדבק API Key מ-Google AI Studio" autocomplete="off">
+                    <label class="input-label">מודלים (מפל, מופרדים בפסיק)</label>
+                    <input type="text" id="ai-models-input" class="minimal-input mb-sm" placeholder="gemini-2.0-flash, gemini-2.0-flash-lite">
+                    <button class="btn-main primary-gradient mb-sm" onclick="saveAISettings()">שמור הגדרות AI</button>
+                    <div class="cloud-btn-grid" style="margin-top:6px;">
+                        <button class="cloud-btn success" onclick="FirebaseManager.saveAIHistoryToCloud().then(ok=>showAlert(ok?'היסטוריה גובתה לענן!':'שגיאה בגיבוי.'))">💾 גבה שיחות</button>
+                        <button class="cloud-btn success" onclick="FirebaseManager.loadAIHistoryFromCloud()">⬇ שחזר שיחות</button>
+                        <button class="cloud-btn full-w" style="color:var(--danger);border-color:rgba(255,69,58,0.3);background:rgba(255,69,58,0.06);" onclick="clearAIHistory()">מחק היסטוריית שיחות</button>
+                    </div>
+                    <div class="ai-security-note">המפתח נשמר מקומית במכשיר זה בלבד ולא מועלה לענן. מומלץ להגביל אותו ל-GitHub Pages שלך ב-Google Cloud Console.</div>
                 </div>
             </div>
 
@@ -856,6 +881,96 @@
         </div>
         <button class="btn-main primary-gradient" id="btn-range-copy" onclick="executeCopyByRange()" disabled style="opacity:0.5;margin-top:16px;">בחר טווח</button>
         <button class="btn-text" onclick="closeRangeSheet()">ביטול</button>
+    </div>
+
+    <!-- AI Coach Modal -->
+    <div id="ai-coach-modal" class="modal-overlay ai-coach-overlay" style="display:none;" onclick="handleAIOverlayClick(event)">
+        <div class="ai-coach-sheet">
+            <div class="ai-sheet-handle"></div>
+            <div class="ai-coach-header">
+                <div class="ai-header-left">
+                    <div class="ai-avatar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+                            <circle cx="9" cy="14" r="1" fill="white" stroke="none"/>
+                            <circle cx="15" cy="14" r="1" fill="white" stroke="none"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="ai-coach-title">AI Coach</div>
+                        <div class="ai-coach-subtitle" id="ai-coach-subtitle">מאמן אישי חכם</div>
+                    </div>
+                </div>
+                <div class="ai-header-right">
+                    <button class="ai-persona-btn" onclick="openAIPersonaSheet()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        פרופיל
+                    </button>
+                    <div class="ai-copy-wrap">
+                        <button class="ai-persona-btn" onclick="toggleAICopyMenu()">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            העתק
+                        </button>
+                        <div id="ai-copy-menu" class="ai-copy-menu" style="display:none;">
+                            <div class="ai-copy-section-label">פורמט</div>
+                            <button onclick="copyAIHistory('chat','all')">שיחה בלבד</button>
+                            <button onclick="copyAIHistory('full','all')">שיחה + הקשר מלא</button>
+                            <div class="ai-copy-divider"></div>
+                            <div class="ai-copy-section-label">טווח</div>
+                            <button onclick="copyAIHistory('chat','week')">שבוע אחרון</button>
+                            <button onclick="copyAIHistory('chat','current_block')">בלוק נוכחי</button>
+                            <button onclick="copyAIHistory('chat','two_blocks')">2 בלוקים</button>
+                            <button onclick="copyAIHistory('chat','all')">הכל</button>
+                        </div>
+                    </div>
+                    <button class="ai-close-btn" onclick="closeAICoach()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Context banner — מוצג רק בזמן אימון פעיל -->
+            <div id="ai-workout-ctx" class="ai-workout-ctx" style="display:none;"></div>
+
+            <!-- הודעות -->
+            <div id="ai-chat-messages" class="ai-chat-messages"></div>
+
+            <!-- Context chips -->
+            <div class="ai-context-strip">
+                <div id="ai-ctx-chip-blocks" class="ai-ctx-chip active" onclick="if(aiFullArchiveMode)toggleFullArchiveMode()">
+                    <div class="ai-ctx-dot"></div>
+                    בלוק נוכחי + קודם
+                </div>
+                <div id="ai-ctx-chip-full" class="ai-ctx-chip warn" onclick="if(!aiFullArchiveMode)toggleFullArchiveMode()">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    ארכיון מלא
+                </div>
+            </div>
+
+            <!-- שורת קלדה -->
+            <div class="ai-input-row">
+                <input id="ai-chat-input" class="ai-chat-input" type="text" placeholder="שאל את המאמן..." maxlength="800"
+                       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage();}">
+                <button id="ai-send-btn" class="ai-send-btn" onclick="sendAIMessage()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Persona Bottom Sheet -->
+    <div id="ai-persona-overlay" class="bottom-sheet-overlay" onclick="closeAIPersonaSheet()"></div>
+    <div id="ai-persona-sheet" class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <h3>ספר למאמן עליך</h3>
+        <p class="sub-text">נשמר ומוזרק לכל שיחה כהקשר קבוע. שנה בכל עת.</p>
+        <textarea id="ai-persona-text" class="ai-persona-textarea" maxlength="500"
+                  placeholder="למשל: מתאמן 3 פעמים בשבוע, מתמקד בכוח. יש לי רגישות בכתף ימין. המטרה שלי היא 140kg Bench..."></textarea>
+        <div id="ai-persona-count" class="text-xs color-dim" style="text-align:left;margin:4px 0 12px;">0 / 500</div>
+        <button class="btn-main primary-gradient" onclick="saveAIPersona()">שמור פרופיל</button>
+        <button class="btn-text" onclick="closeAIPersonaSheet()">ביטול</button>
     </div>
 
     <script src="data.js"></script>

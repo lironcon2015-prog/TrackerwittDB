@@ -100,6 +100,11 @@ let _sessionTimerInterval = null;
 let _sessionTimerStart = null;   // timestamp של תחילת ה-interval הנוכחי
 let _sessionTimerOffset = 0;     // שניות שעברו לפני ה-interval הנוכחי
 
+// ─── AI COACH STATE ────────────────────────────────────────────────────────
+let aiChatHistory    = [];    // זיכרון session — מוזרק ל-API (10 אחרונות)
+let isAILoading      = false; // מניעת double-submit
+let aiFullArchiveMode = false; // מצב ארכיון מלא
+
 function startSessionTimer(fromTimestamp) {
     stopSessionTimer();
     // חישוב offset: כמה שניות כבר עברו מתחילת האימון
@@ -397,6 +402,7 @@ function _doBack(currentScreen) {
 function openSettings() {
     navigate('ui-settings');
     if (typeof updateFirebaseStatus === 'function') updateFirebaseStatus();
+    if (typeof updateAIStatus === 'function') updateAIStatus();
 }
 
 // ─── WORKOUT PLAN SHEET ────────────────────────────────────────────────────
@@ -2045,5 +2051,563 @@ function resetToFactorySettings() {
         showAlert("האפליקציה אופסה. טוען מחדש...", () => {
             window.location.reload();
         });
+    });
+}
+
+// ─── AI COACH ──────────────────────────────────────────────────────────────
+
+/**
+ * buildBlockContext — מחזיר שני בלוקים (נוכחי + קודם) כמחרוזות Raw Summary.
+ * בלוק = כל האימונים מה-week===1 האחרון ועד עכשיו.
+ * fallback: אם אין week field — מחזיר 12 אחרונים כבלוק נוכחי.
+ */
+function buildBlockContext() {
+    const archive = StorageManager.getArchive();
+    if (!archive.length) return { current: [], previous: [] };
+
+    const currentStart = archive.findIndex(a => a.week === 1);
+    if (currentStart === -1) {
+        // אין week field — fallback ל-12 אחרונים
+        return { current: archive.slice(0, Math.min(12, archive.length)), previous: [] };
+    }
+
+    const currentBlock = archive.slice(0, currentStart + 1);
+
+    const prevStart = archive.findIndex((a, i) => i > currentStart && a.week === 1);
+    const previousBlock = prevStart === -1
+        ? archive.slice(currentStart + 1)
+        : archive.slice(currentStart + 1, prevStart + 1);
+
+    return { current: currentBlock, previous: previousBlock };
+}
+
+/**
+ * buildAnalyticsSnapshot — מחזיר string קומפקטי עם נתוני אנליטיקה מצרפיים.
+ */
+function buildAnalyticsSnapshot() {
+    const archive = StorageManager.getArchive().filter(a => a && a.timestamp);
+    if (!archive.length) return '';
+
+    const total      = archive.length;
+    const totalVol   = archive.reduce((s, a) => s + (typeof getWorkoutVolume === 'function' ? getWorkoutVolume(a) : 0), 0);
+    const totalMins  = archive.reduce((s, a) => s + (a.duration || 0), 0);
+    const avgMins    = total ? Math.round(totalMins / total) : 0;
+
+    // עקביות — ממוצע ימים בין אימונים
+    let avgGap = 0;
+    if (archive.length >= 2) {
+        const gaps = [];
+        for (let i = 0; i < archive.length - 1; i++) {
+            gaps.push((archive[i].timestamp - archive[i + 1].timestamp) / 86400000);
+        }
+        avgGap = Math.round(gaps.reduce((s, g) => s + g, 0) / gaps.length * 10) / 10;
+    }
+
+    // 1RM מחושב לתרגילי מפתח
+    const rmLines = [];
+    const prefs = StorageManager.getAnalyticsPrefs();
+    const formula = prefs.formula || 'epley';
+    const keyExercises = state.exercises.filter(e => e.isCalc).slice(0, 5);
+    keyExercises.forEach(ex => {
+        for (const item of archive) {
+            if (!item.details || !item.details[ex.name]) continue;
+            const sets = item.details[ex.name].sets || [];
+            if (!sets.length) continue;
+            let maxE1RM = 0;
+            sets.forEach(s => {
+                if (typeof parseSetsFromStrings === 'function') {
+                    const parsed = parseSetsFromStrings([s]);
+                    if (parsed.length) {
+                        const e = typeof calc1RM === 'function' ? calc1RM(parsed[0].w, parsed[0].r, formula) : 0;
+                        if (e > maxE1RM) maxE1RM = e;
+                    }
+                }
+            });
+            if (maxE1RM > 0) { rmLines.push(`${ex.name}: ~${Math.round(maxE1RM)}kg`); break; }
+        }
+    });
+
+    // שרירים — חודש אחרון
+    const muscleCounts = typeof getMuscleSetCounts === 'function'
+        ? getMuscleSetCounts(archive, '1m') : {};
+    const muscleStr = Object.entries(muscleCounts)
+        .filter(([m]) => !['biceps','triceps','quads','hamstrings','glutes','calves'].includes(m))
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([m, n]) => `${m} ${n}סטים`)
+        .join(' | ');
+
+    let snap = `=== אנליטיקה מצרפית ===\n`;
+    snap += `נפח כולל: ${(totalVol / 1000).toFixed(1)}t | אימונים: ${total} | ממוצע משך: ${avgMins}m`;
+    if (avgGap) snap += ` | ממוצע ימים בין אימונים: ${avgGap}`;
+    if (rmLines.length) snap += `\n1RM מחושב: ${rmLines.join(' | ')}`;
+    if (muscleStr) snap += `\nשרירים (חודש אחרון): ${muscleStr}`;
+    return snap;
+}
+
+/**
+ * buildSystemPrompt — מרכיב את ה-System Instruction המלא לכל קריאת API.
+ */
+function buildSystemPrompt() {
+    let prompt = `אתה מאמן כושר אישי מקצועי של אפליקציית GYMPRO ELITE.
+ענה בעברית בלבד. היה קצר, ענייני ותכליתי. אין אמוג'י. אין כוכביות.
+עזור בהחלטות על עומס פרוגרסיבי, זמני מנוחה, החלפת תרגילים וניתוח ביצועים.\n`;
+
+    // פרופיל אישי
+    const persona = StorageManager.getAIPersona();
+    if (persona) prompt += `\n=== פרופיל המתאמן ===\n${persona}\n`;
+
+    // מצב נוכחי
+    prompt += `\n=== מצב נוכחי ===\n`;
+    if (StorageManager.hasActiveSession()) {
+        prompt += `אימון פעיל: ${state.type} | שבוע: ${state.week}\n`;
+        if (state.currentExName) {
+            prompt += `תרגיל נוכחי: ${state.currentExName}\n`;
+            const rm = StorageManager.getLastRM(state.currentExName);
+            if (rm) prompt += `1RM: ${rm}kg\n`;
+            const currentSets = (state.log || [])
+                .filter(l => !l.skip && l.exName === state.currentExName)
+                .map(l => `${l.w}kg×${l.r} (RIR ${l.rir !== undefined ? l.rir : '—'})`);
+            if (currentSets.length) prompt += `סטים שבוצעו: ${currentSets.join(', ')}\n`;
+        }
+    } else {
+        prompt += `המתאמן לא באימון כרגע.\n`;
+    }
+
+    // תרגילים מותאמים אישית (לא ב-defaultExercises)
+    const defaultNames = new Set(defaultExercises.map(e => e.name));
+    const customExercises = state.exercises.filter(e => !defaultNames.has(e.name));
+    if (customExercises.length) {
+        prompt += `\n=== תרגילים מותאמים אישית ===\n`;
+        prompt += customExercises.map(e => e.name).join(', ') + '\n';
+    }
+
+    // אנליטיקה מצרפית
+    const snap = buildAnalyticsSnapshot();
+    if (snap) prompt += `\n${snap}\n`;
+
+    // ארכיון — בלוקים
+    prompt += `\n=== היסטוריית אימונים ===\n`;
+    if (aiFullArchiveMode) {
+        const all = StorageManager.getArchive();
+        prompt += `(ארכיון מלא — ${all.length} אימונים)\n\n`;
+        all.forEach(item => { if (item.summary) prompt += item.summary + '\n\n'; });
+    } else {
+        const { current, previous } = buildBlockContext();
+        if (current.length) {
+            prompt += `--- בלוק נוכחי ---\n`;
+            [...current].reverse().forEach(item => { if (item.summary) prompt += item.summary + '\n\n'; });
+        }
+        if (previous.length) {
+            prompt += `--- בלוק קודם ---\n`;
+            [...previous].reverse().forEach(item => { if (item.summary) prompt += item.summary + '\n\n'; });
+        }
+        if (!current.length && !previous.length) prompt += `אין היסטוריית אימונים.\n`;
+    }
+
+    return prompt;
+}
+
+/**
+ * callGeminiAPI — Waterfall אסינכרוני על מערך מודלים.
+ * שולח 10 הודעות אחרונות מ-aiChatHistory.
+ */
+async function callGeminiAPI(userMessage) {
+    const config = StorageManager.getAIConfig();
+    if (!config.apiKey) throw new Error('API_KEY_MISSING');
+
+    const last10 = aiChatHistory.slice(-10);
+    const payload = {
+        system_instruction: { parts: [{ text: buildSystemPrompt() }] },
+        contents: [
+            ...last10.map(m => ({ role: m.role, parts: [{ text: m.text }] })),
+            { role: 'user', parts: [{ text: userMessage }] }
+        ],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
+    };
+
+    for (const modelName of config.models) {
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${config.apiKey}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                return text;
+            }
+            if (response.status === 429 || response.status === 503) {
+                console.warn(`GymPro AI: model ${modelName} overloaded, trying next...`);
+                continue;
+            }
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(`API_ERROR_${response.status}: ${errData.error?.message || ''}`);
+        } catch(e) {
+            if (e.message && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError'))) {
+                console.warn(`GymPro AI: network error on ${modelName}, trying next...`);
+                continue;
+            }
+            throw e;
+        }
+    }
+    throw new Error('ALL_MODELS_FAILED');
+}
+
+/**
+ * openAICoach — פותח את מודל הצ'אט וטוען היסטוריה.
+ */
+function openAICoach() {
+    const modal = document.getElementById('ai-coach-modal');
+    if (!modal) return;
+
+    // טעינת היסטוריה מ-LocalStorage לזיכרון session
+    const saved = StorageManager.getAIHistory();
+    aiChatHistory = saved.map(m => ({ role: m.role, text: m.text }));
+
+    // רינדור כל ההיסטוריה בבועות
+    _renderAIChatHistory(saved);
+
+    // context banner אם באימון
+    _updateAIContextBanner();
+
+    // עדכון chip ארכיון
+    _updateAIContextChips();
+
+    modal.style.display = 'flex';
+    haptic('light');
+
+    // גלילה לסוף
+    setTimeout(() => {
+        const msgs = document.getElementById('ai-chat-messages');
+        if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }, 50);
+}
+
+/**
+ * closeAICoach — סוגר מודל וגבה ענן בשקט.
+ */
+function closeAICoach() {
+    const modal = document.getElementById('ai-coach-modal');
+    if (modal) modal.style.display = 'none';
+    // סגור copy menu אם פתוח
+    const menu = document.getElementById('ai-copy-menu');
+    if (menu) menu.style.display = 'none';
+    // גיבוי שקט לענן
+    if (typeof FirebaseManager !== 'undefined' && FirebaseManager.isConfigured()) {
+        FirebaseManager.saveAIHistoryToCloud();
+    }
+    haptic('light');
+}
+
+/**
+ * _renderAIChatHistory — מרנדר את כל ההיסטוריה השמורה.
+ */
+function _renderAIChatHistory(history) {
+    const container = document.getElementById('ai-chat-messages');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!history.length) {
+        container.innerHTML = `<div class="ai-empty-state">שלום! אני המאמן שלך. שאל אותי על האימון, על ביצועים, על תכנון — אני כאן.</div>`;
+        return;
+    }
+    history.forEach(msg => {
+        container.appendChild(_createBubble(msg.role, msg.text));
+    });
+}
+
+/**
+ * _createBubble — יוצר אלמנט בועת צ'אט.
+ */
+function _createBubble(role, text) {
+    const div = document.createElement('div');
+    div.className = `chat-bubble ${role === 'user' ? 'user' : 'ai'}`;
+    if (role === 'model') {
+        div.innerHTML = `<div class="bubble-label">AI Coach</div>${_escapeHtml(text)}`;
+    } else {
+        div.textContent = text;
+    }
+    return div;
+}
+
+function _escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+/**
+ * _updateAIContextBanner — מציג/מסתיר banner הקשר אימון פעיל.
+ */
+function _updateAIContextBanner() {
+    const banner = document.getElementById('ai-workout-ctx');
+    if (!banner) return;
+    if (StorageManager.hasActiveSession() && state.currentExName) {
+        const rm = StorageManager.getLastRM(state.currentExName);
+        const sets = (state.log || [])
+            .filter(l => !l.skip && l.exName === state.currentExName)
+            .map(l => `${l.w}×${l.r} (RIR ${l.rir !== undefined ? l.rir : '—'})`)
+            .join(' • ');
+        banner.innerHTML = `<div class="ctx-lbl">הקשר אימון נוכחי</div>
+            <strong>${state.currentExName}</strong>${rm ? ` • 1RM: ${rm}kg` : ''}${sets ? `<br>${sets}` : ''}`;
+        banner.style.display = 'block';
+    } else {
+        banner.style.display = 'none';
+    }
+}
+
+/**
+ * _updateAIContextChips — מעדכן chips של ארכיון.
+ */
+function _updateAIContextChips() {
+    const chipNormal = document.getElementById('ai-ctx-chip-blocks');
+    const chipFull   = document.getElementById('ai-ctx-chip-full');
+    if (chipNormal) chipNormal.classList.toggle('active', !aiFullArchiveMode);
+    if (chipFull)   chipFull.classList.toggle('active', aiFullArchiveMode);
+}
+
+/**
+ * toggleFullArchiveMode — מחליף מצב ארכיון מלא/בלוקים.
+ */
+function toggleFullArchiveMode() {
+    aiFullArchiveMode = !aiFullArchiveMode;
+    _updateAIContextChips();
+    haptic('light');
+}
+
+/**
+ * sendAIMessage — שולח הודעת משתמש ומקבל תשובה.
+ */
+async function sendAIMessage() {
+    if (isAILoading) return;
+    const input = document.getElementById('ai-chat-input');
+    const sendBtn = document.getElementById('ai-send-btn');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+
+    const config = StorageManager.getAIConfig();
+    if (!config.apiKey) {
+        showAlert('לא הוגדר Gemini API Key. לך להגדרות ← AI Coach.');
+        return;
+    }
+
+    // הצגת הודעת משתמש
+    const container = document.getElementById('ai-chat-messages');
+    // הסרת empty state אם קיים
+    const empty = container.querySelector('.ai-empty-state');
+    if (empty) empty.remove();
+
+    container.appendChild(_createBubble('user', text));
+    input.value = '';
+
+    // הצגת typing indicator
+    const typing = document.createElement('div');
+    typing.className = 'ai-typing';
+    typing.id = 'ai-typing-indicator';
+    typing.innerHTML = '<div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>';
+    container.appendChild(typing);
+    container.scrollTop = container.scrollHeight;
+
+    // נעילה
+    isAILoading = true;
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.style.opacity = '0.5'; }
+
+    try {
+        const responseText = await callGeminiAPI(text);
+
+        // עדכון זיכרון
+        const now = Date.now();
+        const userMsg  = { role: 'user',  text, timestamp: now, workoutWeek: state.week || null, workoutType: state.type || null };
+        const modelMsg = { role: 'model', text: responseText, timestamp: now + 1, workoutWeek: state.week || null, workoutType: state.type || null };
+
+        aiChatHistory.push({ role: 'user', text });
+        aiChatHistory.push({ role: 'model', text: responseText });
+
+        StorageManager.appendAIMessage(userMsg);
+        StorageManager.appendAIMessage(modelMsg);
+
+        // הצגת תשובה
+        typing.remove();
+        container.appendChild(_createBubble('model', responseText));
+
+    } catch(e) {
+        typing.remove();
+        let errMsg = 'שגיאה בתקשורת עם AI. נסה שוב.';
+        if (e.message === 'API_KEY_MISSING')   errMsg = 'API Key חסר. הגדר ב-הגדרות ← AI Coach.';
+        if (e.message === 'ALL_MODELS_FAILED') errMsg = 'כל המודלים עמוסים או לא זמינים. נסה שוב בעוד כמה דקות.';
+        if (e.message.includes('400') || e.message.includes('403')) errMsg = 'API Key שגוי או חסר הרשאות.';
+        const errBubble = document.createElement('div');
+        errBubble.className = 'ai-error-msg';
+        errBubble.textContent = errMsg;
+        container.appendChild(errBubble);
+    } finally {
+        isAILoading = false;
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.style.opacity = '1'; }
+        container.scrollTop = container.scrollHeight;
+        haptic('light');
+    }
+}
+
+/**
+ * openAIPersonaSheet — פותח bottom sheet לעריכת פרופיל.
+ */
+function openAIPersonaSheet() {
+    const textarea = document.getElementById('ai-persona-text');
+    const counter  = document.getElementById('ai-persona-count');
+    if (textarea) {
+        textarea.value = StorageManager.getAIPersona();
+        if (counter) counter.textContent = textarea.value.length + ' / 500';
+        textarea.oninput = () => { if (counter) counter.textContent = textarea.value.length + ' / 500'; };
+    }
+    document.getElementById('ai-persona-overlay').style.display = 'block';
+    document.getElementById('ai-persona-sheet').classList.add('open');
+    haptic('light');
+}
+
+function closeAIPersonaSheet() {
+    document.getElementById('ai-persona-overlay').style.display = 'none';
+    document.getElementById('ai-persona-sheet').classList.remove('open');
+}
+
+function saveAIPersona() {
+    const textarea = document.getElementById('ai-persona-text');
+    if (!textarea) return;
+    StorageManager.saveAIPersona(textarea.value.trim());
+    closeAIPersonaSheet();
+    showAlert('הפרופיל נשמר!');
+}
+
+/**
+ * toggleAICopyMenu — פותח/סוגר תפריט העתקה.
+ */
+function toggleAICopyMenu() {
+    const menu = document.getElementById('ai-copy-menu');
+    if (!menu) return;
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    haptic('light');
+}
+
+/**
+ * copyAIHistory — מעתיק היסטוריית שיחה לפי mode ו-range.
+ * mode: 'chat' | 'full'
+ * range: 'week' | 'current_block' | 'two_blocks' | 'all'
+ */
+function copyAIHistory(mode, range) {
+    const menu = document.getElementById('ai-copy-menu');
+    if (menu) menu.style.display = 'none';
+
+    let history = StorageManager.getAIHistory();
+    if (!history.length) { showAlert('אין היסטוריית שיחות להעתקה.'); return; }
+
+    // סינון לפי טווח
+    if (range && range !== 'all') {
+        const now = Date.now();
+        if (range === 'week') {
+            const weekMs = 7 * 24 * 60 * 60 * 1000;
+            history = history.filter(m => m.timestamp && (now - m.timestamp) <= weekMs);
+        } else if (range === 'current_block') {
+            const archive = StorageManager.getArchive();
+            const currentStart = archive.findIndex(a => a.week === 1);
+            if (currentStart !== -1) {
+                const blockStartTs = archive[currentStart].timestamp;
+                history = history.filter(m => m.timestamp && m.timestamp >= blockStartTs);
+            }
+        } else if (range === 'two_blocks') {
+            const archive = StorageManager.getArchive();
+            const currentStart = archive.findIndex(a => a.week === 1);
+            const prevStart = currentStart !== -1
+                ? archive.findIndex((a, i) => i > currentStart && a.week === 1)
+                : -1;
+            const refIdx = prevStart !== -1 ? prevStart : currentStart;
+            if (refIdx !== -1) {
+                const blockStartTs = archive[refIdx].timestamp;
+                history = history.filter(m => m.timestamp && m.timestamp >= blockStartTs);
+            }
+        }
+    }
+
+    if (!history.length) { showAlert('אין הודעות בטווח שנבחר.'); return; }
+
+    const dateStr = new Date().toLocaleDateString('he-IL');
+    let text = '';
+
+    if (mode === 'full') {
+        text += `=== GYMPRO AI Coach — הקשר מלא ===\nתאריך: ${dateStr}\n\n`;
+        text += buildSystemPrompt();
+        text += `\n\n=== היסטוריית שיחה ===\n`;
+    } else {
+        text += `=== AI Coach — שיחה ===\nתאריך: ${dateStr}\n\n`;
+    }
+
+    history.forEach(m => {
+        const label = m.role === 'user' ? '[אתה]' : '[AI Coach]';
+        text += `${label} ${m.text}\n\n`;
+    });
+
+    if (mode === 'full') text += `\n=== סוף הקשר ===\nהדבק הודעה זו בתחילת שיחה חדשה עם Claude / ChatGPT / Gemini להמשכיות מלאה.`;
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            haptic('success');
+            showAlert(mode === 'full' ? 'הקשר מלא הועתק!' : 'השיחה הועתקה!');
+        });
+    } else {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+        showAlert(mode === 'full' ? 'הקשר מלא הועתק!' : 'השיחה הועתקה!');
+    }
+}
+
+/**
+ * saveAISettings — שומר הגדרות AI מתוך ui-settings.
+ */
+function saveAISettings() {
+    const keyInput    = document.getElementById('ai-api-key-input');
+    const modelsInput = document.getElementById('ai-models-input');
+    if (!keyInput || !modelsInput) return;
+    StorageManager.saveAIConfig(keyInput.value.trim(), modelsInput.value);
+    updateAIStatus();
+    showAlert('הגדרות AI נשמרו!');
+}
+
+/**
+ * updateAIStatus — מעדכן שורת סטטוס AI בהגדרות.
+ */
+function updateAIStatus() {
+    const el = document.getElementById('ai-status');
+    if (!el) return;
+    const config = StorageManager.getAIConfig();
+    if (config.apiKey) {
+        el.innerHTML = `<span style="color:var(--type-b);font-weight:700;">&#9679; מפתח מוגדר</span> <span style="color:var(--text-dim);font-size:0.85em;">${config.models[0]}</span>`;
+        // מילוי שדות
+        const ki = document.getElementById('ai-api-key-input');
+        const mi = document.getElementById('ai-models-input');
+        if (ki && !ki.value) ki.value = config.apiKey;
+        if (mi && !mi.value) mi.value = config.models.join(', ');
+    } else {
+        el.innerHTML = '<span style="color:var(--text-dim);">&#9679; לא מוגדר</span>';
+    }
+}
+
+/**
+ * handleAIOverlayClick — סוגר copy menu בלחיצה מחוץ לו, לא סוגר את המודל.
+ */
+function handleAIOverlayClick(e) {
+    if (e.target === document.getElementById('ai-coach-modal')) {
+        const menu = document.getElementById('ai-copy-menu');
+        if (menu) menu.style.display = 'none';
+    }
+}
+
+/**
+ * clearAIHistory — מוחק היסטוריית שיחות עם אישור.
+ */
+function clearAIHistory() {
+    showConfirm('למחוק את כל היסטוריית השיחות? פעולה בלתי הפיכה.', () => {
+        StorageManager.clearAIHistory();
+        aiChatHistory = [];
+        showAlert('ההיסטוריה נמחקה.');
     });
 }
