@@ -141,6 +141,10 @@ window.onload = () => {
     checkRecovery();
     if (typeof renderHeroCard === 'function') renderHeroCard();
     if (typeof renderHomePRCard === 'function') renderHomePRCard();
+    fetch('version.json?t=' + Date.now())
+        .then(r => r.json())
+        .then(d => { const el = document.getElementById('app-version-label'); if (el && d.version) el.textContent = 'GymPro Elite v' + d.version; })
+        .catch(() => {});
 };
 
 function checkRecovery() {
