@@ -144,6 +144,15 @@ window.onload = () => {
     checkRecovery();
     if (typeof renderHeroCard === 'function') renderHeroCard();
     if (typeof renderHomePRCard === 'function') renderHomePRCard();
+    // קריאה ללא cache-bust → מחזיר את הגרסה המותקנת מה-SW cache
+    fetch('./version.json')
+        .then(r => r.json())
+        .then(d => {
+            window._gymproVersion = d.version || '';
+            const el = document.getElementById('app-version-label');
+            if (el && d.version) el.textContent = 'GymPro Elite v' + d.version;
+        })
+        .catch(() => {});
 };
 
 function checkRecovery() {

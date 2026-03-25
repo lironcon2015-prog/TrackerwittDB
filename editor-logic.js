@@ -923,13 +923,15 @@ function saveWorkoutManagerToCloud() {
 
 async function checkForUpdate() {
     try {
+        // cache-bust → עוקף את ה-SW cache ומביא את הגרסה האחרונה מהשרת
         const res = await fetch('./version.json?t=' + Date.now());
         if (!res.ok) throw new Error('network error');
         const data = await res.json();
-        const currentVersion = '14.11.0-1';
-        if (data.version && data.version !== currentVersion) {
+        // הגרסה המותקנת כרגע — נטענה ב-window.onload ישירות מה-SW cache
+        const currentVersion = window._gymproVersion || '';
+        if (data.version && currentVersion && data.version !== currentVersion) {
             showConfirm(
-                `עדכון זמין (${data.version}). לנקות cache ולרענן?`,
+                `עדכון זמין! (${currentVersion} → ${data.version}). לנקות cache ולרענן?`,
                 async () => {
                     if ('caches' in window) {
                         const keys = await caches.keys();
@@ -939,7 +941,7 @@ async function checkForUpdate() {
                 }
             );
         } else {
-            showAlert('האפליקציה מעודכנת (v' + currentVersion + ')');
+            showAlert('האפליקציה מעודכנת (v' + (currentVersion || data.version) + ')');
         }
     } catch(e) {
         showAlert('לא ניתן לבדוק עדכונים. בדוק חיבור לאינטרנט.');
