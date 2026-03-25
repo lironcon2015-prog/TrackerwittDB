@@ -355,6 +355,9 @@ function handleBackClick() {
     if (currentScreen === 'ui-cluster-rest') {
         showConfirm("האם לצאת ממצב Cluster?", () => {
             state.clusterMode = false;
+            state.activeCluster = null;
+            state.clusterIdx = 0;
+            state.clusterRound = 1;
             document.getElementById('ui-main').classList.remove('cluster');
             _doBack(currentScreen);
         });
@@ -401,7 +404,8 @@ function _doBack(currentScreen) {
 
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(prevScreen).classList.add('active');
-    document.getElementById('global-back').style.display = (prevScreen !== 'ui-week') ? 'flex' : 'none';
+    const NO_BACK = ['ui-week', 'ui-analytics', 'ui-archive'];
+    document.getElementById('global-back').style.display = !NO_BACK.includes(prevScreen) ? 'flex' : 'none';
 }
 
 function openSettings() {
