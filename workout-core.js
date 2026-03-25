@@ -101,9 +101,10 @@ let _sessionTimerStart = null;   // timestamp של תחילת ה-interval הנו
 let _sessionTimerOffset = 0;     // שניות שעברו לפני ה-interval הנוכחי
 
 // ─── AI COACH STATE ────────────────────────────────────────────────────────
-let aiChatHistory    = [];    // זיכרון session — מוזרק ל-API (10 אחרונות)
-let isAILoading      = false; // מניעת double-submit
+let aiChatHistory     = [];    // זיכרון session — מוזרק ל-API (10 אחרונות)
+let isAILoading       = false; // מניעת double-submit
 let aiFullArchiveMode = false; // מצב ארכיון מלא
+let _aiDisplayCleared = false; // תצוגה נוקתה בסשן זה — לא לרנדר מחדש
 
 function startSessionTimer(fromTimestamp) {
     stopSessionTimer();
@@ -2267,8 +2268,8 @@ function openAICoach() {
     const saved = StorageManager.getAIHistory();
     aiChatHistory = saved.map(m => ({ role: m.role, text: m.text }));
 
-    // רינדור כל ההיסטוריה בבועות
-    _renderAIChatHistory(saved);
+    // רינדור היסטוריה — דילוג אם המשתמש ניקה תצוגה בסשן זה
+    if (!_aiDisplayCleared) _renderAIChatHistory(saved);
 
     // context banner אם באימון
     _updateAIContextBanner();
@@ -2307,6 +2308,7 @@ function closeAICoach() {
 function clearAIChatDisplay() {
     const container = document.getElementById('ai-chat-messages');
     if (container) container.innerHTML = '';
+    _aiDisplayCleared = true;
     haptic('success');
 }
 
