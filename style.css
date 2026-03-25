@@ -1613,11 +1613,20 @@ body {
 }
 
 .ai-sheet-handle {
+    width: 100%;
+    padding: 12px 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: grab;
+}
+.ai-sheet-handle::after {
+    content: '';
+    display: block;
     width: 36px; height: 4px;
     background: rgba(255,255,255,0.18);
     border-radius: 2px;
-    margin: 10px auto 0;
-    flex-shrink: 0;
 }
 
 /* Header */
@@ -1654,7 +1663,7 @@ body {
 .ai-persona-btn:active { background: rgba(255,255,255,0.12); }
 
 .ai-close-btn {
-    width: 26px; height: 26px; border-radius: 7px;
+    width: 44px; height: 44px; border-radius: 10px;
     background: rgba(255,255,255,0.07);
     border: 1px solid rgba(255,255,255,0.1);
     display: flex; align-items: center; justify-content: center;

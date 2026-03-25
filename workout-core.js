@@ -2305,20 +2305,24 @@ function closeAICoach() {
  * clearAIChatDisplay — מנקה תצוגה בלבד. היסטוריה נשמרת.
  */
 function clearAIChatDisplay() {
-    showConfirm('לנקות את תצוגת השיחה? ההיסטוריה נשמרת ברקע.', () => {
-        const container = document.getElementById('ai-chat-messages');
-        if (container) container.innerHTML = '';
-        haptic('success');
-    });
+    const container = document.getElementById('ai-chat-messages');
+    if (container) container.innerHTML = '';
+    haptic('success');
 }
 
 /**
  * initAISheetSwipe — גרירה למטה לסגירת ה-AI Coach sheet (iOS 26 style).
+ * נרשם פעם אחת בלבד.
  */
+let _aiSwipeInit = false;
 function initAISheetSwipe() {
-    const sheet   = document.querySelector('.ai-coach-sheet');
-    const handle  = document.querySelector('.ai-sheet-handle');
-    if (!sheet || !handle) return;
+    if (_aiSwipeInit) return;
+    const sheet  = document.querySelector('.ai-coach-sheet');
+    const header = document.querySelector('.ai-coach-header');
+    const handle = document.querySelector('.ai-sheet-handle');
+    if (!sheet || !header || !handle) return;
+    _aiSwipeInit = true;
+
     let startY = 0, currentY = 0, dragging = false;
 
     function onStart(e) {
@@ -2348,9 +2352,12 @@ function initAISheetSwipe() {
             sheet.style.transform = '';
         }
     }
-    handle.addEventListener('touchstart', onStart, { passive: true });
-    handle.addEventListener('touchmove',  onMove,  { passive: true });
-    handle.addEventListener('touchend',   onEnd);
+
+    [handle, header].forEach(el => {
+        el.addEventListener('touchstart', onStart, { passive: true });
+        el.addEventListener('touchmove',  onMove,  { passive: true });
+        el.addEventListener('touchend',   onEnd);
+    });
 }
 
 /**
