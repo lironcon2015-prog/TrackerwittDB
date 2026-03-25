@@ -2006,6 +2006,7 @@ function _saveToArchive(note) {
         date: archiveDateStr,
         time: timeStr,
         type: state.type,
+        week: state.week,
         duration: state.workoutDurationMins,
         summary: summaryLines.join('\n').trimEnd(),
         details,
@@ -2344,6 +2345,16 @@ function buildSystemPrompt() {
                 .filter(l => !l.skip && l.exName === state.currentExName)
                 .map(l => `${l.w}kg×${l.r} (RIR ${l.rir !== undefined ? l.rir : '—'})`);
             if (currentSets.length) prompt += `סטים שבוצעו: ${currentSets.join(', ')}\n`;
+        }
+
+        // שבועות מקבילים מהבלוק הקודם — לעזור בהשוואה ישירה
+        if (state.week && state.week !== 'deload' && !state.isFreestyle) {
+            const { previous } = buildBlockContext();
+            const parallelWeek = previous.filter(item => item.week === state.week);
+            if (parallelWeek.length) {
+                prompt += `\nשבוע ${state.week} בבלוק הקודם (לצורך השוואה ישירה):\n`;
+                parallelWeek.forEach(item => { if (item.summary) prompt += item.summary + '\n'; });
+            }
         }
     } else {
         prompt += `המתאמן לא באימון כרגע.\n`;
