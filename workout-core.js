@@ -52,6 +52,10 @@ function isExOrVariationDone(originalName) {
     return false;
 }
 
+// ─── UTILITY ───────────────────────────────────────────────────────────────
+
+function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
 // ─── GLOBAL STATE ──────────────────────────────────────────────────────────
 
 let state = {
@@ -343,6 +347,44 @@ function handleBackClick() {
                 stopSessionTimer();
                 _doBack(currentScreen);
             });
+            return;
+        }
+        if (!isSpecialMode && state.log.length > 0) {
+            const lastEntry = state.log[state.log.length - 1];
+            if (lastEntry.isCluster) {
+                // ביטול cluster מסובך — יציאה רגילה
+                showConfirm("האם לצאת מהאימון?", () => {
+                    StorageManager.clearSessionState();
+                    stopSessionTimer();
+                    _doBack(currentScreen);
+                });
+                return;
+            }
+            // ביטול הסט האחרון
+            state.log.pop();
+            const prevExName = lastEntry.exName;
+            const exData = state.exercises.find(e => e.name === prevExName);
+            if (exData) {
+                state.currentEx = deepClone(exData);
+                state.currentExName = prevExName;
+                const workoutList = state.workouts[state.type] || [];
+                const prevExIdx = workoutList.findIndex(item => item.type !== 'cluster' && item.name === prevExName);
+                if (prevExIdx !== -1) state.exIdx = prevExIdx;
+                state.completedExInSession = state.completedExInSession.filter(n => n !== prevExName);
+                const remaining = state.log.filter(l => !l.skip && l.exName === prevExName);
+                state.setIdx = remaining.length;
+                state.lastLoggedSet = remaining.length > 0 ? remaining[remaining.length - 1] : null;
+                StorageManager.saveSessionState();
+                if (exData.isCalc) {
+                    showConfirmScreen();
+                } else {
+                    const ap = document.getElementById('action-panel');
+                    if (ap) { ap.style.display = 'none'; ap.classList.remove('is-visible'); }
+                    document.getElementById('btn-submit-set').style.display = 'block';
+                    navigate('ui-main');
+                    initPickers();
+                }
+            }
             return;
         }
     }
@@ -659,7 +701,7 @@ function checkFlow() {
 
     if (item.type === 'cluster') {
         state.clusterMode = true;
-        state.activeCluster = JSON.parse(JSON.stringify(item));
+        state.activeCluster = deepClone(item);
         state.clusterIdx = 0;
         state.clusterRound = 1;
         state.lastClusterRest = 30;
@@ -721,7 +763,7 @@ function showConfirmScreen(forceExName = null) {
     const exData = state.exercises.find(e => e.name === exName);
     if (!exData) { showAlert("שגיאה: התרגיל לא נמצא במאגר."); return; }
 
-    state.currentEx = JSON.parse(JSON.stringify(exData));
+    state.currentEx = deepClone(exData);
     state.currentExName = exData.name;
 
     if (currentPlanItem) {
@@ -833,7 +875,7 @@ function confirmExercise(doEx) {
         const firstExItem = state.activeCluster.exercises[0];
         const exData = state.exercises.find(e => e.name === firstExItem.name);
 
-        state.currentEx = JSON.parse(JSON.stringify(exData));
+        state.currentEx = deepClone(exData);
         state.currentExName = exData.name;
 
         if (firstExItem.restTime) state.currentEx.restTime = firstExItem.restTime;
@@ -1160,7 +1202,7 @@ function nextStep() {
             const nextExItem = state.activeCluster.exercises[state.clusterIdx];
             const exData = state.exercises.find(e => e.name === nextExItem.name);
 
-            state.currentEx = JSON.parse(JSON.stringify(exData));
+            state.currentEx = deepClone(exData);
             state.currentExName = exData.name;
 
             if (nextExItem.restTime) state.currentEx.restTime = nextExItem.restTime;
@@ -1273,7 +1315,7 @@ function startNextRound() {
     const nextExItem = state.activeCluster.exercises[0];
     const exData = state.exercises.find(e => e.name === nextExItem.name);
 
-    state.currentEx = JSON.parse(JSON.stringify(exData));
+    state.currentEx = deepClone(exData);
     state.currentExName = exData.name;
 
     if (nextExItem.restTime) state.currentEx.restTime = nextExItem.restTime;
@@ -1316,7 +1358,7 @@ function skipCurrentExercise() {
                 const nextExItem = state.activeCluster.exercises[state.clusterIdx];
                 const exData = state.exercises.find(e => e.name === nextExItem.name);
 
-                state.currentEx = JSON.parse(JSON.stringify(exData));
+                state.currentEx = deepClone(exData);
                 state.currentExName = exData.name;
 
                 if (nextExItem.restTime) state.currentEx.restTime = nextExItem.restTime;
@@ -1454,7 +1496,7 @@ function selectExtraCluster(workoutName, clusterIdx) {
 
     state.isExtraPhase = true;
     state.clusterMode  = true;
-    state.activeCluster = JSON.parse(JSON.stringify(item));
+    state.activeCluster = deepClone(item);
     state.clusterIdx   = 0;
     state.clusterRound = 1;
     state.lastClusterRest = item.clusterRest || 120;
@@ -1561,7 +1603,7 @@ function renderFreestyleList() {
         btn.className = "menu-card";
         btn.innerHTML = `<span>${ex.name}</span><div class="chevron"></div>`;
         btn.onclick = () => {
-            state.currentEx = JSON.parse(JSON.stringify(ex));
+            state.currentEx = deepClone(ex);
             state.currentExName = ex.name;
             if (!state.currentEx.sets || state.currentEx.sets.length < 3) state.currentEx.sets = [{ w: 10, r: 10 }, { w: 10, r: 10 }, { w: 10, r: 10 }];
             startRecording();
@@ -1646,7 +1688,7 @@ function _renderSwapMenu(searchVal) {
         btn.innerHTML = `<span>${ex.name}</span><div class="chevron"></div>`;
         btn.onclick = () => {
             state.currentExName = ex.name;
-            state.currentEx = JSON.parse(JSON.stringify(ex));
+            state.currentEx = deepClone(ex);
             if (!state.currentEx.sets || state.currentEx.sets.length === 0) {
                 state.currentEx.sets = [{ w: 20, r: 10 }, { w: 20, r: 10 }, { w: 20, r: 10 }];
             }

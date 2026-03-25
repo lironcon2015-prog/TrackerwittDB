@@ -20,7 +20,7 @@ const StorageManager = {
 
     getData(key) {
         try { return JSON.parse(localStorage.getItem(key)); }
-        catch { return null; }
+        catch(e) { console.error('GymPro: storage read error', key, e); return null; }
     },
 
     saveData(key, data) {
@@ -216,20 +216,9 @@ const StorageManager = {
             if (data.aliases)        prefs.workoutAliases    = data.aliases;
             if (data.analyticsPrefs) {
                 const ap = data.analyticsPrefs;
-                if (ap.heroMetrics      !== undefined) prefs.heroMetrics      = ap.heroMetrics;
-                if (ap.volumeRange      !== undefined) prefs.volumeRange      = ap.volumeRange;
-                if (ap.muscleRange      !== undefined) prefs.muscleRange      = ap.muscleRange;
-                if (ap.consistencyRange !== undefined) prefs.consistencyRange = ap.consistencyRange;
-                if (ap.consistencyGreen  !== undefined) prefs.consistencyGreen  = ap.consistencyGreen;
-                if (ap.consistencyOrange !== undefined) prefs.consistencyOrange = ap.consistencyOrange;
-                if (ap.microPoints      !== undefined) prefs.microPoints      = ap.microPoints;
-                if (ap.microAxis        !== undefined) prefs.microAxis        = ap.microAxis;
-                if (ap.microOrder       !== undefined) prefs.microOrder       = ap.microOrder;
-                if (ap.formula          !== undefined) prefs.formula          = ap.formula;
-                if (ap.units            !== undefined) prefs.units            = ap.units;
-                if (ap.name             !== undefined) prefs.name             = ap.name;
-                if (ap.homePRRange      !== undefined) prefs.homePRRange      = ap.homePRRange;
-                if (ap.workoutAliasColors !== undefined) prefs.workoutAliasColors = ap.workoutAliasColors;
+                ['heroMetrics','volumeRange','muscleRange','consistencyRange','consistencyGreen','consistencyOrange','microPoints','microAxis','microOrder','formula','units','name','homePRRange','workoutAliasColors'].forEach(k => {
+                    if (ap[k] !== undefined) prefs[k] = ap[k];
+                });
             }
             this.saveAnalyticsPrefs(prefs);
             showAlert("התבניות נטענו בהצלחה!", () => { window.location.reload(); });
@@ -273,7 +262,7 @@ const StorageManager = {
 
     getAIHistory() {
         try { return JSON.parse(localStorage.getItem(this.KEY_AI_HISTORY)) || []; }
-        catch { return []; }
+        catch(e) { console.error('GymPro: AI history read error', e); return []; }
     },
 
     saveAIHistory(arr) {
