@@ -2242,7 +2242,9 @@ async function callGeminiAPI(userMessage) {
             }
             if (response.status === 429 || response.status === 503) {
                 console.warn(`GymPro AI: model ${modelName} overloaded, trying next...`);
-                lastErr += `${modelName}:${response.status} `;
+                const errBody = await response.json().catch(() => ({}));
+                const detail = errBody.error?.message || errBody.error?.status || response.status;
+                lastErr += `${modelName}:(${detail}) `;
                 continue;
             }
             const errData = await response.json().catch(() => ({}));
