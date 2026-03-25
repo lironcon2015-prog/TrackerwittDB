@@ -2433,10 +2433,13 @@ async function sendAIMessage() {
 
     } catch(e) {
         typing.remove();
-        let errMsg = 'שגיאה בתקשורת עם AI. נסה שוב.';
+        console.error('GymPro AI error:', e.message);
+        let errMsg = `שגיאה בתקשורת עם AI. נסה שוב. (${e.message})`;
         if (e.message === 'API_KEY_MISSING')   errMsg = 'API Key חסר. הגדר ב-הגדרות ← AI Coach.';
         if (e.message === 'ALL_MODELS_FAILED') errMsg = 'כל המודלים עמוסים או לא זמינים. נסה שוב בעוד כמה דקות.';
-        if (e.message.includes('400') || e.message.includes('403')) errMsg = 'API Key שגוי או חסר הרשאות.';
+        if (e.message.includes('400') || e.message.includes('401') || e.message.includes('403')) errMsg = 'API Key שגוי או חסר הרשאות. בדוק את המפתח בהגדרות.';
+        if (e.message.includes('404')) errMsg = 'מודל AI לא נמצא. בדוק את שם המודל בהגדרות ← AI Coach.';
+        if (e.message.includes('500') || e.message.includes('503')) errMsg = 'שרת Gemini לא זמין. נסה שוב בעוד כמה דקות.';
         const errBubble = document.createElement('div');
         errBubble.className = 'ai-error-msg';
         errBubble.textContent = errMsg;
