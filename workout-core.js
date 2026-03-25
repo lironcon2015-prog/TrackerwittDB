@@ -171,7 +171,9 @@ function restoreSession() {
 
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(lastScreen).classList.add('active');
-        document.getElementById('global-back').style.visibility = (lastScreen === 'ui-week') ? 'hidden' : 'visible';
+        const _backVis174 = (lastScreen === 'ui-week') ? 'hidden' : 'visible';
+        document.getElementById('global-back').style.visibility = _backVis174;
+        document.getElementById('btn-ai').style.visibility = (_backVis174 === 'hidden') ? 'visible' : 'hidden';
 
         if (state.workoutStartTime) startSessionTimer(state.workoutStartTime);
 
@@ -292,7 +294,9 @@ function navigate(id, clearStack = false) {
 
     // Back button hidden on main tab screens
     const NO_BACK = ['ui-week', 'ui-analytics', 'ui-archive'];
-    document.getElementById('global-back').style.visibility = NO_BACK.includes(id) ? 'hidden' : 'visible';
+    const _backVis295 = NO_BACK.includes(id) ? 'hidden' : 'visible';
+    document.getElementById('global-back').style.visibility = _backVis295;
+    document.getElementById('btn-ai').style.visibility = (_backVis295 === 'hidden') ? 'visible' : 'hidden';
 
     updatePlanFloatBtn(id);
 }
@@ -396,7 +400,9 @@ function _doBack(currentScreen) {
 
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(prevScreen).classList.add('active');
-    document.getElementById('global-back').style.visibility = (prevScreen === 'ui-week') ? 'hidden' : 'visible';
+    const _backVis399 = (prevScreen === 'ui-week') ? 'hidden' : 'visible';
+    document.getElementById('global-back').style.visibility = _backVis399;
+    document.getElementById('btn-ai').style.visibility = (_backVis399 === 'hidden') ? 'visible' : 'hidden';
 }
 
 function openSettings() {
