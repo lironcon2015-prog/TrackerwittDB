@@ -171,9 +171,7 @@ function restoreSession() {
 
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(lastScreen).classList.add('active');
-        const _showBack174 = (lastScreen !== 'ui-week');
-        document.getElementById('global-back').style.display = _showBack174 ? 'flex' : 'none';
-        document.getElementById('btn-ai').style.display     = _showBack174 ? 'none' : 'flex';
+        document.getElementById('global-back').style.display = (lastScreen !== 'ui-week') ? 'flex' : 'none';
 
         if (state.workoutStartTime) startSessionTimer(state.workoutStartTime);
 
@@ -294,9 +292,7 @@ function navigate(id, clearStack = false) {
 
     // Back button hidden on main tab screens
     const NO_BACK = ['ui-week', 'ui-analytics', 'ui-archive'];
-    const _showBack295 = !NO_BACK.includes(id);
-    document.getElementById('global-back').style.display = _showBack295 ? 'flex' : 'none';
-    document.getElementById('btn-ai').style.display     = _showBack295 ? 'none' : 'flex';
+    document.getElementById('global-back').style.display = !NO_BACK.includes(id) ? 'flex' : 'none';
 
     updatePlanFloatBtn(id);
 }
@@ -400,9 +396,7 @@ function _doBack(currentScreen) {
 
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(prevScreen).classList.add('active');
-    const _showBack399 = (prevScreen !== 'ui-week');
-    document.getElementById('global-back').style.display = _showBack399 ? 'flex' : 'none';
-    document.getElementById('btn-ai').style.display     = _showBack399 ? 'none' : 'flex';
+    document.getElementById('global-back').style.display = (prevScreen !== 'ui-week') ? 'flex' : 'none';
 }
 
 function openSettings() {
@@ -2284,6 +2278,7 @@ function openAICoach() {
 
     modal.style.display = 'flex';
     haptic('light');
+    initAISheetSwipe();
 
     // גלילה לסוף
     setTimeout(() => {
@@ -2298,14 +2293,64 @@ function openAICoach() {
 function closeAICoach() {
     const modal = document.getElementById('ai-coach-modal');
     if (modal) modal.style.display = 'none';
-    // סגור copy menu אם פתוח
     const menu = document.getElementById('ai-copy-menu');
     if (menu) menu.style.display = 'none';
-    // גיבוי שקט לענן
     if (typeof FirebaseManager !== 'undefined' && FirebaseManager.isConfigured()) {
         FirebaseManager.saveAIHistoryToCloud();
     }
     haptic('light');
+}
+
+/**
+ * clearAIChatDisplay — מנקה תצוגה בלבד. היסטוריה נשמרת.
+ */
+function clearAIChatDisplay() {
+    showConfirm('לנקות את תצוגת השיחה? ההיסטוריה נשמרת ברקע.', () => {
+        const container = document.getElementById('ai-chat-messages');
+        if (container) container.innerHTML = '';
+        haptic('success');
+    });
+}
+
+/**
+ * initAISheetSwipe — גרירה למטה לסגירת ה-AI Coach sheet (iOS 26 style).
+ */
+function initAISheetSwipe() {
+    const sheet   = document.querySelector('.ai-coach-sheet');
+    const handle  = document.querySelector('.ai-sheet-handle');
+    if (!sheet || !handle) return;
+    let startY = 0, currentY = 0, dragging = false;
+
+    function onStart(e) {
+        startY   = e.touches[0].clientY;
+        currentY = 0;
+        dragging = true;
+        sheet.style.transition = 'none';
+    }
+    function onMove(e) {
+        if (!dragging) return;
+        currentY = e.touches[0].clientY - startY;
+        if (currentY < 0) currentY = 0;
+        sheet.style.transform = `translateY(${currentY}px)`;
+    }
+    function onEnd() {
+        if (!dragging) return;
+        dragging = false;
+        sheet.style.transition = 'transform 0.3s cubic-bezier(0.32,0.72,0,1)';
+        if (currentY > 120) {
+            sheet.style.transform = `translateY(100%)`;
+            setTimeout(() => {
+                sheet.style.transform = '';
+                sheet.style.transition = '';
+                closeAICoach();
+            }, 300);
+        } else {
+            sheet.style.transform = '';
+        }
+    }
+    handle.addEventListener('touchstart', onStart, { passive: true });
+    handle.addEventListener('touchmove',  onMove,  { passive: true });
+    handle.addEventListener('touchend',   onEnd);
 }
 
 /**
@@ -2463,12 +2508,7 @@ async function sendAIMessage() {
  */
 function openAIPersonaSheet() {
     const textarea = document.getElementById('ai-persona-text');
-    const counter  = document.getElementById('ai-persona-count');
-    if (textarea) {
-        textarea.value = StorageManager.getAIPersona();
-        if (counter) counter.textContent = textarea.value.length + ' / 500';
-        textarea.oninput = () => { if (counter) counter.textContent = textarea.value.length + ' / 500'; };
-    }
+    if (textarea) textarea.value = StorageManager.getAIPersona();
     document.getElementById('ai-persona-overlay').style.display = 'block';
     document.getElementById('ai-persona-sheet').classList.add('open');
     haptic('light');
