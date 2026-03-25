@@ -2153,7 +2153,8 @@ function buildSystemPrompt() {
     let prompt = `אתה מאמן כושר אישי מקצועי של אפליקציית GYMPRO ELITE.
 ענה בעברית בלבד. היה קצר, ענייני ותכליתי. אין אמוג'י. אין כוכביות.
 אסור להציג תהליך חשיבה, תיוגי THINK, ניתוח פנימי או כל טקסט שאינו חלק מהתשובה הסופית.
-עזור בהחלטות על עומס פרוגרסיבי, זמני מנוחה, החלפת תרגילים וניתוח ביצועים.\n`;
+עזור בהחלטות על עומס פרוגרסיבי, זמני מנוחה, החלפת תרגילים וניתוח ביצועים.
+כאשר משווה בין בלוקים, השווה תמיד שבועות מקבילים (שבוע N בבלוק הנוכחי לשבוע N בבלוק הקודם).\n`;
 
     // פרופיל אישי
     const persona = StorageManager.getAIPersona();
@@ -2238,7 +2239,8 @@ async function callGeminiAPI(userMessage) {
             });
             if (response.ok) {
                 const data = await response.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const parts = data.candidates?.[0]?.content?.parts || [];
+                const text = parts.find(p => !p.thought)?.text || '';
                 return text;
             }
             if (response.status === 429 || response.status === 503) {
