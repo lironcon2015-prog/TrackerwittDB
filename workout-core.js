@@ -312,7 +312,20 @@ function handleBackClick() {
         if ((state.isFreestyle || state.isExtraPhase || state.isInterruption) && state.setIdx === 0 && state.log.length === 0) {
             // pass
         } else if (state.setIdx > 0) {
+            const ap = document.getElementById('action-panel');
+            const lastSetLogged = ap && ap.style.display === 'block';
             showConfirm("חזרה אחורה תמחק את הסט הנוכחי. להמשיך?", () => {
+                if (lastSetLogged) {
+                    // הסט האחרון כבר נרשם — מחק אותו מה-log
+                    const lastEntry = state.log[state.log.length - 1];
+                    if (lastEntry && lastEntry.exName === state.currentExName && !lastEntry.skip) {
+                        state.log.pop();
+                    }
+                    ap.style.display = 'none';
+                    ap.classList.remove('is-visible');
+                    document.getElementById('btn-submit-set').style.display = 'block';
+                    document.getElementById('btn-skip-exercise').style.display = 'block';
+                }
                 state.setIdx--;
                 initPickers();
                 StorageManager.saveSessionState();
