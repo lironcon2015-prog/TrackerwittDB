@@ -2445,7 +2445,7 @@ async function sendAIMessage() {
         if (e.message === 'API_KEY_MISSING')   errMsg = 'API Key חסר. הגדר ב-הגדרות ← AI Coach.';
         if (e.message === 'ALL_MODELS_FAILED') { const cfg = StorageManager.getAIConfig(); const keySuffix = cfg.apiKey ? '...'+cfg.apiKey.slice(-4) : 'חסר'; errMsg = `כל המודלים נכשלו. מפתח:${keySuffix} שגיאות:${e._details || 'לא ידוע'}`; }
         if (e.message.includes('400') || e.message.includes('401') || e.message.includes('403')) errMsg = 'API Key שגוי או חסר הרשאות. בדוק את המפתח בהגדרות.';
-        if (e.message.includes('404')) errMsg = 'מודל AI לא נמצא. בדוק את שם המודל בהגדרות ← AI Coach.';
+        if (e.message.includes('404')) { const cfg = StorageManager.getAIConfig(); const keySuffix = cfg.apiKey ? '...'+cfg.apiKey.slice(-4) : 'חסר'; errMsg = `404 מפתח:${keySuffix} ${e.message}`; }
         if (e.message.includes('500') || e.message.includes('503')) errMsg = 'שרת Gemini לא זמין. נסה שוב בעוד כמה דקות.';
         const errBubble = document.createElement('div');
         errBubble.className = 'ai-error-msg';
