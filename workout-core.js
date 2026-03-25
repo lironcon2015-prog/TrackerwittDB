@@ -52,6 +52,10 @@ function isExOrVariationDone(originalName) {
     return false;
 }
 
+// ─── UTILITY ───────────────────────────────────────────────────────────────
+
+function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
 // ─── GLOBAL STATE ──────────────────────────────────────────────────────────
 
 let state = {
@@ -141,9 +145,14 @@ window.onload = () => {
     checkRecovery();
     if (typeof renderHeroCard === 'function') renderHeroCard();
     if (typeof renderHomePRCard === 'function') renderHomePRCard();
-    fetch('version.json?t=' + Date.now())
+    // קריאה ללא cache-bust → מחזיר את הגרסה המותקנת מה-SW cache
+    fetch('./version.json')
         .then(r => r.json())
-        .then(d => { const el = document.getElementById('app-version-label'); if (el && d.version) el.textContent = 'GymPro Elite v' + d.version; })
+        .then(d => {
+            window._gymproVersion = d.version || '';
+            const el = document.getElementById('app-version-label');
+            if (el && d.version) el.textContent = 'GymPro Elite v' + d.version;
+        })
         .catch(() => {});
 };
 
@@ -380,7 +389,7 @@ function handleBackClick() {
             const prevExName = lastEntry.exName;
             const exData = state.exercises.find(e => e.name === prevExName);
             if (exData) {
-                state.currentEx = JSON.parse(JSON.stringify(exData));
+                state.currentEx = deepClone(exData);
                 state.currentExName = prevExName;
                 const workoutList = state.workouts[state.type] || [];
                 const prevExIdx = workoutList.findIndex(item => item.type !== 'cluster' && item.name === prevExName);
@@ -720,7 +729,7 @@ function checkFlow() {
 
     if (item.type === 'cluster') {
         state.clusterMode = true;
-        state.activeCluster = JSON.parse(JSON.stringify(item));
+        state.activeCluster = deepClone(item);
         state.clusterIdx = 0;
         state.clusterRound = 1;
         state.lastClusterRest = 30;
@@ -782,7 +791,7 @@ function showConfirmScreen(forceExName = null) {
     const exData = state.exercises.find(e => e.name === exName);
     if (!exData) { showAlert("שגיאה: התרגיל לא נמצא במאגר."); return; }
 
-    state.currentEx = JSON.parse(JSON.stringify(exData));
+    state.currentEx = deepClone(exData);
     state.currentExName = exData.name;
 
     if (currentPlanItem) {
@@ -894,7 +903,7 @@ function confirmExercise(doEx) {
         const firstExItem = state.activeCluster.exercises[0];
         const exData = state.exercises.find(e => e.name === firstExItem.name);
 
-        state.currentEx = JSON.parse(JSON.stringify(exData));
+        state.currentEx = deepClone(exData);
         state.currentExName = exData.name;
 
         if (firstExItem.restTime) state.currentEx.restTime = firstExItem.restTime;
@@ -955,10 +964,17 @@ function setupCalculatedEx() {
     const lastRM = StorageManager.getLastRM(state.currentExName);
     const baseRM = state.currentEx.baseRM || 50;
     const p = document.getElementById('rm-picker'); p.innerHTML = "";
-    const defaultRM = lastRM ? lastRM : baseRM;
+    const defaultRM = lastRM != null ? lastRM : baseRM;
     for (let i = 20; i <= 200; i += 2.5) {
-        let o = new Option(i + " kg", i); if (i === defaultRM) o.selected = true; p.add(o);
+        p.add(new Option(i + " kg", i));
     }
+    // Robust selection: find closest option to defaultRM
+    let bestIdx = 0, bestDiff = Infinity;
+    for (let j = 0; j < p.options.length; j++) {
+        const diff = Math.abs(parseFloat(p.options[j].value) - defaultRM);
+        if (diff < bestDiff) { bestDiff = diff; bestIdx = j; }
+    }
+    p.selectedIndex = bestIdx;
     navigate('ui-1rm');
     StorageManager.saveSessionState();
 }
@@ -1221,7 +1237,7 @@ function nextStep() {
             const nextExItem = state.activeCluster.exercises[state.clusterIdx];
             const exData = state.exercises.find(e => e.name === nextExItem.name);
 
-            state.currentEx = JSON.parse(JSON.stringify(exData));
+            state.currentEx = deepClone(exData);
             state.currentExName = exData.name;
 
             if (nextExItem.restTime) state.currentEx.restTime = nextExItem.restTime;
@@ -1334,7 +1350,7 @@ function startNextRound() {
     const nextExItem = state.activeCluster.exercises[0];
     const exData = state.exercises.find(e => e.name === nextExItem.name);
 
-    state.currentEx = JSON.parse(JSON.stringify(exData));
+    state.currentEx = deepClone(exData);
     state.currentExName = exData.name;
 
     if (nextExItem.restTime) state.currentEx.restTime = nextExItem.restTime;
@@ -1377,7 +1393,7 @@ function skipCurrentExercise() {
                 const nextExItem = state.activeCluster.exercises[state.clusterIdx];
                 const exData = state.exercises.find(e => e.name === nextExItem.name);
 
-                state.currentEx = JSON.parse(JSON.stringify(exData));
+                state.currentEx = deepClone(exData);
                 state.currentExName = exData.name;
 
                 if (nextExItem.restTime) state.currentEx.restTime = nextExItem.restTime;
@@ -1515,7 +1531,7 @@ function selectExtraCluster(workoutName, clusterIdx) {
 
     state.isExtraPhase = true;
     state.clusterMode  = true;
-    state.activeCluster = JSON.parse(JSON.stringify(item));
+    state.activeCluster = deepClone(item);
     state.clusterIdx   = 0;
     state.clusterRound = 1;
     state.lastClusterRest = item.clusterRest || 120;
@@ -1622,7 +1638,7 @@ function renderFreestyleList() {
         btn.className = "menu-card";
         btn.innerHTML = `<span>${ex.name}</span><div class="chevron"></div>`;
         btn.onclick = () => {
-            state.currentEx = JSON.parse(JSON.stringify(ex));
+            state.currentEx = deepClone(ex);
             state.currentExName = ex.name;
             if (!state.currentEx.sets || state.currentEx.sets.length < 3) state.currentEx.sets = [{ w: 10, r: 10 }, { w: 10, r: 10 }, { w: 10, r: 10 }];
             startRecording();
@@ -1707,7 +1723,7 @@ function _renderSwapMenu(searchVal) {
         btn.innerHTML = `<span>${ex.name}</span><div class="chevron"></div>`;
         btn.onclick = () => {
             state.currentExName = ex.name;
-            state.currentEx = JSON.parse(JSON.stringify(ex));
+            state.currentEx = deepClone(ex);
             if (!state.currentEx.sets || state.currentEx.sets.length === 0) {
                 state.currentEx.sets = [{ w: 20, r: 10 }, { w: 20, r: 10 }, { w: 20, r: 10 }];
             }
@@ -1897,16 +1913,9 @@ function _saveToArchive(note) {
                       state.isFreestyle       ? 'Freestyle' :
                                                 `Week ${state.week}`;
 
+    // ── details (by exercise name — used by analytics / volume calculations) ──
     const details = {};
     let totalVol = 0;
-
-    const summaryLines = [
-        'GYMPRO ELITE SUMMARY',
-        `${state.type} | ${weekLabel} | ${dateStr} | ${state.workoutDurationMins}m`,
-        ''
-    ];
-    if (note) { summaryLines.push(`הערה: ${note}`); summaryLines.push(''); }
-
     exOrder.forEach(exName => {
         const data = exMap[exName];
         let exVol = 0;
@@ -1921,14 +1930,76 @@ function _saveToArchive(note) {
             }
         });
         totalVol += exVol;
-        const volStr = exVol >= 1000 ? (exVol / 1000).toFixed(1) + 't' : exVol + 'kg';
-        const mainTag = data.isMain ? ' (Main)' : '';
-        summaryLines.push(`${exName}${mainTag} (Vol: ${volStr}):`);
-        data.sets.forEach(s => summaryLines.push(s));
-        if (data.skips > 0) summaryLines.push('(Skipped)');
-        summaryLines.push('');
         details[exName] = { sets: data.sets, vol: exVol };
     });
+
+    // ── summaryLines — segment-based to preserve cluster round structure ──
+    const summaryLines = [
+        'GYMPRO ELITE SUMMARY',
+        `${state.type} | ${weekLabel} | ${dateStr} | ${state.workoutDurationMins}m`,
+        ''
+    ];
+    if (note) { summaryLines.push(`הערה: ${note}`); summaryLines.push(''); }
+
+    const _segs = [];
+    state.log.filter(l => !l.skip).forEach(entry => {
+        const last = _segs[_segs.length - 1];
+        if (!entry.isCluster) {
+            if (last && last.type === 'normal' && last.exName === entry.exName) last.sets.push(entry);
+            else _segs.push({ type: 'normal', exName: entry.exName, sets: [entry] });
+        } else {
+            if (last && last.type === 'cluster') last.sets.push(entry);
+            else _segs.push({ type: 'cluster', sets: [entry] });
+        }
+    });
+
+    _segs.forEach(seg => {
+        if (seg.type === 'normal') {
+            const exName = seg.exName;
+            const exVol = details[exName] ? details[exName].vol : 0;
+            const volStr = exVol >= 1000 ? (exVol / 1000).toFixed(1) + 't' : exVol + 'kg';
+            const mainTag = exMap[exName] && exMap[exName].isMain ? ' (Main)' : '';
+            summaryLines.push(`${exName}${mainTag} (Vol: ${volStr}):`);
+            seg.sets.forEach(entry => {
+                const rir = entry.rir !== undefined ? entry.rir : '—';
+                const noteStr = entry.note ? ` | Note: ${entry.note}` : '';
+                summaryLines.push(`${entry.w}kg x ${entry.r} (RIR ${rir})${noteStr}`);
+            });
+            if (exMap[exName] && exMap[exName].skips > 0) summaryLines.push('(Skipped)');
+            summaryLines.push('');
+        } else {
+            const byRound = {};
+            seg.sets.forEach(entry => {
+                const rn = entry.round || 1;
+                if (!byRound[rn]) byRound[rn] = [];
+                byRound[rn].push(entry);
+            });
+            Object.keys(byRound).map(Number).sort((a, b) => a - b).forEach(rn => {
+                summaryLines.push(`Cluster סבב ${rn}:`);
+                byRound[rn].forEach(entry => {
+                    const rir = entry.rir !== undefined ? entry.rir : '—';
+                    const noteStr = entry.note ? ` | Note: ${entry.note}` : '';
+                    summaryLines.push(`  ${entry.exName}: ${entry.w}kg x ${entry.r} (RIR ${rir})${noteStr}`);
+                });
+                summaryLines.push('');
+            });
+        }
+    });
+
+    // Skip-only exercises not covered by segments
+    const _coveredNormal = new Set(_segs.filter(s => s.type === 'normal').map(s => s.exName));
+    exOrder.forEach(exName => {
+        if (!_coveredNormal.has(exName) && exMap[exName] && exMap[exName].skips > 0 && !exMap[exName].sets.length) {
+            summaryLines.push(`${exName}: (Skipped)`);
+            summaryLines.push('');
+        }
+    });
+
+    // ── Minimal log stored for display (archive detail view) ──
+    const archivedLog = state.log.map(l => ({
+        exName: l.exName, w: l.w, r: l.r, rir: l.rir,
+        note: l.note || '', isCluster: !!l.isCluster, round: l.round || null, skip: !!l.skip
+    }));
 
     const archiveEntry = {
         timestamp: Date.now(),
@@ -1939,6 +2010,7 @@ function _saveToArchive(note) {
         summary: summaryLines.join('\n').trimEnd(),
         details,
         exOrder,
+        log: archivedLog,
         note
     };
 
@@ -2319,6 +2391,7 @@ async function callGeminiAPI(userMessage) {
     const config = StorageManager.getAIConfig();
     if (!config.apiKey) throw new Error('API_KEY_MISSING');
 
+    let lastErr = '';
     const last10 = aiChatHistory.slice(-10);
     const payload = {
         system_instruction: { parts: [{ text: buildSystemPrompt() }] },
@@ -2345,6 +2418,7 @@ async function callGeminiAPI(userMessage) {
             }
             if (response.status === 429 || response.status === 503) {
                 console.warn(`GymPro AI: model ${modelName} overloaded, trying next...`);
+                lastErr = `${modelName}: ${response.status}`;
                 continue;
             }
             const errData = await response.json().catch(() => ({}));
@@ -2352,12 +2426,15 @@ async function callGeminiAPI(userMessage) {
         } catch(e) {
             if (e.message && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError'))) {
                 console.warn(`GymPro AI: network error on ${modelName}, trying next...`);
+                lastErr = `${modelName}: ${e.message}`;
                 continue;
             }
             throw e;
         }
     }
-    throw new Error('ALL_MODELS_FAILED');
+    const err = new Error('ALL_MODELS_FAILED');
+    err._details = lastErr;
+    throw err;
 }
 
 /**
@@ -2599,7 +2676,7 @@ async function sendAIMessage() {
         console.error('GymPro AI error:', e.message);
         let errMsg = `שגיאה בתקשורת עם AI. נסה שוב. (${e.message})`;
         if (e.message === 'API_KEY_MISSING')   errMsg = 'API Key חסר. הגדר ב-הגדרות ← AI Coach.';
-        if (e.message === 'ALL_MODELS_FAILED') errMsg = 'כל המודלים עמוסים או לא זמינים. נסה שוב בעוד כמה דקות.';
+        if (e.message === 'ALL_MODELS_FAILED') errMsg = `כל המודלים נכשלו. פרטי שגיאה: ${e._details || 'לא ידוע'}`;
         if (e.message.includes('400') || e.message.includes('401') || e.message.includes('403')) errMsg = 'API Key שגוי או חסר הרשאות. בדוק את המפתח בהגדרות.';
         if (e.message.includes('404')) errMsg = 'מודל AI לא נמצא. בדוק את שם המודל בהגדרות ← AI Coach.';
         if (e.message.includes('500') || e.message.includes('503')) errMsg = 'שרת Gemini לא זמין. נסה שוב בעוד כמה דקות.';

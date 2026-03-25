@@ -1,10 +1,10 @@
 /**
  * GymPro Elite — Service Worker
- * Version: 14.12.0-1
+ * Version: 14.12.0-22
  * העלה את CACHE_VERSION בכל עדכון קוד כדי לרענן את ה-cache של המשתמשים.
  */
 
-const CACHE_VERSION = 'gympro-v14.12.0-18';
+const CACHE_VERSION = 'gympro-v14.12.0-22';
 
 const FILES_TO_CACHE = [
     './index.html',
@@ -14,7 +14,8 @@ const FILES_TO_CACHE = [
     './editor-logic.js',
     './storage.js',
     './data.js',
-    './manifest.json'
+    './manifest.json',
+    './version.json'
 ];
 
 self.addEventListener('install', event => {

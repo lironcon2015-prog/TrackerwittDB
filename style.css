@@ -15,6 +15,7 @@
     --type-c: #FF9F0A;
     --type-free: #5E5CE6;
     --danger: #ff453a;
+    --glass: blur(20px) saturate(180%) brightness(0.88);
 
     /* Design System: Spacing */
     --sp-xs: 4px;
@@ -104,7 +105,7 @@ body {
 .max-w-350 { max-width: 350px !important; }
 
 /* Borders & Backgrounds Utils */
-.bg-card { background: var(--card-bg) !important; backdrop-filter: blur(20px) saturate(180%) brightness(0.88) !important; -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88) !important; box-shadow: inset 0 1px 0 var(--border-hi) !important; }
+.bg-card { background: var(--card-bg) !important; backdrop-filter: var(--glass) !important; -webkit-backdrop-filter: var(--glass) !important; box-shadow: inset 0 1px 0 var(--border-hi) !important; }
 .border-top { border-top: 1px solid var(--border) !important; }
 .border-bottom { border-bottom: 1px solid var(--border) !important; }
 .border-accent { border-color: var(--accent) !important; }
@@ -239,7 +240,7 @@ body {
 .menu-card {
     background: var(--card-bg); border: 1px solid var(--border);
     border-top-color: var(--border-hi);
-    backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
     border-radius: var(--ios-radius); padding: 18px; color: white; margin-bottom: 12px;
     display: flex; justify-content: space-between; align-items: center; cursor: pointer;
     transition: transform 0.1s, background 0.1s;
@@ -277,7 +278,7 @@ body {
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
 .day-name { font-size: 0.75em; color: var(--text-dim); padding-bottom: 10px; font-weight: 600; }
 .calendar-cell {
-    background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    background: var(--card-bg); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
     aspect-ratio: 1/1; border-radius: 10px; display: flex; flex-direction: column; 
     align-items: center; justify-content: flex-start; padding-top: 6px; 
     font-size: 0.9em; position: relative; border: 1px solid transparent; cursor: pointer;
@@ -325,7 +326,7 @@ body {
 .glass-card { 
     background: var(--card-bg); border-radius: var(--ios-radius); 
     padding: 16px; border: 1px solid var(--border); margin-bottom: 15px; 
-    backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
     border-top-color: var(--border-hi);
     box-shadow: inset 0 1px 0 var(--border-hi);
 }
@@ -361,7 +362,7 @@ body {
     display: flex; justify-content: space-between; align-items: center;
     background: var(--card-bg); border: 1px solid var(--border);
     border-top-color: var(--border-hi);
-    backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
     border-radius: var(--ios-radius); padding: 12px 18px;
     margin-bottom: 10px; cursor: pointer;
     box-shadow: inset 0 1px 0 var(--border-hi);
@@ -487,7 +488,7 @@ body {
 }
 
 .summary-overview-card { 
-    background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); 
+    background: var(--card-bg); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); 
     border: 1px solid var(--border); border-top-color: var(--border-hi);
     border-radius: var(--ios-radius); 
     padding: 15px; margin-bottom: 20px; display: flex; 
@@ -500,7 +501,7 @@ body {
 .summary-overview-label { font-size: 0.7em; color: var(--text-dim); margin-top: 4px; }
 
 .summary-ex-card { 
-    background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); 
+    background: var(--card-bg); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); 
     border: 1px solid var(--border); border-top-color: var(--border-hi);
     border-radius: var(--ios-radius); 
     padding: 15px; margin-bottom: 15px; text-align: right; 
@@ -545,6 +546,11 @@ body {
     background: rgba(0,0,0,0.85); z-index: 1000;
     display: none; justify-content: center; align-items: center;
     backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+}
+/* Alert/confirm dialogs must appear above the AI coach sheet (z-index 1000) */
+#custom-alert-modal,
+#custom-confirm-modal {
+    z-index: 1100;
 }
 .modal-content {
     background: rgba(22, 22, 24, 0.82); border: 1px solid var(--border);
@@ -591,7 +597,7 @@ body {
 .passive-preview { color: var(--text-dim); font-size: 0.8em; text-align: center; margin-bottom: 15px; }
 .secondary-action { border: 1px solid var(--border); border-radius: var(--ios-radius); color: var(--text); padding: 15px; }
 
-.history-card-container { background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); width: 100%; border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: var(--ios-radius); padding: 15px; box-shadow: inset 0 1px 0 var(--border-hi); }
+.history-card-container { background: var(--card-bg); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); width: 100%; border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: var(--ios-radius); padding: 15px; box-shadow: inset 0 1px 0 var(--border-hi); }
 .history-header { display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px; font-size: 0.8em; color: var(--text-dim); font-weight: 600; text-align: center; }
 .history-list { display: flex; flex-direction: column; gap: 0; width: 100%; }
 .history-row { display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95em; text-align: center; color: white; }
@@ -621,7 +627,7 @@ body {
 .queue-item { font-size: 0.9em; color: var(--text-dim); margin-bottom: 2px; }
 .queue-item.next { color: white; font-weight: 600; }
 
-.manager-item { background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: var(--ios-radius); padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.1s; box-shadow: inset 0 1px 0 var(--border-hi); }
+.manager-item { background: var(--card-bg); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: var(--ios-radius); padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.1s; box-shadow: inset 0 1px 0 var(--border-hi); }
 .manager-item:active { transform: scale(0.98); } 
 .manager-info h3 { margin: 0; font-size: 1.1em; color: white; }
 .manager-info p { margin: 5px 0 0; font-size: 0.8em; color: var(--text-dim); }
@@ -631,7 +637,7 @@ body {
 .btn-text-action:active { background: rgba(255,255,255,0.1); }
 .btn-text-action.delete { color: #ff453a; border-color: rgba(255, 69, 58, 0.3); }
 
-.editor-row { background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%) brightness(0.88); -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88); border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: 12px; padding: 10px 10px 10px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; box-shadow: inset 0 1px 0 var(--border-hi); }
+.editor-row { background: var(--card-bg); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: 12px; padding: 10px 10px 10px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; box-shadow: inset 0 1px 0 var(--border-hi); }
 .row-info { font-weight: 500; font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 45%; cursor: pointer; }
 .editor-controls { display: flex; gap: 8px; align-items: center; }
 
@@ -754,8 +760,8 @@ body {
 
 .analytics-card {
     background: var(--card-bg);
-    backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
-    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
     border: 1px solid var(--border); border-top-color: var(--border-hi);
     border-radius: var(--ios-radius); padding: 15px; margin-bottom: 14px;
     box-shadow: inset 0 1px 0 var(--border-hi);
@@ -773,8 +779,8 @@ body {
 .metrics-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .metric-tile {
     background: var(--card-bg);
-    backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
-    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
     border: 1px solid var(--border); border-top-color: var(--border-hi);
     border-radius: 14px; padding: 14px; box-shadow: inset 0 1px 0 var(--border-hi);
 }
@@ -820,8 +826,8 @@ body {
 
 .smart-exercise-select {
     width: 100%; background: var(--card-bg);
-    backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
-    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
     border: 1px solid var(--border); border-top-color: var(--border-hi);
     border-radius: 12px; color: var(--text); padding: 13px 14px;
     font-size: 0.95em; font-weight: 600; appearance: none; -webkit-appearance: none;
@@ -1231,8 +1237,8 @@ body {
 .home-pr-card {
     background: var(--card-bg);
     border: 1px solid var(--border); border-top-color: var(--border-hi);
-    backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
-    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.88);
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
     border-radius: var(--ios-radius); padding: 12px 14px; margin-bottom: 0;
     box-shadow: inset 0 1px 0 var(--border-hi);
 }
@@ -1600,6 +1606,8 @@ body {
     background: rgba(0,0,0,0.55);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
+    touch-action: none;
+    overscroll-behavior: none;
 }
 
 /* Sheet — עולה מהתחתית */
@@ -1725,6 +1733,9 @@ body {
 .ai-chat-messages {
     flex: 1;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     padding: 12px 14px 8px;
     display: flex;
     flex-direction: column;
