@@ -342,7 +342,7 @@
                     <label class="input-label">Gemini API Key</label>
                     <input type="password" id="ai-api-key-input" class="minimal-input mb-sm" placeholder="הדבק API Key מ-Google AI Studio" autocomplete="off">
                     <label class="input-label">מודלים (מפל, מופרדים בפסיק)</label>
-                    <input type="text" id="ai-models-input" class="minimal-input mb-sm" placeholder="gemini-2.0-flash, gemini-2.0-flash-lite">
+                    <input type="text" id="ai-models-input" class="minimal-input mb-sm" placeholder="gemini-2.5-flash, gemini-2.5-flash-lite">
                     <button class="btn-main primary-gradient mb-sm" onclick="saveAISettings()">שמור הגדרות AI</button>
                     <div class="cloud-btn-grid" style="margin-top:6px;">
                         <button class="cloud-btn success" onclick="FirebaseManager.saveAIHistoryToCloud().then(ok=>showAlert(ok?'היסטוריה גובתה לענן!':'שגיאה בגיבוי.'))">💾 גבה שיחות</button>

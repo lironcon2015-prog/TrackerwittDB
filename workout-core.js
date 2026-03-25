@@ -2216,7 +2216,6 @@ async function callGeminiAPI(userMessage) {
     const config = StorageManager.getAIConfig();
     if (!config.apiKey) throw new Error('API_KEY_MISSING');
 
-    let lastErr = '';
     const last10 = aiChatHistory.slice(-10);
     const payload = {
         system_instruction: { parts: [{ text: buildSystemPrompt() }] },
@@ -2242,9 +2241,6 @@ async function callGeminiAPI(userMessage) {
             }
             if (response.status === 429 || response.status === 503) {
                 console.warn(`GymPro AI: model ${modelName} overloaded, trying next...`);
-                const errBody = await response.json().catch(() => ({}));
-                const detail = errBody.error?.message || errBody.error?.status || response.status;
-                lastErr += `${modelName}:(${detail}) `;
                 continue;
             }
             const errData = await response.json().catch(() => ({}));
@@ -2252,15 +2248,12 @@ async function callGeminiAPI(userMessage) {
         } catch(e) {
             if (e.message && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError'))) {
                 console.warn(`GymPro AI: network error on ${modelName}, trying next...`);
-                lastErr += `${modelName}:network `;
                 continue;
             }
             throw e;
         }
     }
-    const err = new Error('ALL_MODELS_FAILED');
-    err._details = lastErr;
-    throw err;
+    throw new Error('ALL_MODELS_FAILED');
 }
 
 /**
@@ -2443,9 +2436,9 @@ async function sendAIMessage() {
         console.error('GymPro AI error:', e.message);
         let errMsg = `שגיאה בתקשורת עם AI. נסה שוב. (${e.message})`;
         if (e.message === 'API_KEY_MISSING')   errMsg = 'API Key חסר. הגדר ב-הגדרות ← AI Coach.';
-        if (e.message === 'ALL_MODELS_FAILED') { const cfg = StorageManager.getAIConfig(); const keySuffix = cfg.apiKey ? '...'+cfg.apiKey.slice(-4) : 'חסר'; errMsg = `כל המודלים נכשלו. מפתח:${keySuffix} שגיאות:${e._details || 'לא ידוע'}`; }
+        if (e.message === 'ALL_MODELS_FAILED') errMsg = 'כל המודלים עמוסים או לא זמינים. נסה שוב בעוד כמה דקות.';
         if (e.message.includes('400') || e.message.includes('401') || e.message.includes('403')) errMsg = 'API Key שגוי או חסר הרשאות. בדוק את המפתח בהגדרות.';
-        if (e.message.includes('404')) { const cfg = StorageManager.getAIConfig(); const keySuffix = cfg.apiKey ? '...'+cfg.apiKey.slice(-4) : 'חסר'; errMsg = `404 מפתח:${keySuffix} ${e.message}`; }
+        if (e.message.includes('404')) errMsg = 'מודל AI לא נמצא. בדוק את שם המודל בהגדרות ← AI Coach.';
         if (e.message.includes('500') || e.message.includes('503')) errMsg = 'שרת Gemini לא זמין. נסה שוב בעוד כמה דקות.';
         const errBubble = document.createElement('div');
         errBubble.className = 'ai-error-msg';
