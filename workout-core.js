@@ -936,10 +936,17 @@ function setupCalculatedEx() {
     const lastRM = StorageManager.getLastRM(state.currentExName);
     const baseRM = state.currentEx.baseRM || 50;
     const p = document.getElementById('rm-picker'); p.innerHTML = "";
-    const defaultRM = lastRM ? lastRM : baseRM;
+    const defaultRM = lastRM != null ? lastRM : baseRM;
     for (let i = 20; i <= 200; i += 2.5) {
-        let o = new Option(i + " kg", i); if (i === defaultRM) o.selected = true; p.add(o);
+        p.add(new Option(i + " kg", i));
     }
+    // Robust selection: find closest option to defaultRM
+    let bestIdx = 0, bestDiff = Infinity;
+    for (let j = 0; j < p.options.length; j++) {
+        const diff = Math.abs(parseFloat(p.options[j].value) - defaultRM);
+        if (diff < bestDiff) { bestDiff = diff; bestIdx = j; }
+    }
+    p.selectedIndex = bestIdx;
     navigate('ui-1rm');
     StorageManager.saveSessionState();
 }
@@ -1838,16 +1845,9 @@ function _saveToArchive(note) {
                       state.isFreestyle       ? 'Freestyle' :
                                                 `Week ${state.week}`;
 
+    // ── details (by exercise name — used by analytics / volume calculations) ──
     const details = {};
     let totalVol = 0;
-
-    const summaryLines = [
-        'GYMPRO ELITE SUMMARY',
-        `${state.type} | ${weekLabel} | ${dateStr} | ${state.workoutDurationMins}m`,
-        ''
-    ];
-    if (note) { summaryLines.push(`הערה: ${note}`); summaryLines.push(''); }
-
     exOrder.forEach(exName => {
         const data = exMap[exName];
         let exVol = 0;
@@ -1862,14 +1862,76 @@ function _saveToArchive(note) {
             }
         });
         totalVol += exVol;
-        const volStr = exVol >= 1000 ? (exVol / 1000).toFixed(1) + 't' : exVol + 'kg';
-        const mainTag = data.isMain ? ' (Main)' : '';
-        summaryLines.push(`${exName}${mainTag} (Vol: ${volStr}):`);
-        data.sets.forEach(s => summaryLines.push(s));
-        if (data.skips > 0) summaryLines.push('(Skipped)');
-        summaryLines.push('');
         details[exName] = { sets: data.sets, vol: exVol };
     });
+
+    // ── summaryLines — segment-based to preserve cluster round structure ──
+    const summaryLines = [
+        'GYMPRO ELITE SUMMARY',
+        `${state.type} | ${weekLabel} | ${dateStr} | ${state.workoutDurationMins}m`,
+        ''
+    ];
+    if (note) { summaryLines.push(`הערה: ${note}`); summaryLines.push(''); }
+
+    const _segs = [];
+    state.log.filter(l => !l.skip).forEach(entry => {
+        const last = _segs[_segs.length - 1];
+        if (!entry.isCluster) {
+            if (last && last.type === 'normal' && last.exName === entry.exName) last.sets.push(entry);
+            else _segs.push({ type: 'normal', exName: entry.exName, sets: [entry] });
+        } else {
+            if (last && last.type === 'cluster') last.sets.push(entry);
+            else _segs.push({ type: 'cluster', sets: [entry] });
+        }
+    });
+
+    _segs.forEach(seg => {
+        if (seg.type === 'normal') {
+            const exName = seg.exName;
+            const exVol = details[exName] ? details[exName].vol : 0;
+            const volStr = exVol >= 1000 ? (exVol / 1000).toFixed(1) + 't' : exVol + 'kg';
+            const mainTag = exMap[exName] && exMap[exName].isMain ? ' (Main)' : '';
+            summaryLines.push(`${exName}${mainTag} (Vol: ${volStr}):`);
+            seg.sets.forEach(entry => {
+                const rir = entry.rir !== undefined ? entry.rir : '—';
+                const noteStr = entry.note ? ` | Note: ${entry.note}` : '';
+                summaryLines.push(`${entry.w}kg x ${entry.r} (RIR ${rir})${noteStr}`);
+            });
+            if (exMap[exName] && exMap[exName].skips > 0) summaryLines.push('(Skipped)');
+            summaryLines.push('');
+        } else {
+            const byRound = {};
+            seg.sets.forEach(entry => {
+                const rn = entry.round || 1;
+                if (!byRound[rn]) byRound[rn] = [];
+                byRound[rn].push(entry);
+            });
+            Object.keys(byRound).map(Number).sort((a, b) => a - b).forEach(rn => {
+                summaryLines.push(`Cluster סבב ${rn}:`);
+                byRound[rn].forEach(entry => {
+                    const rir = entry.rir !== undefined ? entry.rir : '—';
+                    const noteStr = entry.note ? ` | Note: ${entry.note}` : '';
+                    summaryLines.push(`  ${entry.exName}: ${entry.w}kg x ${entry.r} (RIR ${rir})${noteStr}`);
+                });
+                summaryLines.push('');
+            });
+        }
+    });
+
+    // Skip-only exercises not covered by segments
+    const _coveredNormal = new Set(_segs.filter(s => s.type === 'normal').map(s => s.exName));
+    exOrder.forEach(exName => {
+        if (!_coveredNormal.has(exName) && exMap[exName] && exMap[exName].skips > 0 && !exMap[exName].sets.length) {
+            summaryLines.push(`${exName}: (Skipped)`);
+            summaryLines.push('');
+        }
+    });
+
+    // ── Minimal log stored for display (archive detail view) ──
+    const archivedLog = state.log.map(l => ({
+        exName: l.exName, w: l.w, r: l.r, rir: l.rir,
+        note: l.note || '', isCluster: !!l.isCluster, round: l.round || null, skip: !!l.skip
+    }));
 
     const archiveEntry = {
         timestamp: Date.now(),
@@ -1880,6 +1942,7 @@ function _saveToArchive(note) {
         summary: summaryLines.join('\n').trimEnd(),
         details,
         exOrder,
+        log: archivedLog,
         note
     };
 

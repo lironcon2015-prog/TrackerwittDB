@@ -286,13 +286,75 @@ function buildArchiveDetailHTML(item) {
         html += `<div class="summary-ex-card" style="font-size:0.9em;color:var(--text-dim);margin-bottom:10px;">הערה: ${item.note}</div>`;
     }
 
-    if (item.details) {
-        // סדר תרגילים — עדיפויות:
-        // 1. item.exOrder — נשמר ישירות מהאימון (רשומות חדשות, מהימן 100%)
-        // 2. _parseExOrderFromSummary — fallback לרשומות ישנות
-        //    תרגילים שלא הופיעו בפורמט (Vol:...) בsummary (למשל: תרגילי Cluster)
-        //    מוכנסים לפי סדרם ב-detailKeys, לפני/אחרי לפי מיקומם ב-details.
-        // 3. Object.keys(details) — last resort
+    if (item.log && item.log.length > 0) {
+        // ── Segment-based rendering (new entries with stored log) ──
+        const segs = [];
+        item.log.filter(l => !l.skip).forEach(entry => {
+            const last = segs[segs.length - 1];
+            if (!entry.isCluster) {
+                if (last && last.type === 'normal' && last.exName === entry.exName) last.sets.push(entry);
+                else segs.push({ type: 'normal', exName: entry.exName, sets: [entry] });
+            } else {
+                if (last && last.type === 'cluster') last.sets.push(entry);
+                else segs.push({ type: 'cluster', sets: [entry] });
+            }
+        });
+
+        segs.forEach(seg => {
+            if (seg.type === 'normal') {
+                const exName = seg.exName;
+                const exVol = (item.details && item.details[exName]) ? item.details[exName].vol : 0;
+                const volStr = exVol >= 1000 ? (exVol / 1000).toFixed(1) + 't' : exVol + 'kg';
+                let setRows = '';
+                seg.sets.forEach((entry, i) => {
+                    const rir = entry.rir !== undefined ? entry.rir : '—';
+                    const noteStr = entry.note ? ` | ${entry.note}` : '';
+                    setRows += `<div class="summary-set-row">
+                        <div class="summary-set-num">${i + 1}</div>
+                        <div class="summary-set-details">${entry.w}kg x ${entry.r} (RIR ${rir}${noteStr})</div>
+                    </div>`;
+                });
+                html += `<div class="summary-ex-card">
+                    <div class="summary-ex-header">
+                        <div class="summary-ex-title">${exName}</div>
+                        <div class="summary-ex-vol">${volStr}</div>
+                    </div>
+                    ${setRows}
+                </div>`;
+            } else {
+                // cluster — group by round
+                const byRound = {};
+                seg.sets.forEach(entry => {
+                    const rn = entry.round || 1;
+                    if (!byRound[rn]) byRound[rn] = [];
+                    byRound[rn].push(entry);
+                });
+                const rounds = Object.keys(byRound).map(Number).sort((a, b) => a - b);
+                let clusterHtml = '';
+                rounds.forEach(rn => {
+                    clusterHtml += `<div class="summary-cluster-round">סבב ${rn}</div>`;
+                    byRound[rn].forEach((entry, i) => {
+                        const rir = entry.rir !== undefined ? entry.rir : '—';
+                        const noteStr = entry.note ? ` | ${entry.note}` : '';
+                        clusterHtml += `<div class="summary-set-row">
+                            <div class="summary-set-num">${i + 1}</div>
+                            <div class="summary-set-details">
+                                <span class="summary-cluster-ex-name">${entry.exName}</span>
+                                ${entry.w}kg x ${entry.r} (RIR ${rir}${noteStr})
+                            </div>
+                        </div>`;
+                    });
+                });
+                html += `<div class="summary-ex-card">
+                    <div class="summary-ex-header">
+                        <div class="summary-ex-title">Cluster (${rounds.length} סבבים)</div>
+                    </div>
+                    ${clusterHtml}
+                </div>`;
+            }
+        });
+    } else if (item.details) {
+        // ── Fallback: flat display for old entries without log field ──
         const detailKeys = Object.keys(item.details);
         let exOrder;
         if (item.exOrder && item.exOrder.length > 0) {
@@ -303,19 +365,12 @@ function buildArchiveDetailHTML(item) {
         } else {
             const parsedOrder = _parseExOrderFromSummary(item.summary);
             if (parsedOrder.length > 0) {
-                // תרגילים שנמצאו ב-summary — לפי סדר summary
-                // תרגילים שלא נמצאו (קלאסטר וכו') — לפי סדר detailKeys, שמור על מיקומם היחסי
                 const parsedSet = new Set(parsedOrder);
                 const missing = detailKeys.filter(n => !parsedSet.has(n));
-                // מיזוג: missing לפני parsed אם הם מופיעים ראשונים ב-detailKeys
                 const firstParsedIdx = detailKeys.findIndex(n => parsedSet.has(n));
                 const missingBefore = missing.filter(n => detailKeys.indexOf(n) < firstParsedIdx);
                 const missingAfter  = missing.filter(n => detailKeys.indexOf(n) >= firstParsedIdx);
-                exOrder = [
-                    ...missingBefore,
-                    ...parsedOrder.filter(n => item.details[n]),
-                    ...missingAfter
-                ];
+                exOrder = [...missingBefore, ...parsedOrder.filter(n => item.details[n]), ...missingAfter];
             } else {
                 exOrder = detailKeys;
             }
@@ -328,7 +383,6 @@ function buildArchiveDetailHTML(item) {
             if (sets.length === 0) return;
             const exVol = exData.vol || 0;
             const volStr = exVol >= 1000 ? (exVol / 1000).toFixed(1) + 't' : exVol + 'kg';
-
             let setRows = '';
             sets.forEach((setStr, i) => {
                 setRows += `<div class="summary-set-row">
@@ -336,7 +390,6 @@ function buildArchiveDetailHTML(item) {
                     <div class="summary-set-details">${setStr}</div>
                 </div>`;
             });
-
             html += `<div class="summary-ex-card">
                 <div class="summary-ex-header">
                     <div class="summary-ex-title">${exName}</div>
