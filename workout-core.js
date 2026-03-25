@@ -342,12 +342,48 @@ function handleBackClick() {
     }
 
     if (currentScreen === 'ui-confirm') {
-        if (state.log.length > 0 || state.completedExInSession.length > 0) {
+        const isSpecialMode = state.isFreestyle || state.isExtraPhase || state.isInterruption;
+        if (isSpecialMode && (state.log.length > 0 || state.completedExInSession.length > 0)) {
             showConfirm("האם לצאת מהאימון?", () => {
                 StorageManager.clearSessionState();
                 stopSessionTimer();
                 _doBack(currentScreen);
             });
+            return;
+        }
+        if (!isSpecialMode && state.log.length > 0) {
+            const lastEntry = state.log[state.log.length - 1];
+            if (lastEntry.isCluster) {
+                // ביטול cluster מסובך — יציאה רגילה
+                showConfirm("האם לצאת מהאימון?", () => {
+                    StorageManager.clearSessionState();
+                    stopSessionTimer();
+                    _doBack(currentScreen);
+                });
+                return;
+            }
+            // ביטול הסט האחרון
+            state.log.pop();
+            const prevExName = lastEntry.exName;
+            const exData = state.exercises.find(e => e.name === prevExName);
+            if (exData) {
+                state.currentEx = JSON.parse(JSON.stringify(exData));
+                state.currentExName = prevExName;
+                const workoutList = state.workouts[state.type] || [];
+                const prevExIdx = workoutList.findIndex(item => item.type !== 'cluster' && item.name === prevExName);
+                if (prevExIdx !== -1) state.exIdx = prevExIdx;
+                state.completedExInSession = state.completedExInSession.filter(n => n !== prevExName);
+                const remaining = state.log.filter(l => !l.skip && l.exName === prevExName);
+                state.setIdx = remaining.length;
+                state.lastLoggedSet = remaining.length > 0 ? remaining[remaining.length - 1] : null;
+                StorageManager.saveSessionState();
+                if (exData.isCalc) {
+                    showConfirmScreen();
+                } else {
+                    navigate('ui-main');
+                    initPickers();
+                }
+            }
             return;
         }
     }
