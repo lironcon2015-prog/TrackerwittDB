@@ -542,6 +542,11 @@ body {
     display: none; justify-content: center; align-items: center;
     backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
 }
+/* Alert/confirm dialogs must appear above the AI coach sheet (z-index 1000) */
+#custom-alert-modal,
+#custom-confirm-modal {
+    z-index: 1100;
+}
 .modal-content {
     background: rgba(22, 22, 24, 0.82); border: 1px solid var(--border);
     border-top-color: var(--border-hi);
@@ -1596,6 +1601,8 @@ body {
     background: rgba(0,0,0,0.55);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
+    touch-action: none;
+    overscroll-behavior: none;
 }
 
 /* Sheet — עולה מהתחתית */
@@ -1712,6 +1719,9 @@ body {
 .ai-chat-messages {
     flex: 1;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     padding: 12px 14px 8px;
     display: flex;
     flex-direction: column;
