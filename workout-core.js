@@ -1691,47 +1691,87 @@ function buildSummaryUI() {
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: '2-digit' });
     const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
 
-    const exMap = {};
-    state.log.forEach(entry => {
-        if (entry.skip) return;
-        if (!exMap[entry.exName]) exMap[entry.exName] = { sets: [], skipped: false };
-        exMap[entry.exName].sets.push(entry);
+    const realSets = state.log.filter(l => !l.skip);
+
+    // בניית סגמנטים בסדר הביצוע (normal per-exercise, cluster per-block)
+    const segments = [];
+    realSets.forEach(entry => {
+        const last = segments[segments.length - 1];
+        if (!entry.isCluster) {
+            if (last && last.type === 'normal' && last.exName === entry.exName) {
+                last.sets.push(entry);
+            } else {
+                segments.push({ type: 'normal', exName: entry.exName, sets: [entry] });
+            }
+        } else {
+            if (last && last.type === 'cluster') {
+                last.sets.push(entry);
+            } else {
+                segments.push({ type: 'cluster', sets: [entry] });
+            }
+        }
     });
 
     let totalVol = 0;
-
     let html = `<div class="summary-overview-card">
         <div class="summary-overview-col"><div class="summary-overview-val">${state.type}</div><div class="summary-overview-label">סוג אימון</div></div>
         <div class="summary-overview-col"><div class="summary-overview-val">${state.workoutDurationMins}m</div><div class="summary-overview-label">משך</div></div>
         <div class="summary-overview-col"><div class="summary-overview-val">${dateStr}</div><div class="summary-overview-label">${timeStr}</div></div>
     </div>`;
 
-    // בניית מיפוי realIdx לכל סט (אינדקס ב-realSets)
-    const realSets = state.log.filter(l => !l.skip);
-
-    Object.entries(exMap).forEach(([exName, data]) => {
-        if (data.sets.length === 0) return;
-        let exVol = 0;
-        let setRows = '';
-        data.sets.forEach((s, i) => {
-            const vol = s.w * s.r;
-            exVol += vol;
-            const realIdx = realSets.indexOf(s);
-            setRows += `<div class="summary-set-row">
-                <div class="summary-set-num">${i + 1}</div>
-                <div class="summary-set-details">${s.w}kg x ${s.r} (RIR ${s.rir}${s.note ? ` | ${s.note}` : ''})</div>
-                <button class="btn-log-edit" onclick="openSummaryEditSetModal(${realIdx})">ערוך</button>
+    segments.forEach(seg => {
+        if (seg.type === 'normal') {
+            let exVol = 0, setRows = '';
+            seg.sets.forEach((s, i) => {
+                exVol += s.w * s.r;
+                const realIdx = realSets.indexOf(s);
+                setRows += `<div class="summary-set-row">
+                    <div class="summary-set-num">${i + 1}</div>
+                    <div class="summary-set-details">${s.w}kg x ${s.r} (RIR ${s.rir}${s.note ? ` | ${s.note}` : ''})</div>
+                    <button class="btn-log-edit" onclick="openSummaryEditSetModal(${realIdx})">ערוך</button>
+                </div>`;
+            });
+            totalVol += exVol;
+            const volStr = exVol >= 1000 ? (exVol / 1000).toFixed(1) + 't' : exVol + 'kg';
+            html += `<div class="summary-ex-card">
+                <div class="summary-ex-header">
+                    <div class="summary-ex-title">${seg.exName}</div>
+                    <div class="summary-ex-vol">${volStr}</div>
+                </div>
+                ${setRows}
             </div>`;
-        });
-        totalVol += exVol;
-        const volStr = exVol >= 1000 ? (exVol / 1000).toFixed(1) + 't' : exVol + 'kg';
-        html += `<div class="summary-ex-card">
-            <div class="summary-ex-header">
-                <div class="summary-ex-title">${exName}</div>
-                <div class="summary-ex-vol">${volStr}</div>
-            </div>
-            ${setRows}
-        </div>`;
+        } else {
+            // Cluster — קבץ לפי סבב
+            const byRound = {};
+            seg.sets.forEach(s => {
+                if (!byRound[s.round]) byRound[s.round] = [];
+                byRound[s.round].push(s);
+            });
+            let clusterVol = 0, roundRows = '';
+            Object.keys(byRound).sort((a, b) => +a - +b).forEach(roundNum => {
+                const roundSets = byRound[roundNum];
+                clusterVol += roundSets.reduce((sum, s) => sum + s.w * s.r, 0);
+                const exRows = roundSets.map(s => {
+                    const realIdx = realSets.indexOf(s);
+                    return `<div class="summary-set-row">
+                        <div class="summary-cluster-ex-name">${s.exName}</div>
+                        <div class="summary-set-details">${s.w}kg×${s.r} (RIR ${s.rir}${s.note ? ` | ${s.note}` : ''})</div>
+                        <button class="btn-log-edit" onclick="openSummaryEditSetModal(${realIdx})">ערוך</button>
+                    </div>`;
+                }).join('');
+                roundRows += `<div class="summary-cluster-round">סבב ${roundNum}</div>${exRows}`;
+            });
+            totalVol += clusterVol;
+            const clusterVolStr = clusterVol >= 1000 ? (clusterVol / 1000).toFixed(1) + 't' : clusterVol + 'kg';
+            const exNames = [...new Set(seg.sets.map(s => s.exName))].join(' + ');
+            html += `<div class="summary-ex-card">
+                <div class="summary-ex-header">
+                    <div class="summary-ex-title">סבב: ${exNames}</div>
+                    <div class="summary-ex-vol">${clusterVolStr}</div>
+                </div>
+                ${roundRows}
+            </div>`;
+        }
     });
 
     area.innerHTML = html;

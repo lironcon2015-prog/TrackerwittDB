@@ -526,10 +526,15 @@ body {
 
 
 .summary-tag-skip { color: var(--text-dim); font-size: 0.85em; margin-bottom: 5px; font-style: italic; }
-.summary-cluster-round { 
-    color: var(--type-free); font-weight: 700; font-size: 0.9em; 
-    margin: 10px 0 5px; border-bottom: 1px dashed rgba(191, 90, 242, 0.3); 
-    padding-bottom: 4px; text-align: right; 
+.summary-cluster-round {
+    color: var(--type-free); font-weight: 700; font-size: 0.85em;
+    margin: 10px 0 3px; border-bottom: 1px dashed rgba(191, 90, 242, 0.3);
+    padding-bottom: 3px; text-align: right;
+}
+.summary-cluster-ex-name {
+    width: 110px; flex-shrink: 0;
+    color: var(--text-dim); font-size: 0.85em; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .finish-main-btn { background: #3a3a3c; color: white; padding: 15px; border-radius: var(--ios-radius); border: none; width: 100%; margin-top: 20px; font-weight: 600; }
