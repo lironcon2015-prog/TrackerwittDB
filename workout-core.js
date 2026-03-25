@@ -2152,6 +2152,7 @@ function buildAnalyticsSnapshot() {
 function buildSystemPrompt() {
     let prompt = `אתה מאמן כושר אישי מקצועי של אפליקציית GYMPRO ELITE.
 ענה בעברית בלבד. היה קצר, ענייני ותכליתי. אין אמוג'י. אין כוכביות.
+אסור להציג תהליך חשיבה, תיוגי THINK, ניתוח פנימי או כל טקסט שאינו חלק מהתשובה הסופית.
 עזור בהחלטות על עומס פרוגרסיבי, זמני מנוחה, החלפת תרגילים וניתוח ביצועים.\n`;
 
     // פרופיל אישי
@@ -2224,7 +2225,7 @@ async function callGeminiAPI(userMessage) {
             ...last10.map(m => ({ role: m.role, parts: [{ text: m.text }] })),
             { role: 'user', parts: [{ text: userMessage }] }
         ],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
+        generationConfig: { temperature: 0.7, maxOutputTokens: 600, thinkingConfig: { thinkingBudget: 0 } }
     };
 
     for (const modelName of config.models) {
