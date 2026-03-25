@@ -380,6 +380,9 @@ function handleBackClick() {
                 if (exData.isCalc) {
                     showConfirmScreen();
                 } else {
+                    const ap = document.getElementById('action-panel');
+                    if (ap) { ap.style.display = 'none'; ap.classList.remove('is-visible'); }
+                    document.getElementById('btn-submit-set').style.display = 'block';
                     navigate('ui-main');
                     initPickers();
                 }
