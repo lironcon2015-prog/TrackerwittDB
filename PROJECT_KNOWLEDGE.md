@@ -7,7 +7,7 @@
 
 ## 1. מצב נוכחי (Current State)
 
-**גרסה:** 14.12.0-24
+**גרסה:** 14.12.0-25
 **סטטוס:** פיתוח פעיל
 
 ### פיצ'רים פעילים
@@ -24,12 +24,13 @@
 - swipe-to-close על AI Coach sheet
 - ניקוי תצוגת שיחה (clearAIChatDisplay) מבלי למחוק היסטוריה
 
-### שינויים אחרונים (v14.12.0-24)
+### שינויים אחרונים (v14.12.0-25)
 
-- תיקון השוואת בלוקים ב-AI: `week` נשמר ב-archive entry, שבוע מקביל מהבלוק הקודם מוזרק ישירות ל-system prompt
-- תיקון cache: bump מ-22 ל-23 ול-24 לאחר merge פגום שהשאיר קבצים ישנים ב-cache
-- תיקון `buildBlockContext()`: הסתמך על `a.week === 1` אבל השדה לא נשמר — תוקן
-- הוספת `CLAUDE.md` + `PROJECT_KNOWLEDGE.md` לריפו
+- תיקון `saveData` ב-StorageManager: עטוף ב-try-catch עם התראת QuotaExceededError — מונע אובדן אימונים שקט
+- תיקון `saveAIHistory`: הגבלה ל-300 הודעות + try-catch + fallback חירום ל-100
+- תיקון `renderManagerList`: null check לפני `innerHTML` (editor-logic.js)
+- תיקון HTML injection בקאלנדר ארכיון: `openArchiveFromDrawer` מקבל `timestamp` (מספר) במקום `JSON.stringify(wo)`
+- הוספת GitHub Actions workflow: auto-merge אוטומטי מ-`claude/**` ל-`main` בכל push
 
 ---
 
@@ -50,6 +51,7 @@ version.json        — {"version": "14.12.0-XX"} — נקרא ע"י SW + האפ
 manifest.json       — PWA manifest
 CLAUDE.md           — הנחיות לסוכן Claude
 PROJECT_KNOWLEDGE.md — מסמך זה
+.github/workflows/auto-merge-to-main.yml — CI: auto-merge claude/** → main
 ```
 
 ### LocalStorage Keys (StorageManager)
@@ -204,3 +206,11 @@ let _aiDisplayCleared = false; // נוקתה תצוגה — לא לרנדר מח
 - **גילוי:** `archiveEntry` לא שמר שדה `week` — `buildBlockContext()` עבד רק עם fallback. AI Coach לא יכל להשוות בלוקים נכון.
 - **גילוי:** אפשר לשלוט על התנהגות סוכן Claude דרך `CLAUDE.md` בתיקיית הפרויקט — נקרא אוטומטית בכל session.
 - **העדפה:** מסמך `PROJECT_KNOWLEDGE.md` מאפשר continuity בין sessions ומונע אובדן context.
+
+**שיחה — 26.3.2026:**
+
+- **באג קריטי שתוקן:** `saveData` ב-StorageManager לא היה עטוף ב-try-catch — QuotaExceededError גרם לאובדן נתונים שקט. **חוק:** כל `localStorage.setItem` חייב try-catch.
+- **באג:** `saveAIHistory` ללא מגבלת גודל — היסטוריה גדלה ללא הגבלה ומאיצה הגעה ל-quota. **חוק:** תמיד slice(-300) לפני שמירת היסטוריה.
+- **באג:** `JSON.stringify(wo)` ב-onclick בקאלנדר ארכיון — HTML injection אפשרי דרך שדות notes. **חוק:** לעולם לא להכניס אובייקטים מ-user input ל-inline HTML. העבר רק מזהה בטוח (timestamp, index).
+- **בעיה מערכתית:** push לbranch `claude/**` בלבד **אינו** מעדכן את האפליקציה — היא מגישה מ-`main`. המשתמש ראה גרסה ישנה למרות שהקוד עודכן. **פתרון:** GitHub Actions workflow (`.github/workflows/auto-merge-to-main.yml`) מבצע auto-merge אוטומטי מ-`claude/**` ל-`main` בכל push. **מעכשיו: "בדוק עדכון" יעבוד תמיד.**
+- **לקח:** `checkForUpdate` מסתמך על השוואת `window._gymproVersion` (מה-SW cache) מול fetch עם cache-bust לשרת. אם שניהם מצביעים על אותו שרת (main) עם אותה גרסה — לא יזוהה עדכון. הפתרון: merge מהיר ל-main = גרסה חדשה זמינה מיד.
