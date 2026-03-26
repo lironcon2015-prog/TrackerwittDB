@@ -24,7 +24,12 @@ const StorageManager = {
     },
 
     saveData(key, data) {
-        localStorage.setItem(key, JSON.stringify(data));
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch(e) {
+            console.error('GymPro: storage write error', key, e);
+            if (e.name === 'QuotaExceededError') showAlert('האחסון המקומי מלא. מחק היסטוריית שיחות AI או ייצא גיבוי כדי לפנות מקום.');
+        }
     },
 
     initDB() {
@@ -266,7 +271,18 @@ const StorageManager = {
     },
 
     saveAIHistory(arr) {
-        localStorage.setItem(this.KEY_AI_HISTORY, JSON.stringify(arr));
+        // שמור עד 300 הודעות אחרונות — מניעת גדילה בלתי מוגבלת
+        const limited = arr.length > 300 ? arr.slice(-300) : arr;
+        try {
+            localStorage.setItem(this.KEY_AI_HISTORY, JSON.stringify(limited));
+        } catch(e) {
+            console.error('GymPro: AI history write error', e);
+            if (e.name === 'QuotaExceededError') {
+                // ניסיון חירום: שמור 100 אחרונות בלבד
+                try { localStorage.setItem(this.KEY_AI_HISTORY, JSON.stringify(arr.slice(-100))); }
+                catch { /* כשל מוחלט — ממשיכים ללא שמירה */ }
+            }
+        }
     },
 
     appendAIMessage(msg) {

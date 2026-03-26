@@ -95,6 +95,7 @@ function _setManagerTab(tab) {
 
 function renderManagerList() {
     const list = document.getElementById('manager-list');
+    if (!list) return;
     list.innerHTML = "";
 
     const keys = Object.keys(state.workouts);
@@ -753,11 +754,11 @@ function processConfigImport(input) {
 
 // ─── ARCHIVE HELPERS ───────────────────────────────────────────────────────
 
-function openArchiveFromDrawer(wo) {
+function openArchiveFromDrawer(timestamp) {
     closeDayDrawer();
     setTimeout(() => {
         const archive = StorageManager.getArchive();
-        const idx = archive.findIndex(a => a.timestamp === wo.timestamp);
+        const idx = archive.findIndex(a => a.timestamp === timestamp);
         if (idx !== -1) openArchiveDetail(idx);
     }, 350);
 }
