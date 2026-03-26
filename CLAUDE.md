@@ -70,6 +70,12 @@
 האפליקציה היא PWA. ה-Service Worker מזהה עדכון **רק** כשקובץ `sw.js` משתנה.
 אם לא מעלים גרסה — המשתמש ממשיך לשרת מה-cache הישן למרות שה-commit נדחף.
 
+### GitHub Actions — auto-merge אוטומטי
+קיים workflow ב-`.github/workflows/auto-merge-to-main.yml`.
+**כל push לbranch `claude/**` ממוזג אוטומטית ל-`main`** — האפליקציה מגישה מ-main.
+אם ה-merge לא קרה (בדוק Actions ב-GitHub), המשתמש לא יראה את העדכון ב-"בדוק עדכון".
+**לעולם אל תניח שהעדכון הגיע למשתמש לפני שווידאת שה-workflow רץ בהצלחה.**
+
 ### תבנית
 ```
 sw.js:        const CACHE_VERSION = 'gympro-v14.12.0-XX';
