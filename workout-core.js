@@ -2402,45 +2402,65 @@ async function callGeminiAPI(userMessage) {
     const config = StorageManager.getAIConfig();
     if (!config.apiKey) throw new Error('API_KEY_MISSING');
 
+    // מודלים שתומכים ב-thinkingConfig (2.5 ומעלה, לא lite)
+    const THINKING_MODELS = ['gemini-2.5-pro', 'gemini-2.5-flash'];
+
     let lastErr = '';
     const last10 = aiChatHistory.slice(-10);
-    const payload = {
-        system_instruction: { parts: [{ text: buildSystemPrompt() }] },
-        contents: [
-            ...last10.map(m => ({ role: m.role, parts: [{ text: m.text }] })),
-            { role: 'user', parts: [{ text: userMessage }] }
-        ],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 600, thinkingConfig: { thinkingBudget: 0 } }
-    };
+    const baseContents = [
+        ...last10.map(m => ({ role: m.role, parts: [{ text: m.text }] })),
+        { role: 'user', parts: [{ text: userMessage }] }
+    ];
 
     for (const modelName of config.models) {
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${config.apiKey}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (response.ok) {
-                const data = await response.json();
-                const parts = data.candidates?.[0]?.content?.parts || [];
-                const text = parts.find(p => !p.thought)?.text || '';
-                return text;
+        // בנה generationConfig בהתאם לתמיכת המודל ב-thinking
+        const supportsThinking = THINKING_MODELS.some(m => modelName.startsWith(m));
+        const generationConfig = supportsThinking
+            ? { temperature: 0.7, maxOutputTokens: 600, thinkingConfig: { thinkingBudget: 0 } }
+            : { temperature: 0.7, maxOutputTokens: 600 };
+
+        const payload = {
+            system_instruction: { parts: [{ text: buildSystemPrompt() }] },
+            contents: baseContents,
+            generationConfig
+        };
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${config.apiKey}`;
+
+        // retry אחד על 503 לפני מעבר למודל הבא
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                if (attempt > 0) await new Promise(r => setTimeout(r, 2000));
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const parts = data.candidates?.[0]?.content?.parts || [];
+                    const text = parts.find(p => !p.thought)?.text || '';
+                    return text;
+                }
+                if (response.status === 503 && attempt === 0) {
+                    console.warn(`GymPro AI: ${modelName} 503, retrying in 2s...`);
+                    continue;
+                }
+                if (response.status === 429 || response.status === 503) {
+                    console.warn(`GymPro AI: model ${modelName} overloaded, trying next...`);
+                    lastErr = `${modelName}: ${response.status}`;
+                    break;
+                }
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(`API_ERROR_${response.status}: ${errData.error?.message || ''}`);
+            } catch(e) {
+                if (e.message && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError'))) {
+                    console.warn(`GymPro AI: network error on ${modelName}, trying next...`);
+                    lastErr = `${modelName}: ${e.message}`;
+                    break;
+                }
+                throw e;
             }
-            if (response.status === 429 || response.status === 503) {
-                console.warn(`GymPro AI: model ${modelName} overloaded, trying next...`);
-                lastErr = `${modelName}: ${response.status}`;
-                continue;
-            }
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(`API_ERROR_${response.status}: ${errData.error?.message || ''}`);
-        } catch(e) {
-            if (e.message && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError'))) {
-                console.warn(`GymPro AI: network error on ${modelName}, trying next...`);
-                lastErr = `${modelName}: ${e.message}`;
-                continue;
-            }
-            throw e;
         }
     }
     const err = new Error('ALL_MODELS_FAILED');
