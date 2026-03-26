@@ -97,7 +97,7 @@ function getMuscleSetCounts(archive, range) {
             if (!exData || !exData.muscles) return;
             const setCount = w.details[exName].sets ? w.details[exName].sets.length : 0;
             exData.muscles.forEach(m => {
-                if (!['biceps','triceps'].includes(m)) {
+                if (!['biceps','triceps','quads','hamstrings','glutes','calves'].includes(m)) {
                     if (!map[m]) map[m] = 0;
                     map[m] += setCount;
                 }
