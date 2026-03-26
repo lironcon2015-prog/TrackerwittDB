@@ -502,7 +502,7 @@ function openDayDrawer(workouts, day, monthName) {
         workouts.forEach(wo => {
             const woMeta = state.workoutMeta[wo.type];
             const dotColor = (woMeta && woMeta.color) ? woMeta.color : 'var(--type-free)';
-            html += `<div class="mini-workout-item" onclick='openArchiveFromDrawer(${JSON.stringify(wo).replace(/'/g, "&#39;")})'>
+            html += `<div class="mini-workout-item" onclick='openArchiveFromDrawer(${wo.timestamp})'>
                 <div class="mini-dot" style="background:${dotColor}"></div>
                 <div style="flex-grow:1;"><div class="font-semi text-base">${wo.type}</div><div class="text-xs color-dim">${wo.duration} דק'</div></div>
                 <div class="chevron"></div>
