@@ -212,12 +212,15 @@ function toggleArchiveSelection(id) {
 
 function updateCopySelectedBtn() {
     const btn = document.getElementById('btn-copy-selected');
+    if (!btn) return;
     if (selectedArchiveIds.size > 0) {
-        btn.disabled = false; btn.style.opacity = "1";
-        btn.style.borderColor = "var(--accent)"; btn.style.color = "var(--accent)";
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'color-dim', 'border-dim');
+        btn.classList.add('color-accent', 'border-accent');
     } else {
-        btn.disabled = true; btn.style.opacity = "0.5";
-        btn.style.borderColor = "var(--border)"; btn.style.color = "var(--text-dim)";
+        btn.disabled = true;
+        btn.classList.remove('color-accent', 'border-accent');
+        btn.classList.add('opacity-50', 'color-dim', 'border-dim');
     }
 }
 
