@@ -175,8 +175,15 @@ window.onload = () => {
 };
 
 function checkRecovery() {
-    if (StorageManager.hasActiveSession()) {
+    if (!StorageManager.hasActiveSession()) return;
+    // הצג modal רק אם האימון התחיל בפועל (יש workoutStartTime)
+    // עריכה בעורך גם שומרת session אבל אין workoutStartTime
+    const saved = StorageManager.getSessionState();
+    if (saved && saved.state && saved.state.workoutStartTime) {
         document.getElementById('recovery-modal').style.display = 'flex';
+    } else {
+        // session של עורך בלבד — נקה אוטומטית
+        StorageManager.clearSessionState();
     }
 }
 
