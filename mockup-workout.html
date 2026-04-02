@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Mockup — Active Workout</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=Heebo:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000000;
+    --card-bg: rgba(28,28,30,0.65);
+    --accent: #0A84FF;
+    --type-b: #32D74B;
+    --type-c: #FF9F0A;
+    --type-free: #5E5CE6;
+    --danger: #ff453a;
+    --text: #ffffff;
+    --text-dim: #8E8E93;
+    --border: rgba(255,255,255,0.10);
+    --border-hi: rgba(255,255,255,0.18);
+    --glass: blur(20px) saturate(180%) brightness(0.88);
+    --ios-radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Heebo', -apple-system, sans-serif;
+    background: #000; color: var(--text);
+    direction: rtl;
+    min-height: 100vh;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 20px 0 40px;
+  }
+
+  /* ── Phone frame ── */
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    background: #000;
+    border-radius: 44px;
+    border: 1px solid rgba(255,255,255,0.15);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  /* ── Ambient background ── */
+  .ambient {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(circle at 20% 40%, rgba(10,132,255,0.18) 0%, transparent 50%),
+      radial-gradient(circle at 80% 15%, rgba(94,92,230,0.14) 0%, transparent 45%),
+      #000;
+  }
+
+  .screen-content {
+    position: relative; z-index: 1;
+    height: 100%; display: flex; flex-direction: column;
+    padding: 52px 20px 0;
+  }
+
+  /* ── Header ── */
+  .app-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  .brand-logo {
+    font-weight: 800; font-size: 1.15em; letter-spacing: -0.5px;
+    position: absolute; left: 50%; transform: translateX(-50%);
+  }
+  .brand-logo span { color: var(--accent); }
+  .header-icon-btn {
+    background: none; border: none; padding: 6px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .header-icon-btn svg { stroke: rgba(174,174,178,0.7); }
+
+  /* ── Workout type + set badges ── */
+  .badge-row {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+  }
+  .badge {
+    padding: 5px 11px; border-radius: 8px;
+    font-size: 0.7em; font-weight: 800; letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .badge-type-a { background: rgba(10,132,255,0.18); color: var(--accent); border: 1px solid rgba(10,132,255,0.35); }
+  .badge-type-c { background: rgba(255,159,10,0.18); color: var(--type-c); border: 1px solid rgba(255,159,10,0.35); }
+  .badge-set { background: var(--accent); color: #fff; }
+
+  /* ── Exercise name ── */
+  .exercise-name {
+    font-size: 2.6em;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    margin-bottom: 6px;
+  }
+  .exercise-name .tag {
+    color: var(--type-c);
+    font-size: 0.55em;
+    font-weight: 800;
+    background: rgba(255,159,10,0.12);
+    border: 1px solid rgba(255,159,10,0.3);
+    border-radius: 6px;
+    padding: 2px 7px;
+    vertical-align: middle;
+    margin-right: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Last set pill ── */
+  .last-set-pill {
+    background: rgba(10,132,255,0.1);
+    border: 1px solid rgba(10,132,255,0.2);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.8em; font-weight: 600; color: var(--accent);
+    margin-bottom: 18px; display: inline-block;
+  }
+
+  /* ── Session log table ── */
+  .session-log {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+  }
+  .session-log-header {
+    display: grid; grid-template-columns: 28px 1fr 1fr 1fr;
+    gap: 6px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-size: 0.65em; color: var(--text-dim); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; text-align: center;
+  }
+  .session-log-header div:first-child { text-align: right; }
+  .session-log-row {
+    display: grid; grid-template-columns: 28px 1fr 1fr 1fr;
+    gap: 6px; padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.88em; text-align: center; align-items: center;
+  }
+  .session-log-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .log-set-num { color: var(--text-dim); font-size: 0.85em; text-align: right; }
+  .log-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .log-rir { color: var(--accent); font-weight: 600; font-size: 0.85em; }
+  .session-log-row.current-set {
+    background: rgba(10,132,255,0.07);
+    border-radius: 8px; padding-right: 6px; padding-left: 6px;
+    margin: 0 -6px;
+  }
+  .session-log-row.current-set .log-set-num { color: var(--accent); }
+
+  /* ── Stepper inputs ── */
+  .stepper-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; margin-bottom: 16px;
+  }
+  .stepper-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+    border: 1px solid var(--border); border-top-color: var(--border-hi);
+    border-radius: var(--ios-radius);
+    padding: 12px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    box-shadow: inset 0 1px 0 var(--border-hi);
+  }
+  .stepper-label {
+    font-size: 0.62em; color: var(--text-dim);
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .stepper-value-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .stepper-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white; font-size: 1.2em; font-weight: 300;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; line-height: 1;
+  }
+  .stepper-num {
+    font-size: 1.55em; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    min-width: 42px; text-align: center; line-height: 1;
+  }
+  .stepper-unit {
+    font-size: 0.62em; color: var(--text-dim); margin-top: -4px;
+    font-weight: 600;
+  }
+
+  /* ── LOG SET button ── */
+  .btn-log-set {
+    width: 100%;
+    background: linear-gradient(135deg, #0A84FF, #0056b3);
+    border: none; border-radius: var(--ios-radius);
+    padding: 22px 20px;
+    color: white; font-size: 1.2em; font-weight: 800;
+    letter-spacing: 0.3px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 6px 28px rgba(10,132,255,0.45);
+    margin-bottom: 16px;
+    position: relative; overflow: hidden;
+  }
+  .btn-log-set::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .btn-log-set .arrow {
+    font-size: 1.1em; opacity: 0.85;
+  }
+
+  /* ── Timer ── */
+  .timer-section {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 16px;
+  }
+  .timer-wrap {
+    position: relative; width: 130px; height: 130px;
+  }
+  .timer-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+  .timer-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 6; }
+  .timer-bar {
+    fill: none; stroke: var(--accent); stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 283;
+    stroke-dashoffset: 80; /* ~72% elapsed */
+    transition: stroke-dashoffset 1s linear;
+  }
+  .timer-text {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2em; font-weight: 300;
+    font-variant-numeric: tabular-nums; letter-spacing: -1px;
+  }
+  .timer-label {
+    font-size: 0.7em; color: var(--text-dim);
+    margin-top: 8px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Next exercise preview ── */
+  .next-ex-preview {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .next-ex-label { font-size: 0.68em; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+  .next-ex-name { font-size: 0.9em; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .next-ex-arrow {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8em; color: var(--text-dim);
+  }
+
+  /* ── Skip button ── */
+  .btn-skip {
+    background: none; border: 1px solid rgba(255,69,58,0.25);
+    border-radius: 20px; color: var(--danger);
+    padding: 9px 20px; font-size: 0.82em; font-weight: 600;
+    width: 100%; cursor: pointer; margin-bottom: 16px;
+  }
+
+  /* ── Tab bar ── */
+  .tab-bar {
+    position: sticky; bottom: 0; left: 0; right: 0;
+    background: rgba(10,10,12,0.88);
+    backdrop-filter: blur(28px) saturate(200%) brightness(0.85);
+    -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(0.85);
+    border-top: 1px solid var(--border-hi);
+    display: flex; align-items: flex-start;
+    padding: 8px 8px 24px; gap: 6px;
+    margin-top: auto;
+  }
+  .tab-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    background: none; border: 1px solid transparent;
+    color: rgba(174,174,178,0.6); cursor: pointer;
+    padding: 11px 6px; border-radius: 12px; font-family: inherit;
+  }
+  .tab-btn.active {
+    color: #fff; background: rgba(10,132,255,0.14);
+    border-color: rgba(10,132,255,0.32);
+  }
+  .tab-label { font-size: 0.88em; font-weight: 700; }
+
+  /* scrollable content area */
+  .scroll-area {
+    flex: 1; overflow-y: auto; scrollbar-width: none;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* divider label */
+  .divider-label {
+    font-size: 0.62em; color: var(--text-dim); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="ambient"></div>
+  <div class="screen-content">
+
+    <!-- Header -->
+    <header class="app-header" style="position:relative;">
+      <button class="header-icon-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+          <circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"/>
+          <circle cx="15" cy="14" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+      </button>
+      <div class="brand-logo">GYMPRO <span>ELITE</span></div>
+      <div style="display:flex;gap:5px;">
+        <button class="header-icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        </button>
+        <button class="header-icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable content -->
+    <div class="scroll-area">
+
+      <!-- Badges -->
+      <div class="badge-row">
+        <span class="badge badge-type-a">TYPE A</span>
+        <span class="badge badge-type-c">PUSH DAY</span>
+        <span class="badge badge-set">SET 2 / 3</span>
+      </div>
+
+      <!-- Exercise Name -->
+      <div class="exercise-name">
+        BENCH PRESS
+        <span class="tag">MAIN</span>
+      </div>
+
+      <!-- Last set pill -->
+      <div class="last-set-pill">סט קודם: 102.5 kg × 8 | RIR 1</div>
+
+      <!-- Session log -->
+      <div class="divider-label">סטים שהושלמו</div>
+      <div class="session-log">
+        <div class="session-log-header">
+          <div>#</div>
+          <div>KG</div>
+          <div>REPS</div>
+          <div>RIR</div>
+        </div>
+        <div class="session-log-row">
+          <div class="log-set-num">1</div>
+          <div class="log-val">100</div>
+          <div class="log-val">8</div>
+          <div class="log-rir">1.5</div>
+        </div>
+        <div class="session-log-row">
+          <div class="log-set-num">2</div>
+          <div class="log-val">102.5</div>
+          <div class="log-val">8</div>
+          <div class="log-rir">1</div>
+        </div>
+        <!-- current set placeholder -->
+        <div class="session-log-row current-set">
+          <div class="log-set-num" style="color:var(--accent);">3</div>
+          <div class="log-val" style="color:rgba(255,255,255,0.3);">—</div>
+          <div class="log-val" style="color:rgba(255,255,255,0.3);">—</div>
+          <div class="log-rir" style="color:rgba(255,255,255,0.3);">—</div>
+        </div>
+      </div>
+
+      <!-- Stepper inputs -->
+      <div class="stepper-grid">
+        <!-- Weight -->
+        <div class="stepper-card">
+          <div class="stepper-label">Weight</div>
+          <div class="stepper-value-row">
+            <button class="stepper-btn">−</button>
+            <div>
+              <div class="stepper-num">105</div>
+              <div class="stepper-unit">kg</div>
+            </div>
+            <button class="stepper-btn">+</button>
+          </div>
+        </div>
+        <!-- Reps -->
+        <div class="stepper-card">
+          <div class="stepper-label">Reps</div>
+          <div class="stepper-value-row">
+            <button class="stepper-btn">−</button>
+            <div>
+              <div class="stepper-num">8</div>
+              <div class="stepper-unit">reps</div>
+            </div>
+            <button class="stepper-btn">+</button>
+          </div>
+        </div>
+        <!-- RIR -->
+        <div class="stepper-card">
+          <div class="stepper-label">RIR</div>
+          <div class="stepper-value-row">
+            <button class="stepper-btn">−</button>
+            <div>
+              <div class="stepper-num">1</div>
+              <div class="stepper-unit">rir</div>
+            </div>
+            <button class="stepper-btn">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOG SET button -->
+      <button class="btn-log-set">
+        LOG SET 3
+        <span class="arrow">›</span>
+      </button>
+
+      <!-- Timer -->
+      <div class="timer-section">
+        <div class="timer-wrap">
+          <svg class="timer-svg" viewBox="0 0 100 100">
+            <circle class="timer-bg" cx="50" cy="50" r="45"/>
+            <circle class="timer-bar" cx="50" cy="50" r="45"/>
+          </svg>
+          <div class="timer-text">01:22</div>
+        </div>
+        <div class="timer-label">מנוחה</div>
+      </div>
+
+      <!-- Next exercise -->
+      <div class="next-ex-preview">
+        <div>
+          <div class="next-ex-label">הבא</div>
+          <div class="next-ex-name">Incline Bench Press</div>
+        </div>
+        <div class="next-ex-arrow">›</div>
+      </div>
+
+      <!-- Skip -->
+      <button class="btn-skip">דלג על התרגיל</button>
+
+    </div><!-- /scroll-area -->
+
+    <!-- Tab bar -->
+    <nav class="tab-bar">
+      <button class="tab-btn active"><span class="tab-label">אימון</span></button>
+      <button class="tab-btn"><span class="tab-label">אנליטיקה</span></button>
+      <button class="tab-btn"><span class="tab-label">ארכיון</span></button>
+    </nav>
+
+  </div>
+</div>
+</body>
+</html>
