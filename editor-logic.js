@@ -4,6 +4,17 @@
  * שדרוג 1: Toggle פעילים/מוסתרים בניהול תוכניות.
  */
 
+// ─── AUTO CLOUD CONFIG SAVE ────────────────────────────────────────────────
+
+function autoSaveConfigToCloud() {
+    if (typeof FirebaseManager === 'undefined' || !FirebaseManager.isConfigured()) return;
+    FirebaseManager.saveConfigToCloud().then(ok => {
+        if (typeof showCloudToast === 'function') {
+            showCloudToast(ok ? '☁️ קונפיג נשמר בענן' : '⚠️ שגיאה בשמירת קונפיג לענן', ok);
+        }
+    });
+}
+
 // ─── DYNAMIC MAIN MENU ─────────────────────────────────────────────────────
 
 function renderWorkoutMenu() {
@@ -152,6 +163,7 @@ function deleteWorkout(key) {
         StorageManager.saveData(StorageManager.KEY_DB_WORKOUTS, state.workouts);
         StorageManager.saveData(StorageManager.KEY_META, state.workoutMeta);
         renderManagerList(); renderWorkoutMenu();
+        autoSaveConfigToCloud();
     });
 }
 
@@ -166,6 +178,7 @@ function duplicateWorkout(key) {
     state.workouts[newName] = copy;
     StorageManager.saveData(StorageManager.KEY_DB_WORKOUTS, state.workouts);
     renderManagerList(); renderWorkoutMenu();
+    autoSaveConfigToCloud();
 }
 
 function createNewWorkout() {
@@ -392,6 +405,7 @@ function _finishSaveExConfig(exIndex, musclesArr, step, isUni, base, min, max) {
     if (!isNaN(max)) delete state.exercises[exIndex].maxW;
 
     StorageManager.saveData(StorageManager.KEY_DB_EXERCISES, state.exercises);
+    autoSaveConfigToCloud();
     closeExConfigModal();
 
     if (document.getElementById('ui-exercise-db').classList.contains('active')) {
@@ -431,6 +445,7 @@ function deleteExercise() {
         if (exIndex > -1) {
             state.exercises.splice(exIndex, 1);
             StorageManager.saveData(StorageManager.KEY_DB_EXERCISES, state.exercises);
+            autoSaveConfigToCloud();
             showAlert("התרגיל נמחק.", () => {
                 closeExConfigModal();
                 renderExerciseDatabase();
@@ -583,6 +598,7 @@ function saveWorkoutChanges() {
 
     state.workouts[newName] = managerState.exercises;
     StorageManager.saveData(StorageManager.KEY_DB_WORKOUTS, state.workouts);
+    autoSaveConfigToCloud();
 
     haptic('success');
 
