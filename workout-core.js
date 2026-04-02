@@ -4,6 +4,24 @@
  * שדרוגים: החלפת תרגיל חופשית, חזרה מבחר אימון, פידבק סיום, כפתור רענון, תיקוני חוב.
  */
 
+// ─── CLOUD TOAST ──────────────────────────────────────────────────────────
+
+let _cloudToastTimer = null;
+function showCloudToast(msg, success) {
+    const t = document.getElementById('cloud-toast');
+    if (!t) return;
+    if (_cloudToastTimer) clearTimeout(_cloudToastTimer);
+    t.textContent = msg;
+    t.className = 'cloud-toast ' + (success ? 'success' : 'error');
+    // force reflow להתחלת אנימציה מחדש אם נקרא שוב
+    void t.offsetWidth;
+    t.classList.add('show');
+    _cloudToastTimer = setTimeout(() => {
+        t.classList.remove('show');
+        _cloudToastTimer = null;
+    }, 3000);
+}
+
 // ─── CUSTOM MODAL SYSTEM ───────────────────────────────────────────────────
 
 function showAlert(msg, onOk) {
@@ -1853,9 +1871,11 @@ function copyResult() {
     const note = (document.getElementById('summary-note') ? document.getElementById('summary-note').value.trim() : '');
     _saveToArchive(note);
 
-    // גיבוי אוטומטי לענן אחרי שמירת אימון — fire and forget
+    // גיבוי אוטומטי לענן אחרי שמירת אימון
     if (typeof FirebaseManager !== 'undefined' && FirebaseManager.isConfigured()) {
-        FirebaseManager.saveArchiveToCloud();
+        FirebaseManager.saveArchiveToCloud().then(ok => {
+            showCloudToast(ok ? '☁️ ארכיון נשמר בענן' : '⚠️ שגיאה בשמירת ארכיון לענן', ok);
+        });
     }
 
     const archive = StorageManager.getArchive();

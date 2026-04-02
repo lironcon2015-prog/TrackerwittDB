@@ -440,7 +440,12 @@ function openArchiveDetail(idx) {
             StorageManager.deleteFromArchive(item.timestamp);
             haptic('warning');
             if (typeof FirebaseManager !== 'undefined' && FirebaseManager.isConfigured()) {
-                FirebaseManager.saveArchiveToCloud().then(() => window.location.reload());
+                FirebaseManager.saveArchiveToCloud().then(ok => {
+                    if (typeof showCloudToast === 'function') {
+                        showCloudToast(ok ? '☁️ ארכיון עודכן בענן' : '⚠️ שגיאה בעדכון ארכיון בענן', ok);
+                    }
+                    window.location.reload();
+                });
             } else {
                 window.location.reload();
             }
