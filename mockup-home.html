@@ -196,16 +196,18 @@
   /* chart */
   .pr-chart-area {
     flex: 1; min-height: 0;
-    display: flex; flex-direction: column; justify-content: flex-end;
+    display: flex; flex-direction: column;
+    overflow: hidden; /* מונע גלישה מחוץ לכרטיס */
   }
   .pr-chart-svg {
     width: 100%;
     flex: 1; min-height: 0;
-    overflow: visible;
+    overflow: hidden;
     display: block;
   }
   .pr-dates {
     display: flex; justify-content: space-between;
+    direction: ltr; /* SVG ציר X הולך שמאל→ימין */
     padding: 0 2px; margin-top: 4px; flex-shrink: 0;
   }
   .pr-date-lbl {
@@ -221,9 +223,9 @@
   }
   .week-card {
     border-radius: 1.75rem;
-    padding: 14px 16px 16px;
-    display: flex; flex-direction: column; justify-content: space-between;
-    cursor: pointer; border: none; text-align: right;
+    padding: 12px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border: none;
     position: relative; overflow: hidden;
     transition: transform 0.15s;
   }
@@ -254,15 +256,19 @@
     opacity: 0.055; pointer-events: none; user-select: none; color: #fff;
   }
 
-  .wk-top { display: flex; justify-content: flex-end; }
+  /* chevron — פינה עליונה, absolute */
+  .wk-top {
+    position: absolute; top: 12px; left: 14px; /* RTL: left = קצה ויזואלי ימני */
+  }
   .wk-chevron { color: #3a3a3a; transition: color 0.2s; }
   .week-card:hover .wk-chevron { color: var(--primary); }
 
   .wk-name {
     font-family: 'Heebo', sans-serif; font-weight: 900;
-    font-size: 22px; text-transform: uppercase;
+    font-size: 26px; text-transform: uppercase;
     letter-spacing: -0.04em; line-height: 1;
     color: var(--on-bg); position: relative; z-index: 1;
+    text-align: center;
   }
   .wkd .wk-name { color: #c4a0ff; }
 
@@ -426,9 +432,6 @@
             <circle cx="224" cy="22" r="3"   fill="#47e266"/>
             <circle cx="280" cy="11" r="3.5" fill="#47e266"/>
           </g>
-          <text x="280" y="6" text-anchor="middle"
-                font-family="Inter,sans-serif" font-size="8" font-weight="700"
-                fill="#47e266" opacity="0.85">102.5</text>
         </svg>
         <div class="pr-dates">
           <span class="pr-date-lbl">15/3</span>
