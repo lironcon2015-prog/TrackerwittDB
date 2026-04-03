@@ -2581,3 +2581,34 @@ body {
     bottom: -6px;
     right: -1px;
 }
+
+/* =========================================
+   LIQUID OBSIDIAN — FIXES v3
+   ========================================= */
+
+/* ── Chart: fills remaining card space ── */
+.home-pr-chart-wrap {
+    flex: 1;
+    min-height: 80px;
+    position: relative;
+    /* override previous height:80px */
+    height: unset;
+}
+
+/* ── Bench/OHP toggle — larger & bolder ─ */
+.home-pr-section-hdr .home-pr-toggle {
+    background: rgba(255,255,255,0.07);
+    border-radius: 9999px;
+    padding: 3px;
+    gap: 2px;
+}
+.home-pr-section-hdr .home-pr-btn {
+    font-size: 0.82em;
+    padding: 7px 16px;
+    border-radius: 9999px;
+    font-weight: 700;
+}
+.home-pr-section-hdr .home-pr-btn.active {
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+}
