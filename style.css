@@ -2683,7 +2683,7 @@ body {
 /* Week cards */
 #ui-week .menu-card { min-height: 60px; padding: 8px 14px; }
 
-/* ─── LIQUID OBSIDIAN — WORKOUT SELECTION SCREEN (v14.12.0-49) ─────────── */
+/* ─── LIQUID OBSIDIAN — WORKOUT SELECTION SCREEN (v14.12.0-50) ─────────── */
 
 .obsidian-week-header { margin-bottom: 28px; }
 
@@ -2698,7 +2698,7 @@ body {
 
 .workout-screen-title {
     margin: 0;
-    font-size: 2.3em;
+    font-size: 2.4em;
     font-weight: 900;
     color: #ffffff;
     line-height: 1.1;
@@ -2706,32 +2706,32 @@ body {
     font-family: 'Heebo', 'Inter', sans-serif;
 }
 
-/* כרטיסיית אימון — Obsidian */
+/* כרטיסיית אימון — Obsidian (מותאם למוקאפ: rounded-lg = 2rem) */
 .obsidian-menu-card {
     position: relative;
     overflow: hidden;
-    background: rgba(27, 27, 27, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
-    padding: 22px;
+    background: #1b1b1b;         /* surface-container-low מהמוקאפ */
+    border: none;
+    border-radius: 2rem;          /* rounded-lg כמו במוקאפ */
+    padding: 24px;
     color: white;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     display: block;
     cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
+    transition: background 0.18s, transform 0.1s;
     width: 100%;
     text-align: right;
     box-sizing: border-box;
 }
-.obsidian-menu-card:hover { background: rgba(42, 42, 42, 0.9); }
-.obsidian-menu-card:active { transform: scale(0.98); }
+.obsidian-menu-card:hover { background: #2a2a2a; }
+.obsidian-menu-card:active { transform: scale(0.98); background: #222; }
 
-/* שכבת gradient על כרטיסייה ראשונה */
+/* gradient overlay על כרטיסייה ראשונה בלבד */
 .obsidian-menu-card.card-featured::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(170, 199, 255, 0.07) 0%, transparent 55%);
+    background: linear-gradient(135deg, rgba(170, 199, 255, 0.10) 0%, transparent 55%);
     pointer-events: none;
 }
 
@@ -2740,47 +2740,75 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    position: relative; /* מעל ה-::before */
 }
 
 .obsidian-card-info {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
     flex: 1;
     min-width: 0;
 }
 
+/* font-headline text-2xl font-black של המוקאפ */
 .obsidian-card-title {
-    margin: 0 0 4px;
-    font-size: 1.45em;
+    margin: 0 0 5px;
+    font-size: 1.6em;
     font-weight: 900;
     color: #ffffff;
     line-height: 1.1;
     font-family: 'Heebo', 'Inter', sans-serif;
+    letter-spacing: -0.01em;
 }
 
+/* text-on-surface-variant text-sm font-medium */
 .obsidian-card-count {
     margin: 0;
-    font-size: 0.82em;
+    font-size: 0.85em;
     font-weight: 500;
-    color: var(--text-dim);
+    color: #c0c6d6;
 }
 
-/* תמונת placeholder מימין */
-.obsidian-card-thumb {
-    width: 88px;
-    height: 88px;
-    border-radius: 16px;
+/* כפתור תרגילים — bg-surface-variant rounded-full כמו במוקאפ */
+.btn-obsidian-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #353535;          /* surface-variant */
+    border: none;
+    border-radius: 9999px;        /* rounded-full */
+    padding: 10px 20px;
+    font-size: 0.78em;
+    font-weight: 700;
+    font-family: inherit;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
     flex-shrink: 0;
-    background: rgba(53, 53, 53, 0.7);
+    direction: rtl;
+}
+.btn-obsidian-pill:hover  { background: #414754; } /* outline-variant */
+.btn-obsidian-pill:active { transform: scale(0.95); }
+
+/* תמונת אימון — w-24 h-24 rounded-2xl כמו במוקאפ */
+.obsidian-card-thumb {
+    width: 96px;
+    height: 96px;
+    border-radius: 1rem;           /* rounded-2xl ≈ 1rem */
+    flex-shrink: 0;
+    background-color: #353535;
+    background-size: cover;
+    background-position: center;
 }
 
 /* כרטיסיית Freestyle */
 .obsidian-freestyle-card {
-    background: rgba(14, 14, 14, 0.6);
-    border: 1px dashed rgba(65, 71, 84, 0.45);
-    border-radius: 20px;
-    padding: 22px;
+    background: #0e0e0e;
+    border: 1px dashed rgba(65, 71, 84, 0.4);
+    border-radius: 2rem;
+    padding: 24px;
     color: white;
     width: 100%;
     display: flex;
@@ -2791,15 +2819,15 @@ body {
     text-align: right;
     box-sizing: border-box;
 }
-.obsidian-freestyle-card:hover { border-color: rgba(170, 199, 255, 0.4); }
+.obsidian-freestyle-card:hover  { border-color: rgba(170, 199, 255, 0.42); }
 .obsidian-freestyle-card:active { transform: scale(0.98); }
-.obsidian-freestyle-card h3 { margin: 0; font-size: 1.2em; font-weight: 700; }
+.obsidian-freestyle-card h3 { margin: 0; font-size: 1.25em; font-weight: 700; }
 .obsidian-freestyle-card p  { margin: 5px 0 0; font-size: 0.83em; font-weight: 600; color: var(--primary); }
 
 .freestyle-add-icon {
     width: 46px;
     height: 46px;
-    background: rgba(42, 42, 42, 0.85);
+    background: #1f1f1f;
     border-radius: 50%;
     display: flex;
     align-items: center;
