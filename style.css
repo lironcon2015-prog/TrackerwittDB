@@ -125,11 +125,12 @@ body {
    BASE STYLES & COMPONENTS
    ========================================= */
 
-/* Ambient Light Upgrade (iOS 17 Style) */
+/* Liquid Obsidian — Ambient */
 .glass-overlay {
     position: fixed; inset: 0;
-    background: radial-gradient(circle at 15% 50%, rgba(10, 132, 255, 0.15), transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(191, 90, 242, 0.1), transparent 50%),
+    background: radial-gradient(ellipse at 20% 45%, rgba(10, 132, 255, 0.26), transparent 52%),
+                radial-gradient(ellipse at 82% 25%, rgba(191, 90, 242, 0.18), transparent 48%),
+                radial-gradient(ellipse at 55% 90%, rgba(10, 132, 255, 0.08), transparent 40%),
                 #000000;
     z-index: -1;
 }
@@ -239,12 +240,12 @@ body {
 /* Glassmorphism Menus */
 .menu-card {
     background: var(--card-bg); border: 1px solid var(--border);
-    border-top-color: var(--border-hi);
+    border-top-color: rgba(255,255,255,0.28);
     backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
     border-radius: var(--ios-radius); padding: 18px; color: white; margin-bottom: 12px;
     display: flex; justify-content: space-between; align-items: center; cursor: pointer;
     transition: transform 0.1s, background 0.1s;
-    box-shadow: inset 0 1px 0 var(--border-hi);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 24px rgba(0,0,0,0.35);
 }
 .menu-card:active { transform: scale(0.98); background: rgba(44, 44, 46, 0.8); }
 .menu-card.tall { flex-direction: column; align-items: flex-start; gap: 5px; }
@@ -323,12 +324,12 @@ body {
 .vertical-stack { display: flex; flex-direction: column; gap: 10px; }
 
 /* Inputs & UI Elements */
-.glass-card { 
-    background: var(--card-bg); border-radius: var(--ios-radius); 
-    padding: 16px; border: 1px solid var(--border); margin-bottom: 15px; 
+.glass-card {
+    background: var(--card-bg); border-radius: var(--ios-radius);
+    padding: 16px; border: 1px solid var(--border); margin-bottom: 15px;
     backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
-    border-top-color: var(--border-hi);
-    box-shadow: inset 0 1px 0 var(--border-hi);
+    border-top-color: rgba(255,255,255,0.28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 20px rgba(0,0,0,0.3);
 }
 .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 .compact { text-align: center; padding: 12px 5px; }
@@ -1943,4 +1944,50 @@ body {
     margin-top: 10px;
     font-size: 11px; color: rgba(255,159,10,0.8);
     line-height: 1.5;
+}
+
+/* =========================================
+   WORKOUT FLOW — UNIFIED BUTTON SYSTEM
+   ========================================= */
+
+/* Primary: sky-blue pill — כל כפתורי פעולה ראשית בפלואו */
+#ui-main .action-panel .btn-main,
+#ui-ask-extra .btn-main,
+#ui-summary .btn-main {
+    border-radius: 50px;
+    background: linear-gradient(135deg, #5DBAFF 0%, #3A9CF5 100%);
+    box-shadow: 0 8px 28px rgba(93,186,255,0.4), 0 2px 10px rgba(58,156,245,0.25);
+    width: calc(100% - 32px);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Secondary: outlined pill — "+ סט נוסף" */
+.secondary-action {
+    border-radius: 50px !important;
+    border: 1.5px solid rgba(93,186,255,0.38) !important;
+    color: #5DBAFF !important;
+    background: rgba(93,186,255,0.06) !important;
+    width: calc(100% - 32px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Ghost pill — "הוסף סבב קיים" */
+#ui-ask-extra .btn-text[onclick="startExtraCluster()"] {
+    border: 1.5px solid rgba(255,255,255,0.14) !important;
+    border-radius: 50px !important;
+    background: rgba(255,255,255,0.04) !important;
+    color: var(--text-dim) !important;
+    width: calc(100% - 32px);
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+/* Liquid Obsidian — stepper cards stronger glass */
+#ui-main .input-grid .glass-card {
+    border-top-color: rgba(255,255,255,0.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 6px 20px rgba(0,0,0,0.4);
+    background: rgba(28,28,30,0.75);
 }
