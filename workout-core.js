@@ -1048,7 +1048,7 @@ function isUnilateral(exName) {
 // ─── INIT PICKERS ──────────────────────────────────────────────────────────
 
 function initPickers() {
-    document.getElementById('ex-display-name').innerText = state.currentExName;
+    document.getElementById('ex-display-name').innerText = state.currentExName.replace(/\s*\(Main\)/i, '');
     const exHeader = document.querySelector('.exercise-header');
     const existingQueue = document.querySelector('.cluster-queue-container');
     if (existingQueue) existingQueue.remove();
