@@ -156,6 +156,7 @@
     border-radius: 2rem;
     padding: 14px 18px 10px;
     display: flex; flex-direction: column;
+    overflow: hidden; /* הכרטיס מגדר — הגרף לא יגלוש החוצה */
   }
   /* top row: label + range chips */
   .pr-top-row {
@@ -195,14 +196,14 @@
   }
   /* chart */
   .pr-chart-area {
-    flex: 1; min-height: 0;
+    flex: 1;
+    min-height: 52px; /* ממנע קריסת flex ל-0 */
     display: flex; flex-direction: column;
-    overflow: hidden; /* מונע גלישה מחוץ לכרטיס */
   }
   .pr-chart-svg {
     width: 100%;
-    flex: 1; min-height: 0;
-    overflow: hidden;
+    height: 100%; /* ממלא את שטח ה-chart-area */
+    overflow: visible; /* glow יגלוש, אבל pr-card מגדר */
     display: block;
   }
   .pr-dates {
