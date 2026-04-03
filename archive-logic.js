@@ -1262,7 +1262,7 @@ const HOME_PR_EXERCISES = {
     bench: 'Bench Press (Main)',
     ohp:   'Overhead Press (Main)'
 };
-const HOME_PR_COLORS = { bench: '#0A84FF', ohp: '#FF9F0A' };
+const HOME_PR_COLORS = { bench: '#47e266', ohp: '#ffb868' };
 
 let _homePRCurrent = 'bench';
 let _homePRSelectedIdx = null;
