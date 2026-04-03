@@ -1191,22 +1191,6 @@ function initPickers() {
     syncStepperDisplay('weight');
     syncStepperDisplay('reps');
     syncStepperDisplay('rir');
-    updateUpNextCard();
-}
-
-// ─── UP NEXT CARD ──────────────────────────────────────────────────────────
-
-function updateUpNextCard() {
-    const card = document.getElementById('up-next-card');
-    const nameEl = document.getElementById('up-next-name');
-    if (!card || !nameEl) return;
-    const nextName = getNextExerciseName();
-    if (nextName && nextName !== 'סיום אימון') {
-        nameEl.textContent = nextName.replace(/\s*\(Main\)/i, '');
-        card.style.display = 'flex';
-    } else {
-        card.style.display = 'none';
-    }
 }
 
 // ─── STEPPER HELPERS ───────────────────────────────────────────────────────
@@ -1231,12 +1215,6 @@ function stepPicker(field, dir) {
 }
 
 // ─── TIMER ─────────────────────────────────────────────────────────────────
-
-function addRestTime(sec) {
-    if (state.timerInterval && state.startTime) {
-        state.startTime += sec * 1000;
-    }
-}
 
 function resetAndStartTimer(customTime = null) {
     stopRestTimer(); state.seconds = 0; state.startTime = Date.now();
