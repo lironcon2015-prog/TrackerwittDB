@@ -3,30 +3,36 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>GymPro Elite — Mockup Home v2</title>
+<title>GymPro Elite — Mockup Home v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@900&family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:             #131313;
-    --primary:        #aac7ff;
-    --primary-ctr:    #3e90ff;
-    --secondary:      #47e266;
-    --tertiary:       #ffb868;
-    --on-bg:          #e2e2e2;
-    --on-var:         #c0c6d6;
-    --surface-ctr:    #1f1f1f;
-    --surface-var:    #353535;
+    --bg:           #131313;
+    --primary:      #aac7ff;
+    --primary-ctr:  #3e90ff;
+    --secondary:    #47e266;
+    --tertiary:     #ffb868;
+    --on-bg:        #e2e2e2;
+    --on-var:       #c0c6d6;
+    --surface-ctr:  #1f1f1f;
+    --surface-var:  #353535;
+    --header-h:     54px;
+    --nav-h:        76px;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
   }
 
   body {
     background: var(--bg);
     color: var(--on-bg);
     font-family: 'Inter', -apple-system, sans-serif;
-    min-height: 100dvh;
-    padding-bottom: 110px;
-    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   /* ── GLASS ──────────────────────────────────── */
@@ -37,19 +43,19 @@
     box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.09);
   }
 
-  /* ── TEXT GLOW ──────────────────────────────── */
   .text-glow { text-shadow: 0 0 22px rgba(170,199,255,0.50); }
-  .text-glow-green { text-shadow: 0 0 14px rgba(71,226,102,0.55); }
 
   /* ── HEADER ─────────────────────────────────── */
   header {
-    position: sticky; top: 0; z-index: 50;
+    flex-shrink: 0;
+    height: var(--header-h);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 15px 20px;
+    padding: 0 20px;
     background: rgba(9,9,9,0.7);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
     box-shadow: inset 0 -1px 0 0 rgba(255,255,255,0.06);
+    z-index: 50;
   }
   .header-logo { display: flex; align-items: center; gap: 10px; }
   .logo-icon { color: var(--primary-ctr); }
@@ -62,32 +68,39 @@
     background: none; border: none; cursor: pointer;
     padding: 8px; border-radius: 50%; color: #555;
     display: flex; align-items: center; justify-content: center;
-    transition: background 0.2s;
   }
-  .icon-btn:hover { background: rgba(255,255,255,0.05); color: #888; }
 
   /* ── MAIN ───────────────────────────────────── */
   main {
-    padding: 18px 16px;
-    display: flex; flex-direction: column; gap: 26px;
-    max-width: 480px; margin: 0 auto;
+    flex: 1;
+    min-height: 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   /* ── SECTION HEADER ─────────────────────────── */
   .sec-hdr {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 4px; margin-bottom: 12px;
+    padding: 0 2px; margin-bottom: 8px; flex-shrink: 0;
   }
   .sec-title {
     font-family: 'Heebo', sans-serif; font-weight: 900;
-    font-size: 19px; text-transform: uppercase; letter-spacing: -0.03em;
+    font-size: 17px; text-transform: uppercase; letter-spacing: -0.03em;
   }
 
-  /* ── HERO CARD ──────────────────────────────── */
+  /* ── HERO ────────────────────────────────────── */
+  .hero-section { flex: 3; min-height: 0; display: flex; flex-direction: column; }
+
   .hero-card {
+    flex: 1; min-height: 0;
     position: relative; border-radius: 2rem; overflow: hidden;
-    height: 252px; display: flex; flex-direction: column;
-    justify-content: space-between; padding: 26px 22px 22px;
+    display: flex; flex-direction: column;
+    justify-content: space-between; padding: 20px 20px 16px;
   }
   .hero-grad {
     position: absolute; inset: 0;
@@ -97,30 +110,29 @@
     position: absolute; inset: 0;
     background:
       radial-gradient(ellipse at 85% 15%, rgba(255,255,255,0.10) 0%, transparent 55%),
-      radial-gradient(ellipse at 15% 90%, rgba(100,40,220,0.35) 0%, transparent 50%);
+      radial-gradient(ellipse at 15% 90%, rgba(100,40,220,0.30) 0%, transparent 50%);
   }
-  .hero-top { position: relative; z-index: 2; }
+  .hero-content { position: relative; z-index: 2; }
   .hero-h1 {
     font-family: 'Heebo', sans-serif; font-weight: 900;
-    font-size: 34px; text-transform: uppercase;
-    letter-spacing: -0.04em; line-height: 1; color: #fff; margin-bottom: 18px;
+    font-size: 30px; text-transform: uppercase;
+    letter-spacing: -0.04em; line-height: 1; color: #fff; margin-bottom: 14px;
   }
-  .hero-stats { display: flex; gap: 26px; }
+  .hero-stats { display: flex; gap: 22px; }
   .stat-lbl {
     font-size: 9px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.12em; color: rgba(255,255,255,0.52); margin-bottom: 3px;
+    letter-spacing: 0.12em; color: rgba(255,255,255,0.52); margin-bottom: 2px;
   }
   .stat-val {
     font-family: 'Heebo', sans-serif; font-weight: 900;
-    font-size: 21px; letter-spacing: -0.04em; color: #fff;
+    font-size: 19px; letter-spacing: -0.04em; color: #fff;
   }
   .hero-bottom { position: relative; z-index: 2; }
   .ghost-btn {
     background: rgba(255,255,255,0.11);
-    backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.20);
-    border-radius: 9999px; padding: 7px 18px;
-    color: #fff; font-size: 12px; font-weight: 700; cursor: pointer;
+    border-radius: 9999px; padding: 6px 16px;
+    color: rgba(255,255,255,0.85); font-size: 11px; font-weight: 700; cursor: pointer;
   }
 
   /* ── PR TOGGLE ───────────────────────────────── */
@@ -129,22 +141,26 @@
     border-radius: 9999px; padding: 3px; gap: 2px;
   }
   .pill-btn {
-    padding: 5px 11px; border-radius: 9999px; border: none;
+    padding: 4px 10px; border-radius: 9999px; border: none;
     background: transparent; color: #555; font-size: 10px;
     font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.07em; cursor: pointer; transition: all 0.18s;
+    letter-spacing: 0.07em; cursor: pointer;
   }
   .pill-btn.active { background: var(--surface-var); color: var(--primary); }
 
-  /* ── PR CARD ─────────────────────────────────── */
+  /* ── PR SECTION ──────────────────────────────── */
+  .pr-section { flex: 2.5; min-height: 0; display: flex; flex-direction: column; }
+
   .pr-card {
+    flex: 1; min-height: 0;
     border-radius: 2rem;
-    padding: 20px 20px 16px;
+    padding: 14px 18px 10px;
+    display: flex; flex-direction: column;
   }
   /* top row: label + range chips */
   .pr-top-row {
-    display: flex; align-items: center;
-    justify-content: space-between; margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px; flex-shrink: 0;
   }
   .pr-lbl {
     font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -155,84 +171,87 @@
     padding: 3px 9px; border-radius: 9999px; border: none;
     background: rgba(255,255,255,0.06); color: #555;
     font-size: 9px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.06em; cursor: pointer; transition: all 0.18s;
+    letter-spacing: 0.06em; cursor: pointer;
   }
-  .range-chip.active {
-    background: rgba(170,199,255,0.14); color: var(--primary);
-  }
-  /* metric row */
+  .range-chip.active { background: rgba(170,199,255,0.14); color: var(--primary); }
+  /* number row */
   .pr-metric-row {
-    display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px;
+    display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px;
+    flex-shrink: 0;
   }
   .pr-num {
     font-family: 'Heebo', sans-serif; font-weight: 900;
-    font-size: 48px; letter-spacing: -0.05em; line-height: 1;
+    font-size: 44px; letter-spacing: -0.05em; line-height: 1;
   }
   .pr-unit {
     font-family: 'Heebo', sans-serif; font-weight: 900;
-    font-size: 22px; opacity: 0.65;
+    font-size: 20px; opacity: 0.60;
   }
   .pr-delta {
-    font-size: 13px; font-weight: 700; color: var(--secondary);
+    font-size: 12px; font-weight: 700; color: var(--secondary);
     display: flex; align-items: center; gap: 2px;
-    padding: 3px 8px; border-radius: 9999px;
+    padding: 2px 7px; border-radius: 9999px;
     background: rgba(71,226,102,0.10);
   }
-  /* chart area */
-  .pr-chart-wrap {
-    width: 100%; overflow: visible;
+  /* chart */
+  .pr-chart-area {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .pr-chart-svg {
+    width: 100%;
+    flex: 1; min-height: 0;
+    overflow: visible;
+    display: block;
   }
   .pr-dates {
     display: flex; justify-content: space-between;
-    padding: 0 2px; margin-top: 5px;
+    padding: 0 2px; margin-top: 4px; flex-shrink: 0;
   }
   .pr-date-lbl {
-    font-size: 9px; font-weight: 500; color: #484f5c;
-    letter-spacing: 0.02em;
+    font-size: 9px; font-weight: 500; color: #424956; letter-spacing: 0.01em;
   }
 
-  /* ── WEEK GRID ───────────────────────────────── */
+  /* ── WEEK SECTION ────────────────────────────── */
+  .week-section { flex: 3; min-height: 0; display: flex; flex-direction: column; }
+
   .week-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 13px;
+    flex: 1; min-height: 0;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 11px;
   }
   .week-card {
-    border-radius: 2rem;
-    padding: 18px 18px 20px;
+    border-radius: 1.75rem;
+    padding: 14px 16px 16px;
     display: flex; flex-direction: column; justify-content: space-between;
-    min-height: 128px;
     cursor: pointer; border: none; text-align: right;
     position: relative; overflow: hidden;
     transition: transform 0.15s;
   }
   .week-card:active { transform: scale(0.97); }
 
-  /* per-card accent glow — top-right corner */
+  /* per-card corner glow */
   .week-card::after {
     content: '';
     position: absolute;
-    top: -30px; left: -30px;   /* RTL: left = visual right */
-    width: 100px; height: 100px;
-    border-radius: 50%;
-    filter: blur(28px);
-    opacity: 0.35;
-    pointer-events: none;
+    top: -25px; left: -25px;
+    width: 90px; height: 90px;
+    border-radius: 50%; filter: blur(24px);
+    opacity: 0.32; pointer-events: none;
   }
   .wk1::after { background: var(--primary-ctr); }
   .wk2::after { background: var(--secondary); }
   .wk3::after { background: var(--tertiary); }
   .wkd::after { background: #9b6dff; }
-  .wkd { border: 1px solid rgba(155,109,255,0.18); }
+  .wkd { border: 1px solid rgba(155,109,255,0.16); }
 
-  /* watermark number */
+  /* watermark */
   .wk-bg-num {
     position: absolute;
-    bottom: -8px; right: -4px;    /* RTL: right = visual left */
+    bottom: -6px; right: -2px;
     font-family: 'Heebo', sans-serif; font-weight: 900;
-    font-size: 90px; line-height: 1;
+    font-size: 76px; line-height: 1;
     text-transform: uppercase; letter-spacing: -0.06em;
-    opacity: 0.055;
-    pointer-events: none; user-select: none;
-    color: #fff;
+    opacity: 0.055; pointer-events: none; user-select: none; color: #fff;
   }
 
   .wk-top { display: flex; justify-content: flex-end; }
@@ -241,7 +260,7 @@
 
   .wk-name {
     font-family: 'Heebo', sans-serif; font-weight: 900;
-    font-size: 24px; text-transform: uppercase;
+    font-size: 22px; text-transform: uppercase;
     letter-spacing: -0.04em; line-height: 1;
     color: var(--on-bg); position: relative; z-index: 1;
   }
@@ -249,31 +268,32 @@
 
   /* ── BOTTOM NAV ──────────────────────────────── */
   nav {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-    display: flex; justify-content: space-around; align-items: flex-end;
-    padding: 12px 20px 30px;
-    background: rgba(25,25,25,0.50);
+    flex-shrink: 0;
+    height: var(--nav-h);
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 0 20px;
+    background: rgba(22,22,22,0.55);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
     border-radius: 2rem 2rem 0 0;
     box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.07);
+    z-index: 50;
   }
   .nav-btn {
     display: flex; flex-direction: column; align-items: center;
     gap: 3px; cursor: pointer; background: none; border: none;
     color: #484f5c; padding: 4px 14px; transition: color 0.2s;
   }
-  .nav-btn:hover { color: #888; }
   .nav-lbl {
     font-size: 9px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.09em;
   }
   .nav-btn.active {
     background: linear-gradient(145deg, #3e90ff, #2b5fc9);
-    border-radius: 9999px; width: 58px; height: 58px;
+    border-radius: 9999px; width: 54px; height: 54px;
     padding: 0; justify-content: center; color: #fff;
-    box-shadow: 0 0 24px rgba(62,144,255,0.42);
-    gap: 2px; margin-bottom: 4px;
+    box-shadow: 0 0 22px rgba(62,144,255,0.40);
+    gap: 2px;
   }
   .nav-btn.active .nav-lbl { font-size: 8px; }
 </style>
@@ -283,7 +303,7 @@
 <!-- HEADER -->
 <header>
   <div class="header-logo">
-    <svg class="logo-icon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+    <svg class="logo-icon" width="21" height="21" viewBox="0 0 24 24" fill="none"
          stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="1" y="9" width="4" height="6" rx="1.5"/>
       <rect x="19" y="9" width="4" height="6" rx="1.5"/>
@@ -294,7 +314,7 @@
     <span class="header-title">GymPro Elite</span>
   </div>
   <button class="icon-btn">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="3"/>
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06
@@ -312,45 +332,45 @@
 
 <main>
 
-  <!-- ── HERO ───────────────────────────────────── -->
-  <section class="hero-card">
-    <div class="hero-grad"></div>
-    <div class="hero-shine"></div>
-    <div class="hero-top">
-      <h2 class="hero-h1">מוכן לאימון?</h2>
-      <div class="hero-stats">
-        <div>
-          <div class="stat-lbl">נפח אחרון</div>
-          <div class="stat-val">4.2t</div>
-        </div>
-        <div>
-          <div class="stat-lbl">משך</div>
-          <div class="stat-val">52m</div>
-        </div>
-        <div>
-          <div class="stat-lbl">רצף</div>
-          <div class="stat-val">4 ימים</div>
+  <!-- HERO -->
+  <div class="hero-section">
+    <div class="hero-card">
+      <div class="hero-grad"></div>
+      <div class="hero-shine"></div>
+      <div class="hero-content">
+        <h2 class="hero-h1">מוכן לאימון?</h2>
+        <div class="hero-stats">
+          <div>
+            <div class="stat-lbl">נפח אחרון</div>
+            <div class="stat-val">4.2t</div>
+          </div>
+          <div>
+            <div class="stat-lbl">משך</div>
+            <div class="stat-val">52m</div>
+          </div>
+          <div>
+            <div class="stat-lbl">רצף</div>
+            <div class="stat-val">4 ימים</div>
+          </div>
         </div>
       </div>
+      <div class="hero-bottom">
+        <button class="ghost-btn">ערוך תצוגה</button>
+      </div>
     </div>
-    <div class="hero-bottom">
-      <button class="ghost-btn">ערוך תצוגה</button>
-    </div>
-  </section>
+  </div>
 
-  <!-- ── PR ─────────────────────────────────────── -->
-  <section>
+  <!-- PR -->
+  <div class="pr-section">
     <div class="sec-hdr">
       <span class="sec-title">שיאים אישיים</span>
       <div class="pill-toggle">
-        <button class="pill-btn active">Bench</button>
+        <button class="pill-btn active">Bench Press</button>
         <button class="pill-btn">OHP</button>
       </div>
     </div>
 
     <div class="pr-card glass">
-
-      <!-- שורת תווית + range chips -->
       <div class="pr-top-row">
         <span class="pr-lbl">E1RM משוערך</span>
         <div class="range-chips">
@@ -359,102 +379,81 @@
           <button class="range-chip">כל</button>
         </div>
       </div>
-
-      <!-- מספר + דלתא -->
       <div class="pr-metric-row">
         <span class="pr-num text-glow">102.5</span>
         <span class="pr-unit">kg</span>
         <span class="pr-delta">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l8 16H4z"/></svg>
-          2.5 kg
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l8 16H4z"/></svg>
+          2.5
         </span>
       </div>
 
-      <!-- גרף עם נקודות ותאריכים -->
-      <!--
-        נתוני דוגמה (6 מדידות אחרונות):
-          15/3 → 95.0   19/3 → 97.5   22/3 → 97.5
-          26/3 → 100.0  30/3 → 100.0  2/4  → 102.5
-
-        viewBox 0 0 280 68
-        Y scale: min=93 max=105  range=12  → pixelPerKg = 68/12 ≈ 5.67
-          95.0  → (105-95.0)  * 5.67 = 56.7  ≈ 57
-          97.5  → (105-97.5)  * 5.67 = 42.5  ≈ 43
-          100.0 → (105-100.0) * 5.67 = 28.3  ≈ 28
-          102.5 → (105-102.5) * 5.67 = 14.2  ≈ 14
-
-        X positions: 0, 56, 112, 168, 224, 280
-      -->
-      <svg class="pr-chart-wrap" viewBox="0 0 280 68" style="overflow:visible;">
-        <defs>
-          <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#47e266" stop-opacity="0.4"/>
-            <stop offset="100%" stop-color="#47e266" stop-opacity="1"/>
-          </linearGradient>
-          <linearGradient id="fillGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#47e266" stop-opacity="0.15"/>
-            <stop offset="100%" stop-color="#47e266" stop-opacity="0"/>
-          </linearGradient>
-          <filter id="dotGlow">
-            <feGaussianBlur stdDeviation="2.5" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-
-        <!-- fill area -->
-        <path d="M 0,57 L 56,43 L 112,43 L 168,28 L 224,28 L 280,14 L 280,68 L 0,68 Z"
-              fill="url(#fillGrad)"/>
-
-        <!-- line -->
-        <path d="M 0,57 L 56,43 L 112,43 L 168,28 L 224,28 L 280,14"
-              fill="none"
-              stroke="url(#lineGrad)"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"/>
-
-        <!-- data points -->
-        <g filter="url(#dotGlow)">
-          <circle cx="0"   cy="57" r="3.5" fill="#47e266"/>
-          <circle cx="56"  cy="43" r="3.5" fill="#47e266"/>
-          <circle cx="112" cy="43" r="3.5" fill="#47e266"/>
-          <circle cx="168" cy="28" r="3.5" fill="#47e266"/>
-          <circle cx="224" cy="28" r="3.5" fill="#47e266"/>
-          <circle cx="280" cy="14" r="4"   fill="#47e266"/><!-- last = bigger -->
-        </g>
-
-        <!-- value label on last point -->
-        <text x="280" y="8" text-anchor="middle"
-              font-family="Inter,sans-serif" font-size="9" font-weight="700"
-              fill="#47e266" opacity="0.9">102.5</text>
-      </svg>
-
-      <!-- תאריכים -->
-      <div class="pr-dates">
-        <span class="pr-date-lbl">15/3</span>
-        <span class="pr-date-lbl">19/3</span>
-        <span class="pr-date-lbl">22/3</span>
-        <span class="pr-date-lbl">26/3</span>
-        <span class="pr-date-lbl">30/3</span>
-        <span class="pr-date-lbl">2/4</span>
+      <div class="pr-chart-area">
+        <!--
+          נקודות: 15/3→95  19/3→97.5  22/3→97.5  26/3→100  30/3→100  2/4→102.5
+          viewBox 0 0 280 52 | Y: min=93 max=105, range=12 → factor=52/12=4.33
+            95   → (105-95)  *4.33 = 43.3
+            97.5 → (105-97.5)*4.33 = 32.5
+            100  → (105-100) *4.33 = 21.7
+            102.5→ (105-102.5)*4.33= 10.8
+          X: 0, 56, 112, 168, 224, 280
+        -->
+        <svg class="pr-chart-svg" viewBox="0 0 280 52" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="lg" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#47e266" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#47e266" stop-opacity="1"/>
+            </linearGradient>
+            <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#47e266" stop-opacity="0.14"/>
+              <stop offset="100%" stop-color="#47e266" stop-opacity="0"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path d="M 0,43 L 56,32 L 112,32 L 168,22 L 224,22 L 280,11 L 280,52 L 0,52 Z"
+                fill="url(#fill)"/>
+          <path d="M 0,43 L 56,32 L 112,32 L 168,22 L 224,22 L 280,11"
+                fill="none" stroke="url(#lg)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+          <g filter="url(#glow)">
+            <circle cx="0"   cy="43" r="3"   fill="#47e266"/>
+            <circle cx="56"  cy="32" r="3"   fill="#47e266"/>
+            <circle cx="112" cy="32" r="3"   fill="#47e266"/>
+            <circle cx="168" cy="22" r="3"   fill="#47e266"/>
+            <circle cx="224" cy="22" r="3"   fill="#47e266"/>
+            <circle cx="280" cy="11" r="3.5" fill="#47e266"/>
+          </g>
+          <text x="280" y="6" text-anchor="middle"
+                font-family="Inter,sans-serif" font-size="8" font-weight="700"
+                fill="#47e266" opacity="0.85">102.5</text>
+        </svg>
+        <div class="pr-dates">
+          <span class="pr-date-lbl">15/3</span>
+          <span class="pr-date-lbl">19/3</span>
+          <span class="pr-date-lbl">22/3</span>
+          <span class="pr-date-lbl">26/3</span>
+          <span class="pr-date-lbl">30/3</span>
+          <span class="pr-date-lbl">2/4</span>
+        </div>
       </div>
-
     </div>
-  </section>
+  </div>
 
-  <!-- ── WEEKS ──────────────────────────────────── -->
-  <section>
+  <!-- WEEKS -->
+  <div class="week-section">
     <div class="sec-hdr">
       <span class="sec-title">בחר תוכנית</span>
     </div>
 
     <div class="week-grid">
 
-      <!-- שבוע 1 — accent: כחול -->
       <button class="week-card glass wk1">
         <span class="wk-bg-num">1</span>
         <div class="wk-top">
-          <svg class="wk-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          <svg class="wk-chevron" width="17" height="17" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
@@ -462,11 +461,10 @@
         <div class="wk-name">שבוע 1</div>
       </button>
 
-      <!-- שבוע 2 — accent: ירוק -->
       <button class="week-card glass wk2">
         <span class="wk-bg-num">2</span>
         <div class="wk-top">
-          <svg class="wk-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          <svg class="wk-chevron" width="17" height="17" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
@@ -474,11 +472,10 @@
         <div class="wk-name">שבוע 2</div>
       </button>
 
-      <!-- שבוע 3 — accent: כתום -->
       <button class="week-card glass wk3">
         <span class="wk-bg-num">3</span>
         <div class="wk-top">
-          <svg class="wk-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          <svg class="wk-chevron" width="17" height="17" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
@@ -486,11 +483,10 @@
         <div class="wk-name">שבוע 3</div>
       </button>
 
-      <!-- דילואוד — accent: סגול -->
       <button class="week-card glass wkd">
         <span class="wk-bg-num">D</span>
         <div class="wk-top">
-          <svg class="wk-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          <svg class="wk-chevron" width="17" height="17" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
@@ -499,14 +495,14 @@
       </button>
 
     </div>
-  </section>
+  </div>
 
 </main>
 
 <!-- BOTTOM NAV -->
 <nav>
   <button class="nav-btn active">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="1" y="9" width="4" height="6" rx="1.5"/>
       <rect x="19" y="9" width="4" height="6" rx="1.5"/>
@@ -518,7 +514,7 @@
   </button>
 
   <button class="nav-btn">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="13" width="4" height="8" rx="1"/>
       <rect x="10" y="8" width="4" height="13" rx="1"/>
@@ -528,7 +524,7 @@
   </button>
 
   <button class="nav-btn">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="2" y="3" width="20" height="5" rx="1"/>
       <path d="M4 8v11a2 2 0 002 2h12a2 2 0 002-2V8"/>
