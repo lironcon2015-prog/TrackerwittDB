@@ -2612,3 +2612,37 @@ body {
     background: rgba(255,255,255,0.14);
     color: #fff;
 }
+
+/* =========================================
+   LIQUID OBSIDIAN — FIXES v4
+   ========================================= */
+
+/* ── Chart: natural SVG aspect ratio ──── */
+/* viewBox 0 0 180 68 → ratio 0.378        */
+/* on 360px card → ~136px tall (crisp)     */
+.home-pr-chart-wrap {
+    width: 100%;
+    flex-shrink: 0;
+    flex: unset;         /* cancel flex:1 from v3 */
+    height: unset;
+    position: static;    /* cancel position:relative from v3 */
+    min-height: unset;
+    margin-top: 4px;
+}
+.home-pr-chart-wrap svg {
+    position: static;    /* cancel absolute from v3 */
+    display: block;
+    width: 100%;
+    height: auto;        /* natural height = width × (68/180) */
+    overflow: visible;
+}
+
+/* ── Week cards — more compact ─────────── */
+#ui-week .menu-card {
+    min-height: 64px;
+    padding: 10px 14px;
+}
+.wk-bg-num { font-size: 3.6rem; }
+
+/* ── Version footer — hidden on home ───── */
+#ui-week .version-footer { display: none; }
