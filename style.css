@@ -433,19 +433,29 @@ body {
 /* CONFIRM SCREEN */
 #ui-confirm { justify-content: flex-start; }
 .confirm-fixed-top { width: 100%; margin-top: 0; padding-top: 10px; text-align: center; flex-shrink: 0; }
-.confirm-fixed-top h2 { font-size: 1.8em; margin: 10px 0 10px; }
+.confirm-fixed-top > p {
+    color: var(--primary); font-size: 0.7em; font-weight: 900;
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px;
+}
+.confirm-fixed-top h2, #confirm-ex-name {
+    font-size: clamp(1.4em, 7.5vw, 2.4em);
+    font-weight: 900; letter-spacing: -1px; line-height: 0.9;
+    text-transform: uppercase; font-family: 'Heebo', 'Inter', sans-serif;
+    overflow-wrap: break-word; word-break: break-word; margin: 8px 0 10px;
+}
 .sub-text { color: var(--text-dim); font-size: 0.9em; margin-bottom: 30px; }
 
 #ex-display-name {
     font-size: clamp(1.4em, 7.5vw, 2.4em);
     font-weight: 900;
-    letter-spacing: -2px;
+    letter-spacing: -1px;
     line-height: 0.9;
     max-width: 100%;
     overflow-wrap: break-word;
     word-break: break-word;
     text-transform: uppercase;
     font-family: 'Heebo', 'Inter', sans-serif;
+    padding-inline-end: 2px;
 }
 
 .exercise-header {
@@ -692,14 +702,31 @@ body {
 .passive-preview { color: var(--text-dim); font-size: 0.8em; text-align: center; margin-bottom: 15px; }
 .secondary-action { border: 1px solid var(--border); border-radius: var(--ios-radius); color: var(--text); padding: 15px; }
 
-.history-card-container { background: var(--card-bg); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); width: 100%; border: 1px solid var(--border); border-top-color: var(--border-hi); border-radius: var(--ios-radius); padding: 15px; box-shadow: inset 0 1px 0 var(--border-hi); }
-.history-header { display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px; font-size: 0.8em; color: var(--text-dim); font-weight: 600; text-align: center; }
+.history-card-container {
+    background: rgba(31,31,31,0.4); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+    width: 100%; border: 1px solid rgba(255,255,255,0.06); border-top-color: rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.3);
+}
+.history-header {
+    display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding-bottom: 8px; margin-bottom: 6px;
+    font-size: 0.6em; color: var(--primary); font-weight: 900;
+    text-align: center; text-transform: uppercase; letter-spacing: 0.1em;
+}
 .history-list { display: flex; flex-direction: column; gap: 0; width: 100%; }
-.history-row { display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95em; text-align: center; color: white; }
+.history-row {
+    display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr;
+    align-items: center; padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.9em; text-align: center; color: var(--text);
+    font-weight: 700; font-variant-numeric: tabular-nums;
+}
 .history-row:last-child { border-bottom: none; }
 .history-col { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.history-col.set-idx { color: var(--text-dim); font-size: 0.9em; }
-.history-col.rir-note { color: var(--accent); font-size: 0.85em; }
+.history-col.set-idx { color: rgba(170,199,255,0.45); font-size: 0.8em; font-weight: 700; }
+.history-col.rir-note { color: var(--secondary); font-size: 0.85em; font-weight: 700; }
 
 .history-notes-list { margin-top: 15px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2); text-align: right; }
 .note-item { font-size: 0.85em; color: var(--text-dim); margin-bottom: 4px; display: flex; align-items: flex-start; }
@@ -1218,7 +1245,7 @@ body {
 }
 /* Workout screen — reduce padding-bottom so timer stays on screen */
 #ui-main {
-    padding-bottom: 20px;
+    padding: 0 3px 20px 3px;
 }
 
 #ui-main.cluster .minimal-input {
