@@ -2682,3 +2682,128 @@ body {
 
 /* Week cards */
 #ui-week .menu-card { min-height: 60px; padding: 8px 14px; }
+
+/* ─── LIQUID OBSIDIAN — WORKOUT SELECTION SCREEN (v14.12.0-49) ─────────── */
+
+.obsidian-week-header { margin-bottom: 28px; }
+
+.workout-week-label {
+    margin: 0 0 6px;
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(170, 199, 255, 0.65);
+}
+
+.workout-screen-title {
+    margin: 0;
+    font-size: 2.3em;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-family: 'Heebo', 'Inter', sans-serif;
+}
+
+/* כרטיסיית אימון — Obsidian */
+.obsidian-menu-card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(27, 27, 27, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 22px;
+    color: white;
+    margin-bottom: 14px;
+    display: block;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    width: 100%;
+    text-align: right;
+    box-sizing: border-box;
+}
+.obsidian-menu-card:hover { background: rgba(42, 42, 42, 0.9); }
+.obsidian-menu-card:active { transform: scale(0.98); }
+
+/* שכבת gradient על כרטיסייה ראשונה */
+.obsidian-menu-card.card-featured::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(170, 199, 255, 0.07) 0%, transparent 55%);
+    pointer-events: none;
+}
+
+.obsidian-card-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.obsidian-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+
+.obsidian-card-title {
+    margin: 0 0 4px;
+    font-size: 1.45em;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.1;
+    font-family: 'Heebo', 'Inter', sans-serif;
+}
+
+.obsidian-card-count {
+    margin: 0;
+    font-size: 0.82em;
+    font-weight: 500;
+    color: var(--text-dim);
+}
+
+/* תמונת placeholder מימין */
+.obsidian-card-thumb {
+    width: 88px;
+    height: 88px;
+    border-radius: 16px;
+    flex-shrink: 0;
+    background: rgba(53, 53, 53, 0.7);
+}
+
+/* כרטיסיית Freestyle */
+.obsidian-freestyle-card {
+    background: rgba(14, 14, 14, 0.6);
+    border: 1px dashed rgba(65, 71, 84, 0.45);
+    border-radius: 20px;
+    padding: 22px;
+    color: white;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.15s;
+    text-align: right;
+    box-sizing: border-box;
+}
+.obsidian-freestyle-card:hover { border-color: rgba(170, 199, 255, 0.4); }
+.obsidian-freestyle-card:active { transform: scale(0.98); }
+.obsidian-freestyle-card h3 { margin: 0; font-size: 1.2em; font-weight: 700; }
+.obsidian-freestyle-card p  { margin: 5px 0 0; font-size: 0.83em; font-weight: 600; color: var(--primary); }
+
+.freestyle-add-icon {
+    width: 46px;
+    height: 46px;
+    background: rgba(42, 42, 42, 0.85);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    flex-shrink: 0;
+}

@@ -459,9 +459,20 @@
             </div>
 
             <div id="ui-workout-type" class="screen">
-                <div class="hero-section"><h2 id="workout-week-title">בחר מסלול</h2></div>
+                <div class="obsidian-week-header">
+                    <p id="workout-week-label" class="workout-week-label">Week 1</p>
+                    <h2 id="workout-week-title" class="workout-screen-title">בחר אימון</h2>
+                </div>
                 <div id="workout-menu-container" class="vertical-stack"></div>
-                <button class="menu-card tall freestyle-card mt-md" onclick="startFreestyle()"><h3>Freestyle</h3><p>בחירה חופשית</p></button>
+                <button class="obsidian-freestyle-card mt-md" onclick="startFreestyle()">
+                    <div>
+                        <h3>Freestyle</h3>
+                        <p>בחירה חופשית</p>
+                    </div>
+                    <div class="freestyle-add-icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                    </div>
+                </button>
             </div>
 
             <div id="ui-variation" class="screen">

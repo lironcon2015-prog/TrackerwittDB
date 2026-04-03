@@ -23,8 +23,47 @@ function renderWorkoutMenu() {
 
     container.innerHTML = "";
     const title = document.getElementById('workout-week-title');
+    const weekLabel = document.getElementById('workout-week-label');
+
+    // SVG icon for exercises pill
+    const pillSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`;
+
+    // צבעי thumb לפי אינדקס כרטיסייה
+    const thumbGradients = [
+        'linear-gradient(135deg,#1a2a4a 0%,#0d1526 100%)',
+        'linear-gradient(135deg,#1a2e28 0%,#0d1e1a 100%)',
+        'linear-gradient(135deg,#2a1a3a 0%,#1a0d26 100%)',
+        'linear-gradient(135deg,#2d2418 0%,#1c1610 100%)',
+        'linear-gradient(135deg,#18283a 0%,#0d1a28 100%)',
+    ];
+
+    function buildCard(key, count, thumbIndex, isFirst, badge) {
+        const btn = document.createElement('button');
+        btn.className = 'obsidian-menu-card' + (isFirst ? ' card-featured' : '');
+        const thumbStyle = `background:${thumbGradients[thumbIndex % thumbGradients.length]}`;
+        const badgeHtml = badge || '';
+        const safeKey = key.replace(/'/g, "\\'");
+        btn.innerHTML = `
+            <div class="obsidian-card-content">
+                <div class="obsidian-card-info">
+                    <div>
+                        <h3 class="obsidian-card-title">${key}</h3>
+                        ${badgeHtml}
+                        <p class="obsidian-card-count">${count} תרגילים</p>
+                    </div>
+                    <button class="btn-exercises-pill" onclick="event.stopPropagation(); openWorkoutPlanSheet('${safeKey}')">
+                        ${pillSvg}
+                        תרגילים
+                    </button>
+                </div>
+                <div class="obsidian-card-thumb" style="${thumbStyle}"></div>
+            </div>`;
+        btn.onclick = () => selectWorkout(key);
+        return btn;
+    }
 
     if (state.week === 'deload') {
+        if (weekLabel) weekLabel.innerText = 'Deload';
         title.innerText = "שבוע דילואוד";
         const keys = Object.keys(state.workouts);
         const deloadWorkouts = keys.filter(k => {
@@ -35,59 +74,35 @@ function renderWorkoutMenu() {
         if (deloadWorkouts.length === 0) {
             container.innerHTML = `<p class="text-center color-dim">בחר Freestyle או סמן תוכנית כדילואוד בעורך</p>`;
         } else {
-            deloadWorkouts.forEach(key => {
-                const btn = document.createElement('button');
-                btn.className = "menu-card tall";
+            deloadWorkouts.forEach((key, idx) => {
                 const meta = state.workoutMeta[key];
-
-                const badge = (meta && meta.isDeloadOnly)
-                    ? `<span class="text-xs color-type-free rounded-md" style="border:1px solid var(--type-free); padding:2px 6px;">Deload Only</span>`
-                    : '';
-
                 let count = 0;
                 const w = state.workouts[key];
                 if (Array.isArray(w)) {
                     w.forEach(item => { if (item.type === 'cluster') count += item.exercises.length; else count++; });
                 }
-
-                btn.innerHTML = `
-                    <div class="flex-between w-100 mb-xs"><h3>${key}</h3>${badge}</div>
-                    <div class="flex-between w-100">
-                        <p style="margin:0;">${count} תרגילים</p>
-                        <button class="btn-exercises-pill" onclick="event.stopPropagation(); openWorkoutPlanSheet('${key.replace(/'/g, "\\'")}')">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                            תרגילים
-                        </button>
-                    </div>`;
-                btn.onclick = () => selectWorkout(key);
-                container.appendChild(btn);
+                const badge = (meta && meta.isDeloadOnly)
+                    ? `<span class="text-xs color-type-free" style="border:1px solid var(--type-free); border-radius:6px; padding:2px 6px; font-size:0.7em;">Deload Only</span>`
+                    : '';
+                container.appendChild(buildCard(key, count, idx, idx === 0, badge));
             });
         }
     } else {
+        if (weekLabel) weekLabel.innerText = `Week ${state.week}`;
         title.innerText = `שבוע ${state.week} - בחר אימון`;
+        let idx = 0;
         Object.keys(state.workouts).forEach(key => {
             const meta = state.workoutMeta[key];
             if (meta && meta.isDeloadOnly) return;
             if (meta && meta.isHidden) return;
 
-            const btn = document.createElement('button');
-            btn.className = "menu-card tall";
             let count = 0;
             const w = state.workouts[key];
             if (Array.isArray(w)) {
                 w.forEach(item => { if (item.type === 'cluster') count += item.exercises.length; else count++; });
             }
-            btn.innerHTML = `
-                <div class="flex-between w-100 mb-xs"><h3>${key}</h3></div>
-                <div class="flex-between w-100">
-                    <p style="margin:0;">${count} תרגילים</p>
-                    <button class="btn-exercises-pill" onclick="event.stopPropagation(); openWorkoutPlanSheet('${key.replace(/'/g, "\\'")}')">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                        תרגילים
-                    </button>
-                </div>`;
-            btn.onclick = () => selectWorkout(key);
-            container.appendChild(btn);
+            container.appendChild(buildCard(key, count, idx, idx === 0, ''));
+            idx++;
         });
     }
 
