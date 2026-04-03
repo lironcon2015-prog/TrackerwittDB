@@ -333,6 +333,25 @@ body {
 .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 .compact { text-align: center; padding: 12px 5px; }
 .compact label { font-size: 0.7em; color: var(--text-dim); display: block; margin-bottom: 5px; text-transform: uppercase; }
+
+/* ── Stepper Controls (Weight / Reps / RIR) ── */
+.stepper-card { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.stepper-row { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 2px; }
+.stepper-pm-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.55); font-size: 1.2em; font-weight: 300;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; font-family: inherit; line-height: 1;
+    -webkit-tap-highlight-color: transparent; transition: background 0.15s;
+}
+.stepper-pm-btn:active { background: rgba(255,255,255,0.18); transform: scale(0.9); }
+.stepper-num-display {
+    font-size: 1.55em; font-weight: 800;
+    font-variant-numeric: tabular-nums; letter-spacing: -1px; line-height: 1;
+    min-width: 34px; text-align: center;
+}
+.stepper-unit-lbl { font-size: 0.6em; color: var(--text-dim); font-weight: 600; }
 .input-label { font-size: 0.8em; color: var(--text-dim); display: block; margin-bottom: 5px; }
 
 .ios-picker {
@@ -412,8 +431,7 @@ body {
     padding: 22px;
     font-size: 1.2em;
     border-radius: 50px;
-    background: var(--success-gradient);
-    box-shadow: 0 8px 32px rgba(50, 215, 75, 0.45), 0 2px 10px rgba(50, 215, 75, 0.25);
+    box-shadow: 0 8px 32px rgba(10, 132, 255, 0.45), 0 2px 10px rgba(10, 132, 255, 0.25);
 }
 
 .pulse {
@@ -421,9 +439,9 @@ body {
 }
 
 @keyframes pulseButton {
-    0% { transform: scale(1); box-shadow: 0 8px 32px rgba(50, 215, 75, 0.45); }
-    50% { transform: scale(1.02); box-shadow: 0 8px 40px rgba(50, 215, 75, 0.7); }
-    100% { transform: scale(1); box-shadow: 0 8px 32px rgba(50, 215, 75, 0.45); }
+    0% { transform: scale(1); box-shadow: 0 8px 32px rgba(10, 132, 255, 0.45); }
+    50% { transform: scale(1.02); box-shadow: 0 8px 40px rgba(10, 132, 255, 0.7); }
+    100% { transform: scale(1); box-shadow: 0 8px 32px rgba(10, 132, 255, 0.45); }
 }
 
 @keyframes buttonGlow {

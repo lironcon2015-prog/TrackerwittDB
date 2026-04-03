@@ -534,9 +534,36 @@
                     <div id="last-set-info" class="history-pill"></div>
                 </div>
                 <div class="input-grid">
-                    <div class="glass-card compact"><label>Weight</label><select id="weight-picker" class="ios-picker"></select></div>
-                    <div class="glass-card compact"><label>Reps</label><select id="reps-picker" class="ios-picker"></select></div>
-                    <div class="glass-card compact"><label>RIR</label><select id="rir-picker" class="ios-picker"></select></div>
+                    <div class="glass-card compact stepper-card">
+                        <label>Weight</label>
+                        <select id="weight-picker" class="ios-picker" style="display:none;"></select>
+                        <div class="stepper-row">
+                            <button class="stepper-pm-btn" onclick="stepPicker('weight',-1)">−</button>
+                            <div id="weight-display" class="stepper-num-display">—</div>
+                            <button class="stepper-pm-btn" onclick="stepPicker('weight',1)">+</button>
+                        </div>
+                        <div class="stepper-unit-lbl">kg</div>
+                    </div>
+                    <div class="glass-card compact stepper-card">
+                        <label>Reps</label>
+                        <select id="reps-picker" class="ios-picker" style="display:none;"></select>
+                        <div class="stepper-row">
+                            <button class="stepper-pm-btn" onclick="stepPicker('reps',-1)">−</button>
+                            <div id="reps-display" class="stepper-num-display">—</div>
+                            <button class="stepper-pm-btn" onclick="stepPicker('reps',1)">+</button>
+                        </div>
+                        <div class="stepper-unit-lbl">reps</div>
+                    </div>
+                    <div class="glass-card compact stepper-card">
+                        <label>RIR</label>
+                        <select id="rir-picker" class="ios-picker" style="display:none;"></select>
+                        <div class="stepper-row">
+                            <button class="stepper-pm-btn" onclick="stepPicker('rir',-1)">−</button>
+                            <div id="rir-display" class="stepper-num-display">—</div>
+                            <button class="stepper-pm-btn" onclick="stepPicker('rir',1)">+</button>
+                        </div>
+                        <div class="stepper-unit-lbl">rir</div>
+                    </div>
                 </div>
                 <input type="text" id="set-notes" class="minimal-input" placeholder="הערות לסט (אופציונלי)">
                 <button id="btn-submit-set" class="btn-main primary-gradient pulse" onclick="nextStep()">סיום סט</button>
