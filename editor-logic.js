@@ -4,6 +4,24 @@
  * שדרוג 1: Toggle פעילים/מוסתרים בניהול תוכניות.
  */
 
+// ─── WORKOUT QUICK MENU (היסטוריה / יומן) ─────────────────────────────────
+
+function toggleWorkoutQuickMenu() {
+    const menu = document.getElementById('workout-quick-menu');
+    if (!menu) return;
+    const isOpen = menu.style.display !== 'none';
+    menu.style.display = isOpen ? 'none' : 'block';
+}
+
+// סגירת התפריט בלחיצה מחוץ לו
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('workout-quick-menu');
+    const btn  = document.getElementById('btn-workout-menu');
+    if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.style.display = 'none';
+    }
+});
+
 // ─── AUTO CLOUD CONFIG SAVE ────────────────────────────────────────────────
 
 function autoSaveConfigToCloud() {
