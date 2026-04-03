@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Heebo:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
     <!-- Firebase SDK (Compat) — Firestore only -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -201,27 +201,6 @@
                 <button id="global-back" class="back-btn" style="display:none;visibility:visible;" onclick="handleBackClick()">
                     <div class="chevron-back"></div>
                 </button>
-                <!-- Reload button: visible only outside workout flow -->
-                <button id="btn-reload" class="settings-btn" onclick="window.location.reload()" title="רענון">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="23 4 23 10 17 10"></polyline>
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                    </svg>
-                </button>
-                <!-- Sound button: muted by default, waves appear on activation -->
-                <button id="btn-sound" class="settings-btn" onclick="initAudio()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                        <g class="sound-muted-lines">
-                            <line x1="23" y1="9" x2="17" y2="15"/>
-                            <line x1="17" y1="9" x2="23" y2="15"/>
-                        </g>
-                        <g class="sound-active-waves">
-                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                        </g>
-                    </svg>
-                </button>
                 <!-- Settings button: gear SVG -->
                 <button id="btn-settings" class="settings-btn" onclick="openSettings()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -236,51 +215,69 @@
 
             <!-- WEEK / HOME SCREEN -->
             <div id="ui-week" class="screen active">
-                <div class="hero-analytics-card mt-xs" id="hero-card">
-                    <h2>מוכן לאימון?</h2>
-                    <div class="hero-last-workout" id="hero-last-workout"></div>
-                    <div class="hero-stats-row" id="hero-stats-row">
-                        <div class="hero-stat" id="hero-stat-0"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
-                        <div class="hero-stat" id="hero-stat-1"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
-                        <div class="hero-stat" id="hero-stat-2"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
+                <div class="hero-analytics-card" id="hero-card">
+                    <div class="hero-content">
+                        <h2>מוכן לאימון?</h2>
+                        <div class="hero-last-workout" id="hero-last-workout"></div>
+                        <div class="hero-stats-row" id="hero-stats-row">
+                            <div class="hero-stat" id="hero-stat-0"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
+                            <div class="hero-stat" id="hero-stat-1"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
+                            <div class="hero-stat" id="hero-stat-2"><div class="hero-stat-val">—</div><div class="hero-stat-lbl">—</div></div>
+                        </div>
                     </div>
-                    <button class="btn-text color-accent p-0 mt-sm text-sm" style="width:auto;text-align:right;" onclick="openHeroSettings()">ערוך תצוגה</button>
+                    <div class="hero-footer">
+                        <button class="hero-edit-btn" onclick="openHeroSettings()">ערוך תצוגה</button>
+                    </div>
                 </div>
 
                 <!-- PR CARD -->
-                <div class="home-pr-card mt-md" id="home-pr-card">
+                <div class="home-pr-card" id="home-pr-card">
                     <div class="home-pr-top">
-                        <span class="home-pr-lbl">שיא אישי — E1RM</span>
-                        <div style="display:flex;align-items:center;gap:5px;">
-                            <div id="home-pr-range-chips-inline" class="home-pr-range-chips" style="margin-bottom:0;"></div>
+                        <span class="home-pr-lbl">E1RM משוערך</span>
+                        <div class="home-pr-controls">
+                            <div id="home-pr-range-chips-inline" class="home-pr-range-chips"></div>
                             <div class="home-pr-toggle">
-                                <button class="home-pr-btn active" id="home-pr-bench" onclick="switchHomePR('bench',this)">Bench Press</button>
-                                <button class="home-pr-btn" id="home-pr-ohp" onclick="switchHomePR('ohp',this)">Overhead Press</button>
+                                <button class="home-pr-btn active" id="home-pr-bench" onclick="switchHomePR('bench',this)">Bench</button>
+                                <button class="home-pr-btn" id="home-pr-ohp" onclick="switchHomePR('ohp',this)">OHP</button>
                             </div>
                         </div>
                     </div>
-                    <div class="home-pr-body">
-                        <div class="home-pr-left">
-                            <div class="home-pr-num-row">
-                                <span class="home-pr-num" id="home-pr-num">—</span>
-                                <span class="home-pr-unit">kg</span>
-                            </div>
-                            <div class="home-pr-set" id="home-pr-set">—</div>
-                            <div class="home-pr-date" id="home-pr-date"></div>
-                            <div class="home-pr-delta" id="home-pr-delta"></div>
-                        </div>
-                        <div class="home-pr-chart">
-                            <svg id="home-pr-svg" viewBox="0 0 180 68" style="display:block;overflow:visible;width:100%"></svg>
-                        </div>
+                    <div class="home-pr-metric-row">
+                        <span class="home-pr-num" id="home-pr-num">—</span>
+                        <span class="home-pr-unit">kg</span>
+                        <div class="home-pr-delta" id="home-pr-delta"></div>
+                    </div>
+                    <div class="home-pr-sub-row">
+                        <span class="home-pr-set" id="home-pr-set"></span>
+                        <span class="home-pr-date" id="home-pr-date"></span>
+                    </div>
+                    <div class="home-pr-chart-wrap">
+                        <svg id="home-pr-svg" viewBox="0 0 180 68" style="display:block;width:100%;overflow:visible;"></svg>
                     </div>
                 </div>
 
-                <div class="section-label mt-lg">בחר תוכנית שבועית</div>
-                <div class="grid-menu grid-2-cols mt-sm">
-                    <button class="menu-card" onclick="selectWeek(1)"><span>שבוע 1</span><div class="chevron"></div></button>
-                    <button class="menu-card" onclick="selectWeek(2)"><span>שבוע 2</span><div class="chevron"></div></button>
-                    <button class="menu-card" onclick="selectWeek(3)"><span>שבוע 3</span><div class="chevron"></div></button>
-                    <button class="menu-card deload-card" onclick="selectWeek('deload')"><span>דילואוד</span><div class="chevron"></div></button>
+                <div class="section-label">בחר תוכנית</div>
+                <div class="grid-menu grid-2-cols">
+                    <button class="menu-card wk-card-1" onclick="selectWeek(1)">
+                        <span class="wk-bg-num" aria-hidden="true">1</span>
+                        <span class="wk-name">שבוע 1</span>
+                        <div class="chevron"></div>
+                    </button>
+                    <button class="menu-card wk-card-2" onclick="selectWeek(2)">
+                        <span class="wk-bg-num" aria-hidden="true">2</span>
+                        <span class="wk-name">שבוע 2</span>
+                        <div class="chevron"></div>
+                    </button>
+                    <button class="menu-card wk-card-3" onclick="selectWeek(3)">
+                        <span class="wk-bg-num" aria-hidden="true">3</span>
+                        <span class="wk-name">שבוע 3</span>
+                        <div class="chevron"></div>
+                    </button>
+                    <button class="menu-card deload-card wk-card-d" onclick="selectWeek('deload')">
+                        <span class="wk-bg-num" aria-hidden="true">D</span>
+                        <span class="wk-name">דילואוד</span>
+                        <div class="chevron"></div>
+                    </button>
                 </div>
                 <div class="version-footer" id="app-version-label">GymPro Elite</div>
             </div>
@@ -309,6 +306,20 @@
                         <div class="input-grid grid-2-cols">
                             <button class="glass-card compact m-0 border-accent color-accent" onclick="StorageManager.exportConfiguration()">שמור תבנית</button>
                             <button class="glass-card compact m-0 border-type-b color-type-b" onclick="triggerConfigImport()">טען תבנית</button>
+                        </div>
+                    </div>
+                    <div class="border-top pt-md mt-md">
+                        <label class="color-dim text-xs d-block mb-sm">כלים</label>
+                        <div class="input-grid grid-2-cols">
+                            <button id="btn-reload" class="glass-card compact m-0" onclick="window.location.reload()">🔄 רענן אפליקציה</button>
+                            <button id="btn-sound" class="settings-btn glass-card compact m-0" onclick="initAudio()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                    <g class="sound-muted-lines"><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></g>
+                                    <g class="sound-active-waves"><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></g>
+                                </svg>
+                                הפעל צלילים
+                            </button>
                         </div>
                     </div>
                 </div>
