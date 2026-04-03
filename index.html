@@ -230,27 +230,29 @@
                     </div>
                 </div>
 
+                <!-- PR SECTION HEADER — מחוץ לכרטיס -->
+                <div class="home-pr-section-hdr">
+                    <span class="home-pr-section-title">שיאים אישיים</span>
+                    <div class="home-pr-toggle">
+                        <button class="home-pr-btn active" id="home-pr-bench" onclick="switchHomePR('bench',this)">Bench Press</button>
+                        <button class="home-pr-btn" id="home-pr-ohp" onclick="switchHomePR('ohp',this)">OHP</button>
+                    </div>
+                </div>
+
                 <!-- PR CARD -->
                 <div class="home-pr-card" id="home-pr-card">
                     <div class="home-pr-top">
                         <span class="home-pr-lbl">E1RM משוערך</span>
-                        <div class="home-pr-controls">
-                            <div id="home-pr-range-chips-inline" class="home-pr-range-chips"></div>
-                            <div class="home-pr-toggle">
-                                <button class="home-pr-btn active" id="home-pr-bench" onclick="switchHomePR('bench',this)">Bench</button>
-                                <button class="home-pr-btn" id="home-pr-ohp" onclick="switchHomePR('ohp',this)">OHP</button>
-                            </div>
-                        </div>
+                        <div id="home-pr-range-chips-inline" class="home-pr-range-chips"></div>
                     </div>
                     <div class="home-pr-metric-row">
                         <span class="home-pr-num" id="home-pr-num">—</span>
                         <span class="home-pr-unit">kg</span>
                         <div class="home-pr-delta" id="home-pr-delta"></div>
                     </div>
-                    <div class="home-pr-sub-row">
-                        <span class="home-pr-set" id="home-pr-set"></span>
-                        <span class="home-pr-date" id="home-pr-date"></span>
-                    </div>
+                    <!-- נשמרים ב-DOM ל-JS, מוסתרים ויזואלית -->
+                    <span id="home-pr-set" style="display:none"></span>
+                    <span id="home-pr-date" style="display:none"></span>
                     <div class="home-pr-chart-wrap">
                         <svg id="home-pr-svg" viewBox="0 0 180 68" style="display:block;width:100%;overflow:visible;"></svg>
                     </div>

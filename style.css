@@ -2491,3 +2491,93 @@ body {
     font-size: 0.6em;
     opacity: 0.25;
 }
+
+/* =========================================
+   LIQUID OBSIDIAN — FIXES v2
+   ========================================= */
+
+/* ── PR section header (outside card) ─── */
+.home-pr-section-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+    margin-top: 14px;
+    margin-bottom: 8px;
+}
+.home-pr-section-title {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 900;
+    font-size: 1.05em;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    color: var(--text);
+}
+
+/* toggle moved outside — same pill style */
+.home-pr-section-hdr .home-pr-toggle {
+    background: rgba(0,0,0,0.30);
+}
+
+/* ── Hide all-time PR (JS-generated) ──── */
+.home-pr-alltime { display: none !important; }
+
+/* ── PR chart wrap — match JS viewBox ─── */
+.home-pr-chart-wrap {
+    position: relative;
+    height: 80px;   /* proportional to viewBox 180×68 */
+    flex-shrink: 0;
+}
+.home-pr-chart-wrap svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: block;
+    overflow: visible;
+}
+
+/* ── Tab bar — fixed sizes, no jumping ── */
+.tab-bar {
+    height: 72px;
+    padding-top: 0;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    align-items: center;
+    justify-content: space-around;
+}
+.tab-btn {
+    flex: 0 0 58px;
+    width: 58px;
+    height: 58px;
+    border-radius: 9999px;
+    padding: 0;
+    gap: 2px;
+    border: none;
+    background: none;
+    box-shadow: none;
+    color: rgba(174,174,178,0.45);
+    transition: background 0.22s, color 0.22s, box-shadow 0.22s;
+}
+.tab-btn.active {
+    background: linear-gradient(145deg, #3e90ff, #2b5fc9);
+    color: #fff;
+    box-shadow: 0 0 22px rgba(62,144,255,0.40);
+    /* flex and size unchanged → no layout jump */
+}
+.tab-label { font-size: 0.6em; letter-spacing: 0.07em; }
+.tab-btn.active .tab-label { font-size: 0.6em; }
+
+/* ── Week cards — compact + big text ──── */
+#ui-week .menu-card {
+    min-height: 76px;
+    padding: 12px 14px;
+}
+.wk-name {
+    font-size: 1.6em;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+}
+.wk-bg-num {
+    font-size: 4.2rem;
+    bottom: -6px;
+    right: -1px;
+}
