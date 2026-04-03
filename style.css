@@ -204,6 +204,7 @@ body {
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
+    min-height: 0; /* תיקון פלקס: מאפשר גלילה בילדים */
 }
 
 .screen { 
@@ -468,6 +469,9 @@ body {
     margin-bottom: 18px;
     position: relative;
 }
+
+/* padding-bottom גדול יותר כדי שכפתור הדילוג גלוי מעל הסטריפ */
+#ui-main { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
 
 #ui-main .input-grid {
     background: transparent;
