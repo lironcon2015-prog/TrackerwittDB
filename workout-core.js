@@ -1187,6 +1187,31 @@ function initPickers() {
         if (parseFloat(v) === parseFloat(defaultRIR)) o.selected = true;
         rirPick.add(o);
     });
+
+    syncStepperDisplay('weight');
+    syncStepperDisplay('reps');
+    syncStepperDisplay('rir');
+}
+
+// ─── STEPPER HELPERS ───────────────────────────────────────────────────────
+
+function syncStepperDisplay(field) {
+    const selId  = { weight: 'weight-picker', reps: 'reps-picker', rir: 'rir-picker' };
+    const dispId = { weight: 'weight-display', reps: 'reps-display', rir: 'rir-display' };
+    const sel  = document.getElementById(selId[field]);
+    const disp = document.getElementById(dispId[field]);
+    if (!sel || !disp) return;
+    const raw = sel.options[sel.selectedIndex]?.text || sel.value;
+    disp.textContent = raw.replace(' kg', '');
+}
+
+function stepPicker(field, dir) {
+    const selId = { weight: 'weight-picker', reps: 'reps-picker', rir: 'rir-picker' };
+    const sel = document.getElementById(selId[field]);
+    if (!sel) return;
+    sel.selectedIndex = Math.max(0, Math.min(sel.options.length - 1, sel.selectedIndex + dir));
+    syncStepperDisplay(field);
+    haptic('light');
 }
 
 // ─── TIMER ─────────────────────────────────────────────────────────────────
