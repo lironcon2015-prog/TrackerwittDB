@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GymPro Elite — Mockup Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@900&family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:              #131313;
+    --primary:         #aac7ff;
+    --primary-ctr:     #3e90ff;
+    --secondary:       #47e266;
+    --tertiary:        #ffb868;
+    --on-bg:           #e2e2e2;
+    --on-surface-var:  #c0c6d6;
+    --surface-ctr:     #1f1f1f;
+    --surface-hi:      #2a2a2a;
+    --surface-var:     #353535;
+    --outline-var:     #414754;
+    --danger:          #ff453a;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--on-bg);
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100dvh;
+    padding-bottom: 100px;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── LIQUID GLASS ──────────────────────────── */
+  .glass {
+    background: rgba(53, 53, 53, 0.4);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.10);
+  }
+
+  /* ── TYPOGRAPHY ────────────────────────────── */
+  .headline {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .label-cap {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--on-surface-var);
+  }
+  .text-glow {
+    text-shadow: 0 0 20px rgba(170, 199, 255, 0.45);
+  }
+
+  /* ── HEADER ────────────────────────────────── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(9, 9, 9, 0.65);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    box-shadow: inset 0 -1px 0 0 rgba(255,255,255,0.07);
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-logo svg { color: var(--primary-ctr); }
+  .header-title {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.05em;
+    color: #f0f0f0;
+  }
+  .header-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 9999px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .header-btn:hover { background: rgba(255,255,255,0.05); }
+
+  /* ── MAIN ──────────────────────────────────── */
+  main {
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── HERO CARD ─────────────────────────────── */
+  .hero-card {
+    position: relative;
+    border-radius: 2rem;
+    overflow: hidden;
+    height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 24px 24px;
+  }
+  .hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #3e90ff 0%, #6a5af9 55%, #8a2be2 100%);
+    opacity: 0.92;
+  }
+  /* subtle noise texture overlay */
+  .hero-texture {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 20% 80%, rgba(138,43,226,0.3) 0%, transparent 50%);
+  }
+  .hero-top { position: relative; z-index: 2; }
+  .hero-headline {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 900;
+    font-size: 36px;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 28px;
+  }
+  .hero-stat-lbl {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 3px;
+  }
+  .hero-stat-val {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: -0.04em;
+    color: #fff;
+  }
+  .hero-bottom {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-start;
+  }
+  .hero-customize-btn {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 9999px;
+    padding: 8px 20px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .hero-customize-btn:hover { background: rgba(255,255,255,0.20); }
+
+  /* ── SECTION HEADER ────────────────────────── */
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 4px;
+    margin-bottom: 12px;
+  }
+  .section-title-text {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    color: var(--on-bg);
+  }
+
+  /* ── PR TOGGLE PILL ────────────────────────── */
+  .toggle-pill {
+    display: flex;
+    background: var(--surface-ctr);
+    border-radius: 9999px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .toggle-btn {
+    padding: 5px 12px;
+    border-radius: 9999px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toggle-btn.active {
+    background: var(--surface-var);
+    color: var(--primary);
+  }
+
+  /* ── PR CARD ───────────────────────────────── */
+  .pr-card {
+    border-radius: 2rem;
+    padding: 24px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .pr-left { flex: 1; }
+  .pr-metric-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--on-surface-var);
+    margin-bottom: 6px;
+  }
+  .pr-num-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .pr-num {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 900;
+    font-size: 52px;
+    letter-spacing: -0.05em;
+    color: var(--on-bg);
+  }
+  .pr-unit {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 900;
+    font-size: 24px;
+    letter-spacing: -0.03em;
+    color: var(--on-bg);
+    opacity: 0.7;
+  }
+  .pr-delta {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--secondary);
+  }
+  .pr-delta-arrow {
+    font-size: 18px;
+    line-height: 1;
+  }
+  .pr-chart { width: 120px; height: 56px; flex-shrink: 0; }
+
+  /* ── WEEK GRID ─────────────────────────────── */
+  .week-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .week-card {
+    border-radius: 2rem;
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 130px;
+    cursor: pointer;
+    border: none;
+    text-align: right;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .week-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.03);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .week-card:hover::before { opacity: 1; }
+  .week-card-top {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .week-chevron {
+    color: #444;
+    transition: color 0.2s;
+  }
+  .week-card:hover .week-chevron { color: var(--primary); }
+  .week-card-bottom {}
+  .week-name {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    color: var(--on-bg);
+    line-height: 1;
+  }
+  /* Deload card subtle highlight */
+  .week-card.deload {
+    border: 1px solid rgba(170, 199, 255, 0.12);
+  }
+  .week-card.deload .week-name {
+    color: var(--tertiary);
+  }
+
+  /* ── BOTTOM NAV ────────────────────────────── */
+  nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    padding: 12px 20px 28px;
+    background: rgba(30, 30, 30, 0.45);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-radius: 2rem 2rem 0 0;
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.07);
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    color: #555;
+    transition: color 0.2s;
+    padding: 4px 16px;
+    background: none;
+    border: none;
+  }
+  .nav-item:hover { color: #aaa; }
+  .nav-item-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  /* Active nav item — glowing circle */
+  .nav-item.active {
+    background: linear-gradient(135deg, var(--primary-ctr), #3060cc);
+    border-radius: 9999px;
+    width: 58px;
+    height: 58px;
+    padding: 0;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 0 22px rgba(62, 144, 255, 0.45);
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+  .nav-item.active .nav-item-label {
+    font-size: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────── -->
+<header>
+  <div class="header-logo">
+    <!-- dumbbell icon -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" color="#3e90ff">
+      <rect x="1" y="9" width="4" height="6" rx="1.5"/>
+      <rect x="19" y="9" width="4" height="6" rx="1.5"/>
+      <rect x="5" y="7" width="3" height="10" rx="1"/>
+      <rect x="16" y="7" width="3" height="10" rx="1"/>
+      <line x1="8" y1="12" x2="16" y2="12"/>
+    </svg>
+    <span class="header-title">GymPro Elite</span>
+  </div>
+  <!-- Settings -->
+  <button class="header-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  </button>
+</header>
+
+<!-- ── MAIN ────────────────────────────────────────── -->
+<main>
+
+  <!-- HERO CARD -->
+  <section class="hero-card">
+    <div class="hero-gradient"></div>
+    <div class="hero-texture"></div>
+    <div class="hero-top">
+      <h2 class="hero-headline">מוכן לאימון?</h2>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-lbl">נפח אחרון</div>
+          <div class="hero-stat-val">4.2t</div>
+        </div>
+        <div>
+          <div class="hero-stat-lbl">משך</div>
+          <div class="hero-stat-val">52m</div>
+        </div>
+        <div>
+          <div class="hero-stat-lbl">רצף</div>
+          <div class="hero-stat-val">4 ימים</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-bottom">
+      <button class="hero-customize-btn">ערוך תצוגה</button>
+    </div>
+  </section>
+
+  <!-- PR SECTION -->
+  <section>
+    <div class="section-header">
+      <span class="section-title-text">שיאים אישיים</span>
+      <div class="toggle-pill">
+        <button class="toggle-btn active">Bench Press</button>
+        <button class="toggle-btn">OHP</button>
+      </div>
+    </div>
+
+    <div class="pr-card glass">
+      <div class="pr-left">
+        <div class="pr-metric-lbl">E1RM משוערך</div>
+        <div class="pr-num-row">
+          <span class="pr-num text-glow">102.5</span>
+          <span class="pr-unit">kg</span>
+        </div>
+        <div class="pr-delta">
+          <span class="pr-delta-arrow">↑</span>
+          <span>2.5 kg</span>
+        </div>
+      </div>
+      <div class="pr-chart">
+        <svg viewBox="0 0 120 56" style="width:100%;height:100%;overflow:visible">
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path d="M 0 50 Q 30 44 60 28 Q 90 32 120 8"
+                fill="none"
+                stroke="#47e266"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                filter="url(#glow)"
+                opacity="0.9"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- WEEK GRID -->
+  <section>
+    <div class="section-header">
+      <span class="section-title-text">בחר תוכנית</span>
+    </div>
+
+    <div class="week-grid">
+      <!-- שבוע 1 -->
+      <button class="week-card glass">
+        <div class="week-card-top">
+          <svg class="week-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </div>
+        <div class="week-card-bottom">
+          <div class="week-name">שבוע 1</div>
+        </div>
+      </button>
+
+      <!-- שבוע 2 -->
+      <button class="week-card glass">
+        <div class="week-card-top">
+          <svg class="week-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </div>
+        <div class="week-card-bottom">
+          <div class="week-name">שבוע 2</div>
+        </div>
+      </button>
+
+      <!-- שבוע 3 -->
+      <button class="week-card glass">
+        <div class="week-card-top">
+          <svg class="week-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </div>
+        <div class="week-card-bottom">
+          <div class="week-name">שבוע 3</div>
+        </div>
+      </button>
+
+      <!-- דילואוד -->
+      <button class="week-card glass deload">
+        <div class="week-card-top">
+          <svg class="week-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </div>
+        <div class="week-card-bottom">
+          <div class="week-name">דילואוד</div>
+        </div>
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── BOTTOM NAV ──────────────────────────────────── -->
+<nav>
+  <!-- אימון — active -->
+  <button class="nav-item active">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1" y="9" width="4" height="6" rx="1.5"/>
+      <rect x="19" y="9" width="4" height="6" rx="1.5"/>
+      <rect x="5" y="7" width="3" height="10" rx="1"/>
+      <rect x="16" y="7" width="3" height="10" rx="1"/>
+      <line x1="8" y1="12" x2="16" y2="12"/>
+    </svg>
+    <span class="nav-item-label">אימון</span>
+  </button>
+
+  <!-- אנליטיקה -->
+  <button class="nav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="13" width="4" height="8" rx="1"/>
+      <rect x="10" y="8" width="4" height="13" rx="1"/>
+      <rect x="17" y="4" width="4" height="17" rx="1"/>
+    </svg>
+    <span class="nav-item-label">אנליטיקה</span>
+  </button>
+
+  <!-- ארכיון -->
+  <button class="nav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="5" rx="1"/>
+      <path d="M4 8v11a2 2 0 002 2h12a2 2 0 002-2V8"/>
+      <line x1="9" y1="14" x2="15" y2="14"/>
+    </svg>
+    <span class="nav-item-label">ארכיון</span>
+  </button>
+</nav>
+
+</body>
+</html>
