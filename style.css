@@ -351,7 +351,7 @@ body {
     font-size: 0.55em; font-weight: 900; color: var(--primary);
     text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;
 }
-.stepper-row { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 2px; }
+.stepper-row { display: flex; align-items: center; justify-content: center; width: 100%; gap: 14px; margin-top: 4px; }
 .stepper-pm-btn {
     width: 26px; height: 26px; border-radius: 8px;
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
