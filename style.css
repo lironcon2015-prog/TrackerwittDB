@@ -1630,7 +1630,13 @@ body {
 /* ─── SESSION TIMER STRIP ────────────────────────────────────────────────── */
 
 .session-timer-dot {
-    width: 6px; height: 6px; border-radius: 50%; background: #30D158; flex-shrink: 0;
+    width: 10px; height: 10px; border-radius: 50%; background: #30D158; flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(48, 209, 88, 0.5);
+    animation: timerDotPulse 2s ease-in-out infinite;
+}
+@keyframes timerDotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.55; transform: scale(0.8); }
 }
 
 /* ─── MANAGER HIDDEN ITEM ────────────────────────────────────────────────── */
@@ -2754,18 +2760,18 @@ body {
 /* font-headline text-2xl font-black של המוקאפ */
 .obsidian-card-title {
     margin: 0 0 5px;
-    font-size: 1.6em;
+    font-size: 1.95em;
     font-weight: 900;
     color: #ffffff;
-    line-height: 1.1;
+    line-height: 1.05;
     font-family: 'Heebo', 'Inter', sans-serif;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
 }
 
 /* text-on-surface-variant text-sm font-medium */
 .obsidian-card-count {
     margin: 0;
-    font-size: 0.85em;
+    font-size: 0.9em;
     font-weight: 500;
     color: #c0c6d6;
 }
@@ -2774,12 +2780,12 @@ body {
 .btn-obsidian-pill {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     background: #353535;          /* surface-variant */
     border: none;
     border-radius: 9999px;        /* rounded-full */
-    padding: 10px 20px;
-    font-size: 0.78em;
+    padding: 7px 14px;
+    font-size: 0.88em;            /* גדול יותר מהקודם */
     font-weight: 700;
     font-family: inherit;
     color: #ffffff;
