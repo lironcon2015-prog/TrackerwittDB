@@ -2646,3 +2646,39 @@ body {
 
 /* ── Version footer — hidden on home ───── */
 #ui-week .version-footer { display: none; }
+
+/* =========================================
+   LIQUID OBSIDIAN — FIXES v5 (no-scroll)
+   ========================================= */
+
+/* ── PR card: label+chips below number ── */
+/* top row is now the sub-info row         */
+.home-pr-metric-row { margin-bottom: 2px; }
+#ui-week .home-pr-card .home-pr-top {
+    margin-bottom: 6px;
+    margin-top: 0;
+}
+
+/* ── Tighten global spacing ─────────────  */
+/* Header */
+.app-header { margin-bottom: 10px; }
+
+/* Hero card */
+.hero-analytics-card { min-height: 168px; padding: 18px 20px 14px; }
+.hero-analytics-card h2 { font-size: 1.75em; margin-bottom: 10px; }
+.hero-stats-row { padding-top: 10px; }
+
+/* PR section header */
+.home-pr-section-hdr { margin-top: 10px; margin-bottom: 6px; }
+
+/* PR card */
+#ui-week .home-pr-card { padding: 12px 16px 10px; margin-top: 0; }
+
+/* Section label (weeks) */
+#ui-week .section-label { margin-top: 10px; margin-bottom: 8px; font-size: 0.95em; }
+
+/* Week grid gap */
+#ui-week .grid-menu { gap: 9px; }
+
+/* Week cards */
+#ui-week .menu-card { min-height: 60px; padding: 8px 14px; }
