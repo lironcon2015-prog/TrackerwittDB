@@ -84,7 +84,7 @@ let state = {
     isFreestyle: false, isExtraPhase: false, isInterruption: false,
     currentMuscle: '',
     completedExInSession: [],
-    workoutStartTime: null, workoutDurationMins: 0, pausedDuration: 0,
+    workoutStartTime: null, workoutDurationMins: 0, sessionElapsedSecs: 0,
     lastLoggedSet: null,
     lastWorkoutDetails: {},
     archiveView: 'list',
@@ -128,11 +128,10 @@ let isAILoading       = false; // מניעת double-submit
 let aiFullArchiveMode = false; // מצב ארכיון מלא
 let _aiDisplayCleared = false; // תצוגה נוקתה בסשן זה — לא לרנדר מחדש
 
-function startSessionTimer(fromTimestamp) {
+function startSessionTimer(restoreElapsed) {
     stopSessionTimer();
-    // חישוב offset: כמה שניות כבר עברו מתחילת האימון (מנוכה זמן הפסקות)
-    const pausedMs = (state.pausedDuration || 0);
-    _sessionTimerOffset = fromTimestamp ? Math.floor((Date.now() - fromTimestamp - pausedMs) / 1000) : 0;
+    // restoreElapsed = שניות שעברו בפועל (משוחזר מ-state)
+    _sessionTimerOffset = restoreElapsed || 0;
     _sessionTimerStart = Date.now();
     _updateSessionTimerDisplay();
     // interval ב-500ms לדיוק — כמו טיימר המנוחה
@@ -151,10 +150,19 @@ function _updateSessionTimerDisplay() {
     const elapsed = _sessionTimerStart
         ? _sessionTimerOffset + Math.floor((Date.now() - _sessionTimerStart) / 1000)
         : _sessionTimerOffset;
+    // שמירת הזמן שעבר ב-state — לשחזור מדויק אחרי הפסקה
+    state.sessionElapsedSecs = elapsed;
     const m = Math.floor(elapsed / 60);
     const s = elapsed % 60;
     el.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 }
+
+// ─── שמירת session כשהאפליקציה עוברת לרקע ──────────────────────────────────
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && state.workoutStartTime) {
+        StorageManager.saveSessionState();
+    }
+});
 
 // ─── INITIALIZATION ────────────────────────────────────────────────────────
 
@@ -194,12 +202,6 @@ function restoreSession() {
         state = session.state;
         if (session.managerState) managerState = session.managerState;
 
-        // חישוב זמן הפסקה — ניכוי מהטיימר כדי לספור זמן נטו
-        if (session.timestamp && state.workoutStartTime) {
-            const pauseTime = Math.max(0, Date.now() - session.timestamp);
-            state.pausedDuration = (state.pausedDuration || 0) + pauseTime;
-        }
-
         document.getElementById('recovery-modal').style.display = 'none';
 
         let lastScreen = state.historyStack[state.historyStack.length - 1];
@@ -233,7 +235,8 @@ function restoreSession() {
         if (soundBtn)    soundBtn.style.display    = inWorkout ? 'none' : 'flex';
         if (reloadBtn)   reloadBtn.style.display   = inWorkout ? 'none' : 'flex';
 
-        if (state.workoutStartTime) startSessionTimer(state.workoutStartTime);
+        // שחזור טיימר מהזמן שנשמר — לא כולל זמן הפסקה
+        if (state.workoutStartTime) startSessionTimer(state.sessionElapsedSecs || 0);
 
         switch (lastScreen) {
             case 'ui-main':
@@ -747,7 +750,7 @@ function selectWorkout(t) {
     state.type = t; state.exIdx = 0; state.log = [];
     state.completedExInSession = []; state.isFreestyle = false; state.isExtraPhase = false; state.isInterruption = false;
     state.workoutStartTime = Date.now();
-    state.pausedDuration = 0;
+    state.sessionElapsedSecs = 0;
     state.clusterMode = false;
     startSessionTimer();
     checkFlow();
@@ -1622,7 +1625,7 @@ function startFreestyle() {
     state.type = 'Freestyle'; state.log = []; state.completedExInSession = [];
     state.isFreestyle = true; state.isExtraPhase = false; state.isInterruption = false;
     state.workoutStartTime = Date.now();
-    state.pausedDuration = 0;
+    state.sessionElapsedSecs = 0;
 
     state.freestyleFilter = 'all';
     document.getElementById('freestyle-search').value = '';
@@ -1822,7 +1825,7 @@ function _renderSwapMenu(searchVal) {
 
 function finish() {
     stopRestTimer();
-    state.workoutDurationMins = state.workoutStartTime ? Math.round((Date.now() - state.workoutStartTime - (state.pausedDuration || 0)) / 60000) : 0;
+    state.workoutDurationMins = state.sessionElapsedSecs ? Math.round(state.sessionElapsedSecs / 60) : 0;
 
     const summaryNote = document.getElementById('summary-note');
     if (summaryNote) summaryNote.value = '';
