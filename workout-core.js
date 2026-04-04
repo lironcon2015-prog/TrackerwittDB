@@ -876,9 +876,6 @@ function showConfirmScreen(forceExName = null) {
         const history = getLastPerformance(exName);
         if (history) {
             let rowsHtml = "";
-            let notesHtml = "";
-            let hasAnyNotes = false;
-            let notesList = [];
 
             history.sets.forEach((setStr, idx) => {
                 let weight = "-", reps = "-", rir = "-";
@@ -890,9 +887,6 @@ function showConfirmScreen(forceExName = null) {
                     coreStr = parts[0].trim();
                     currentNote = parts[1].trim();
                 }
-
-                if (currentNote) hasAnyNotes = true;
-                notesList.push(currentNote);
 
                 try {
                     const parts = coreStr.split('x');
@@ -912,15 +906,15 @@ function showConfirmScreen(forceExName = null) {
                     <div class="history-col">${reps}</div>
                     <div class="history-col rir-note">${rir}</div>
                 </div>`;
-            });
 
-            if (hasAnyNotes) {
-                notesHtml = `<div class="history-notes-list">`;
-                notesList.forEach((note, i) => {
-                    notesHtml += `<div class="note-item"><span class="note-num">${i + 1}.</span> ${note}</div>`;
-                });
-                notesHtml += `</div>`;
-            }
+                // הערה inline מתחת לסט — רק אם קיימת
+                if (currentNote) {
+                    rowsHtml += `
+                    <div class="history-note-inline">
+                        <div><p>${currentNote}</p></div>
+                    </div>`;
+                }
+            });
 
             const gridHtml = `
             <div class="history-card-container">
@@ -929,7 +923,6 @@ function showConfirmScreen(forceExName = null) {
                     <div>סט</div><div>משקל</div><div>חזרות</div><div>RIR</div>
                 </div>
                 <div class="history-list">${rowsHtml}</div>
-                ${notesHtml}
             </div>`;
             historyContainer.innerHTML = gridHtml;
         }
