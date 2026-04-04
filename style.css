@@ -528,20 +528,23 @@ body {
 }
 
 .secondary-buttons-grid {
-    display: grid; 
-    grid-template-columns: 1fr 1.5fr 1.5fr; 
-    gap: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
     margin-top: 15px; width: 100%;
 }
 
 .control-btn {
-    border-radius: 12px; padding: 15px 5px;
+    border-radius: 9999px; padding: 12px 5px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-size: 0.9em; font-weight: 600; cursor: pointer; transition: all 0.2s; height: 50px;
+    gap: 2px;
+    font-size: 0.9em; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
+.control-btn .ctrl-icon { font-size: 1.25rem; }
+.control-btn .ctrl-label { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
 .control-btn:active { transform: scale(0.95); opacity: 0.8; }
 
-.passive-action { background: rgba(255, 59, 48, 0.08); border: 1px solid rgba(255, 59, 48, 0.3); color: #ff453a; }
+.passive-action { background: rgba(255, 59, 48, 0.08); border: 1px solid rgba(255, 59, 48, 0.2); color: #ff453a; }
 .outline-action { background: transparent; border: 1px solid var(--accent); color: var(--text); }
 .primary-gradient { background: var(--accent-gradient); }
 .success-gradient { background: var(--success-gradient); }
@@ -741,6 +744,25 @@ body {
 .history-notes-list { margin-top: 15px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2); text-align: right; }
 .note-item { font-size: 0.85em; color: var(--text-dim); margin-bottom: 4px; display: flex; align-items: flex-start; }
 .note-num { color: var(--accent); font-weight: bold; margin-left: 8px; min-width: 15px; }
+
+/* הערה inline מתחת לשורת סט */
+.history-note-inline {
+    padding: 6px 10px 10px;
+    grid-column: 1 / -1;
+}
+.history-note-inline > div {
+    background: rgba(53,53,53,0.3);
+    border-radius: 10px;
+    padding: 8px 10px;
+    text-align: right;
+    border-right: 2px solid rgba(170,199,255,0.35);
+}
+.history-note-inline p {
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.55);
+    margin: 0;
+}
 
 .passive-skip { 
     margin: 25px auto 0; font-size: 0.85em; color: #ff453a; 
@@ -2116,13 +2138,14 @@ body {
     display: block;
 }
 
-/* Control buttons (החלף, הוסף) — outlined sky-blue pill */
+/* Control buttons (החלף, הוסף) — outlined pill */
 .control-btn.outline-action {
-    border-radius: 50px;
-    border: 1.5px solid rgba(93,186,255,0.38);
-    color: #5DBAFF;
-    background: rgba(93,186,255,0.06);
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
 }
+.control-btn.outline-action .ctrl-icon { color: var(--accent); }
 
 /* Liquid Obsidian — stepper cards stronger glass */
 #ui-main .input-grid .glass-card {
