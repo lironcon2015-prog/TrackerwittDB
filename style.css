@@ -535,16 +535,22 @@ body {
 }
 
 .control-btn {
-    border-radius: 9999px; padding: 12px 5px;
+    border-radius: 9999px; padding: 18px 5px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 2px;
+    gap: 4px;
     font-size: 0.9em; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
-.control-btn .ctrl-icon { font-size: 1.25rem; }
-.control-btn .ctrl-label { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.control-btn .ctrl-icon { font-size: 1.4rem; }
+.control-btn .ctrl-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 .control-btn:active { transform: scale(0.95); opacity: 0.8; }
 
-.passive-action { background: rgba(255, 59, 48, 0.08); border: 1px solid rgba(255, 59, 48, 0.2); color: #ff453a; }
+.passive-action {
+    background: rgba(53,53,53,0.4);
+    backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    color: #ff453a;
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.1);
+}
 .outline-action { background: transparent; border: 1px solid var(--accent); color: var(--text); }
 .primary-gradient { background: var(--accent-gradient); }
 .success-gradient { background: var(--success-gradient); }
@@ -747,8 +753,8 @@ body {
 
 /* הערה inline מתחת לשורת סט */
 .history-note-inline {
-    padding: 6px 10px 10px;
-    grid-column: 1 / -1;
+    padding: 2px 8px 10px;
+    width: 100%;
 }
 .history-note-inline > div {
     background: rgba(53,53,53,0.3);
@@ -2138,14 +2144,19 @@ body {
     display: block;
 }
 
-/* Control buttons (החלף, הוסף) — outlined pill */
+/* Control buttons (החלף, הוסף) — glass pill */
 .control-btn.outline-action {
     border-radius: 9999px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.12);
     color: var(--text);
-    background: rgba(255,255,255,0.03);
+    background: rgba(53,53,53,0.4);
+    backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.1);
 }
-.control-btn.outline-action .ctrl-icon { color: var(--accent); }
+/* Swap icon — primary blue */
+#btn-swap-confirm .ctrl-icon { color: var(--accent); }
+/* Add icon — green */
+#btn-add-exercise .ctrl-icon { color: var(--secondary); }
 
 /* Liquid Obsidian — stepper cards stronger glass */
 #ui-main .input-grid .glass-card {
