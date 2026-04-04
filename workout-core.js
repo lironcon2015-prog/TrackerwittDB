@@ -899,12 +899,15 @@ function showConfirmScreen(forceExName = null) {
                     }
                 } catch (e) {}
 
+                const rirNum = parseFloat(rir);
+                const rirClass = (rir !== '-' && rirNum <= 0) ? 'rir-val rir-orange' : 'rir-val rir-green';
+
                 rowsHtml += `
                 <div class="history-row">
-                    <div class="history-col set-idx">#${idx + 1}</div>
+                    <div class="history-col set-idx">${idx + 1}</div>
                     <div class="history-col">${weight}</div>
                     <div class="history-col">${reps}</div>
-                    <div class="history-col rir-note">${rir}</div>
+                    <div class="history-col ${rirClass}">${rir}</div>
                 </div>`;
 
                 // הערה inline מתחת לסט — רק אם קיימת
@@ -919,6 +922,8 @@ function showConfirmScreen(forceExName = null) {
             const gridHtml = `
             <div class="history-card-container">
                 <div class="text-sm color-dim text-right mb-sm">ביצוע אחרון: ${history.date}</div>
+                <div class="history-separator"></div>
+                <div class="history-section-title">ביצוע קודם</div>
                 <div class="history-header">
                     <div>סט</div><div>משקל</div><div>חזרות</div><div>RIR</div>
                 </div>
