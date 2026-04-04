@@ -207,18 +207,20 @@ body {
     min-height: 0; /* תיקון פלקס: מאפשר גלילה בילדים */
 }
 
-.screen { 
-    display: none; 
-    flex-direction: column; 
-    height: 100%; 
+.screen {
+    display: none;
+    flex-direction: column;
+    height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-bottom: 90px; 
+    padding-bottom: 90px;
     scrollbar-width: none;
-    overscroll-behavior-y: contain; 
+    overscroll-behavior-y: contain;
 }
 .screen::-webkit-scrollbar { display: none; }
 .screen.active { display: flex; animation: slideIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+/* תיקון גלילה סופי: ילדי flex-column לא יתכווצו, כך שioverflow-y יכנס לפעולה */
+.screen > * { flex-shrink: 0; }
 @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 /* Cards & Buttons */
