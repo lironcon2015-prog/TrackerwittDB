@@ -1253,9 +1253,10 @@ body {
 #ui-main.cluster .glass-card.compact {
     padding: 7px 5px;
 }
-/* Workout screen — reduce padding-bottom so timer stays on screen */
+/* Workout screen — padding left/right only; padding-bottom נשמר מש׳ 476 כדי שכפתור הדילוג גלוי מעל סטריפ הטיימר */
 #ui-main {
-    padding: 0 8px 20px 8px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 #ui-main.cluster .minimal-input {
