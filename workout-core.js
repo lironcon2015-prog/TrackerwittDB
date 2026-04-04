@@ -84,7 +84,7 @@ let state = {
     isFreestyle: false, isExtraPhase: false, isInterruption: false,
     currentMuscle: '',
     completedExInSession: [],
-    workoutStartTime: null, workoutDurationMins: 0,
+    workoutStartTime: null, workoutDurationMins: 0, pausedDuration: 0,
     lastLoggedSet: null,
     lastWorkoutDetails: {},
     archiveView: 'list',
@@ -130,8 +130,9 @@ let _aiDisplayCleared = false; // תצוגה נוקתה בסשן זה — לא �
 
 function startSessionTimer(fromTimestamp) {
     stopSessionTimer();
-    // חישוב offset: כמה שניות כבר עברו מתחילת האימון
-    _sessionTimerOffset = fromTimestamp ? Math.floor((Date.now() - fromTimestamp) / 1000) : 0;
+    // חישוב offset: כמה שניות כבר עברו מתחילת האימון (מנוכה זמן הפסקות)
+    const pausedMs = (state.pausedDuration || 0);
+    _sessionTimerOffset = fromTimestamp ? Math.floor((Date.now() - fromTimestamp - pausedMs) / 1000) : 0;
     _sessionTimerStart = Date.now();
     _updateSessionTimerDisplay();
     // interval ב-500ms לדיוק — כמו טיימר המנוחה
@@ -192,6 +193,12 @@ function restoreSession() {
     if (session && session.state) {
         state = session.state;
         if (session.managerState) managerState = session.managerState;
+
+        // חישוב זמן הפסקה — ניכוי מהטיימר כדי לספור זמן נטו
+        if (session.timestamp && state.workoutStartTime) {
+            const pauseTime = Math.max(0, Date.now() - session.timestamp);
+            state.pausedDuration = (state.pausedDuration || 0) + pauseTime;
+        }
 
         document.getElementById('recovery-modal').style.display = 'none';
 
@@ -740,6 +747,7 @@ function selectWorkout(t) {
     state.type = t; state.exIdx = 0; state.log = [];
     state.completedExInSession = []; state.isFreestyle = false; state.isExtraPhase = false; state.isInterruption = false;
     state.workoutStartTime = Date.now();
+    state.pausedDuration = 0;
     state.clusterMode = false;
     startSessionTimer();
     checkFlow();
@@ -1614,6 +1622,7 @@ function startFreestyle() {
     state.type = 'Freestyle'; state.log = []; state.completedExInSession = [];
     state.isFreestyle = true; state.isExtraPhase = false; state.isInterruption = false;
     state.workoutStartTime = Date.now();
+    state.pausedDuration = 0;
 
     state.freestyleFilter = 'all';
     document.getElementById('freestyle-search').value = '';
@@ -1813,7 +1822,7 @@ function _renderSwapMenu(searchVal) {
 
 function finish() {
     stopRestTimer();
-    state.workoutDurationMins = state.workoutStartTime ? Math.round((Date.now() - state.workoutStartTime) / 60000) : 0;
+    state.workoutDurationMins = state.workoutStartTime ? Math.round((Date.now() - state.workoutStartTime - (state.pausedDuration || 0)) / 60000) : 0;
 
     const summaryNote = document.getElementById('summary-note');
     if (summaryNote) summaryNote.value = '';
