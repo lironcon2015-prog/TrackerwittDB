@@ -212,6 +212,20 @@ function restoreSession() {
         document.getElementById(lastScreen).classList.add('active');
         document.getElementById('global-back').style.display = (lastScreen !== 'ui-week') ? 'flex' : 'none';
 
+        // עדכון UI-state בדיוק כמו navigate() — מסתיר/מציג טאב-בר, סטריפ ו-settings
+        const WORKOUT_SCREENS = ['ui-workout-type', 'ui-confirm', 'ui-main', 'ui-1rm', 'ui-cluster-rest', 'ui-variation', 'ui-swap-list', 'ui-ask-extra', 'ui-extra-cluster', 'ui-summary'];
+        const inWorkout = WORKOUT_SCREENS.includes(lastScreen);
+        const tabBar = document.querySelector('.tab-bar');
+        const strip = document.getElementById('session-timer-strip');
+        const settingsBtn = document.getElementById('btn-settings');
+        const soundBtn    = document.getElementById('btn-sound');
+        const reloadBtn   = document.getElementById('btn-reload');
+        if (tabBar)      tabBar.style.display      = inWorkout ? 'none' : 'flex';
+        if (strip)       strip.style.display       = inWorkout ? 'flex' : 'none';
+        if (settingsBtn) settingsBtn.style.display = inWorkout ? 'none' : 'flex';
+        if (soundBtn)    soundBtn.style.display    = inWorkout ? 'none' : 'flex';
+        if (reloadBtn)   reloadBtn.style.display   = inWorkout ? 'none' : 'flex';
+
         if (state.workoutStartTime) startSessionTimer(state.workoutStartTime);
 
         switch (lastScreen) {
@@ -781,6 +795,10 @@ function showConfirmScreen(forceExName = null) {
     }
 
     if (state.clusterMode && state.clusterIdx === 0 && !forceExName) {
+        // מצב תצוגת מבוא לסבב — אפס currentEx כדי שconfirmExercise ידע שזה מסך המבוא
+        state.currentEx = null;
+        state.currentExName = '';
+
         document.getElementById('confirm-ex-name').innerText = "סבב / מעגל (Cluster)";
         document.getElementById('confirm-ex-config').innerText = `סבב ${state.clusterRound} מתוך ${state.activeCluster.rounds}`;
         document.getElementById('confirm-ex-config').style.display = 'block';
@@ -924,9 +942,11 @@ function showConfirmScreen(forceExName = null) {
 // ─── WORKOUT EXECUTION ─────────────────────────────────────────────────────
 
 function confirmExercise(doEx) {
-    if (state.clusterMode && state.clusterIdx === 0 && document.getElementById('confirm-ex-name').innerText.includes("Cluster")) {
+    // מסך מבוא לסבב — currentEx אפס מסמן שטרם בחרנו תרגיל ספציפי
+    if (state.clusterMode && state.clusterIdx === 0 && !state.currentEx) {
         const firstExItem = state.activeCluster.exercises[0];
         const exData = state.exercises.find(e => e.name === firstExItem.name);
+        if (!exData) { showAlert(`שגיאה: תרגיל "${firstExItem.name}" לא נמצא במאגר.`); return; }
 
         state.currentEx = deepClone(exData);
         state.currentExName = exData.name;
